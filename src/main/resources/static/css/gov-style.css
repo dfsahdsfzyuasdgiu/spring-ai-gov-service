@@ -1,0 +1,947 @@
+:root {
+    --gov-blue: #165dff;
+    --gov-blue-dark: #0e42d2;
+    --gov-blue-light: #e8f3ff;
+    --gov-red: #d93025;
+    --gov-gold: #ff7d00;
+    --gov-text-primary: #1d2129;
+    --gov-text-secondary: #4e5969;
+    --gov-text-muted: #86909c;
+    --gov-border: #e5e6eb;
+    --gov-bg: #f4f7fc;
+    --gov-card-bg: #ffffff;
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "WenQuanYi Micro Hei", sans-serif;
+    background-color: #f4f6fa;
+    color: var(--gov-text-primary);
+    line-height: 1.6;
+}
+
+/* 庄重大气党政大 Banner (红金长城华表全景大图) */
+.gov-hero-banner {
+    position: relative;
+    background: linear-gradient(90deg, rgba(139, 0, 0, 0.70) 0%, rgba(183, 28, 28, 0.50) 45%, rgba(230, 81, 0, 0.40) 100%), url('/img/gov_banner_bg.jpg') center center / cover no-repeat;
+    color: #ffffff;
+    padding: 36px 42px;
+    margin-bottom: 24px;
+    border-radius: 10px;
+    box-shadow: 0 8px 24px rgba(183, 28, 28, 0.30);
+    overflow: hidden;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border: 1px solid rgba(255, 215, 0, 0.65);
+}
+
+.gov-hero-banner::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(90deg, rgba(139, 0, 0, 0.35) 0%, rgba(211, 47, 47, 0.1) 60%, rgba(255, 143, 0, 0.2) 100%);
+    pointer-events: none;
+}
+
+.gov-hero-content {
+    position: relative;
+    z-index: 2;
+    max-width: 800px;
+}
+
+.gov-hero-content h2 {
+    font-size: 24px;
+    font-weight: 800;
+    letter-spacing: 1px;
+    text-shadow: 0 2px 8px rgba(0, 0, 0, 0.35);
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.gov-hero-content p {
+    font-size: 14px;
+    color: #fff9c4;
+    text-shadow: 0 1px 4px rgba(0, 0, 0, 0.3);
+    line-height: 1.6;
+}
+
+.gov-hero-actions {
+    position: relative;
+    z-index: 2;
+    display: flex;
+    gap: 12px;
+}
+
+/* 顶部中国政务风红蓝Header */
+.gov-top-bar {
+    background: linear-gradient(90deg, #b71c1c 0%, #c62828 100%);
+    color: #fff;
+    font-size: 12px;
+    padding: 6px 24px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.gov-top-bar a {
+    color: #ffcdd2;
+    text-decoration: none;
+    margin-left: 16px;
+}
+
+.gov-top-bar a:hover {
+    color: #fff;
+    text-decoration: underline;
+}
+
+.gov-main-header {
+    background: #ffffff;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+    padding: 14px 28px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+}
+
+.gov-logo-area {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.gov-emblem {
+    width: 44px;
+    height: 44px;
+    background: var(--gov-blue);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-weight: bold;
+    font-size: 20px;
+    box-shadow: 0 2px 6px rgba(22, 93, 255, 0.3);
+}
+
+.gov-title-group h1 {
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--gov-blue-dark);
+    letter-spacing: 0.5px;
+}
+
+.gov-title-group p {
+    font-size: 12px;
+    color: var(--gov-text-muted);
+}
+
+.gov-nav-links {
+    display: flex;
+    gap: 16px;
+    align-items: center;
+}
+
+.gov-btn {
+    padding: 7px 16px;
+    border-radius: 4px;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    border: 1px solid transparent;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.gov-btn-primary {
+    background-color: var(--gov-blue);
+    color: #fff;
+}
+
+.gov-btn-primary:hover {
+    background-color: var(--gov-blue-dark);
+}
+
+.gov-btn-outline {
+    border-color: var(--gov-border);
+    background-color: #fff;
+    color: var(--gov-text-secondary);
+}
+
+.gov-btn-outline:hover {
+    border-color: var(--gov-blue);
+    color: var(--gov-blue);
+}
+
+.gov-btn-red {
+    background-color: var(--gov-red);
+    color: white;
+}
+
+.gov-btn-red:hover {
+    background-color: #b71c1c;
+}
+
+/* 页面主要布局 */
+.gov-container {
+    max-width: 1200px;
+    margin: 20px auto;
+    padding: 0 16px;
+}
+
+/* 顶部服务承诺横幅 */
+.gov-banner-badge {
+    background: linear-gradient(135deg, #165dff 0%, #00b42a 100%);
+    color: white;
+    padding: 14px 24px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: 0 4px 12px rgba(22, 93, 255, 0.15);
+}
+
+.gov-banner-badge h2 {
+    font-size: 17px;
+    font-weight: 600;
+}
+
+.gov-banner-badge p {
+    font-size: 13px;
+    opacity: 0.92;
+}
+
+/* 咨询界面左右双栏布局 */
+.gov-chat-layout {
+    display: grid;
+    grid-template-columns: 320px 1fr;
+    gap: 20px;
+    min-height: calc(100vh - 240px);
+}
+
+/* 左侧栏：热点问题与政策直通车 */
+.gov-sidebar {
+    background: var(--gov-card-bg);
+    border-radius: 8px;
+    border: 1px solid var(--gov-border);
+    padding: 18px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.sidebar-section-title {
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--gov-text-primary);
+    border-left: 3px solid var(--gov-blue);
+    padding-left: 8px;
+    margin-bottom: 12px;
+}
+
+.category-tabs {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.category-chip {
+    padding: 5px 12px;
+    border-radius: 20px;
+    font-size: 13px;
+    background: #f2f3f5;
+    color: var(--gov-text-secondary);
+    cursor: pointer;
+    transition: all 0.2s;
+    border: 1px solid transparent;
+}
+
+.category-chip.active, .category-chip:hover {
+    background: var(--gov-blue-light);
+    color: var(--gov-blue);
+    border-color: var(--gov-blue);
+    font-weight: 500;
+}
+
+.hot-question-list {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.hot-question-item {
+    font-size: 13px;
+    color: var(--gov-text-secondary);
+    padding: 8px 10px;
+    border-radius: 6px;
+    background: #f7f8fa;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.hot-question-item:hover {
+    background: var(--gov-blue-light);
+    color: var(--gov-blue);
+    transform: translateX(3px);
+}
+
+.hot-tag {
+    font-size: 10px;
+    background: #ff7d00;
+    color: white;
+    padding: 1px 4px;
+    border-radius: 3px;
+    font-weight: bold;
+}
+
+/* 12345 热线快捷入口卡片 */
+.hotline-card {
+    background: #fff7e8;
+    border: 1px solid #ff7d00;
+    border-radius: 6px;
+    padding: 14px;
+}
+
+.hotline-card h4 {
+    color: #d25f00;
+    font-size: 14px;
+    margin-bottom: 6px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.hotline-card p {
+    font-size: 12px;
+    color: #873800;
+    margin-bottom: 10px;
+}
+
+/* 右侧对话主区域 */
+.gov-chat-main {
+    background: var(--gov-card-bg);
+    border-radius: 8px;
+    border: 1px solid var(--gov-border);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.03);
+}
+
+.chat-history {
+    flex: 1;
+    overflow-y: auto;
+    padding: 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    background: #fafbfc;
+}
+
+/* 消息气泡 */
+.msg-row {
+    display: flex;
+    gap: 12px;
+    max-width: 88%;
+}
+
+.msg-row.user-msg {
+    align-self: flex-end;
+    flex-direction: row-reverse;
+}
+
+.msg-row.ai-msg {
+    align-self: flex-start;
+}
+
+.msg-avatar {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 15px;
+    font-weight: bold;
+    flex-shrink: 0;
+}
+
+.user-avatar {
+    background: #86909c;
+    color: white;
+}
+
+.ai-avatar {
+    background: var(--gov-blue);
+    color: white;
+}
+
+.msg-content {
+    background: #ffffff;
+    padding: 14px 18px;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+    border: 1px solid #edf0f5;
+    font-size: 14px;
+    color: var(--gov-text-primary);
+    position: relative;
+    line-height: 1.7;
+}
+
+.user-msg .msg-content {
+    background: #e8f3ff;
+    border-color: #bedaff;
+    color: #0e42d2;
+}
+
+/* 政策法定依据溯源卡片 */
+.citation-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: #fff2e8;
+    border: 1px solid #ffbb96;
+    padding: 4px 10px;
+    border-radius: 4px;
+    color: #d4380d;
+    font-size: 12px;
+    margin-bottom: 10px;
+    cursor: pointer;
+    font-weight: 500;
+    transition: all 0.2s;
+}
+
+.citation-badge:hover {
+    background: #ffe7ba;
+    box-shadow: 0 2px 6px rgba(212, 56, 13, 0.2);
+}
+
+/* 边聊边办结构化导办卡片 */
+.guide-card-container {
+    margin-top: 14px;
+    background: #ffffff;
+    border: 1px solid #b7dcff;
+    border-radius: 8px;
+    padding: 16px;
+    box-shadow: 0 4px 12px rgba(22, 93, 255, 0.08);
+}
+
+.guide-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px dashed #e5e6eb;
+    padding-bottom: 10px;
+    margin-bottom: 12px;
+}
+
+.guide-card-title {
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--gov-blue-dark);
+}
+
+.guide-speed-badge {
+    background: #e8ffea;
+    color: #00b42a;
+    border: 1px solid #aff0b5;
+    font-size: 11px;
+    padding: 2px 8px;
+    border-radius: 12px;
+    font-weight: bold;
+}
+
+.material-checklist-title {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--gov-text-secondary);
+    margin-bottom: 8px;
+}
+
+.material-item-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+    padding: 6px 0;
+    border-bottom: 1px solid #f2f3f5;
+}
+
+.material-item-row:last-child {
+    border-bottom: none;
+}
+
+.material-checkbox {
+    cursor: pointer;
+}
+
+.material-tag-mandatory {
+    color: var(--gov-red);
+    font-size: 11px;
+    background: #ffece8;
+    padding: 1px 4px;
+    border-radius: 2px;
+}
+
+.material-tag-exempt {
+    color: #00b42a;
+    font-size: 11px;
+    background: #e8ffea;
+    padding: 1px 4px;
+    border-radius: 2px;
+}
+
+/* 办事步骤横向指示器 */
+.step-flow-bar {
+    display: flex;
+    margin-top: 12px;
+    background: #f7f8fa;
+    border-radius: 4px;
+    padding: 8px;
+    gap: 6px;
+}
+
+.step-flow-item {
+    flex: 1;
+    font-size: 11px;
+    text-align: center;
+    color: var(--gov-text-muted);
+    position: relative;
+}
+
+.step-flow-item.active {
+    color: var(--gov-blue);
+    font-weight: bold;
+}
+
+.guide-actions {
+    margin-top: 14px;
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+}
+
+/* 点赞点踩好差评 */
+.feedback-actions {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-top: 12px;
+    padding-top: 8px;
+    border-top: 1px solid #f2f3f5;
+    font-size: 12px;
+    color: var(--gov-text-muted);
+}
+
+.feedback-btn {
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    color: var(--gov-text-muted);
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 12px;
+    transition: all 0.2s;
+}
+
+.feedback-btn:hover {
+    color: var(--gov-blue);
+}
+
+.feedback-btn.active {
+    color: var(--gov-blue);
+    font-weight: bold;
+}
+
+/* AI 检索与思考流式状态微动效 */
+.ai-loading-status {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    padding: 2px 0;
+}
+
+.ai-loading-dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: var(--gov-blue);
+    display: inline-block;
+    animation: aiDotPulse 1.4s infinite ease-in-out both;
+}
+
+.ai-loading-dot:nth-child(1) { animation-delay: -0.32s; }
+.ai-loading-dot:nth-child(2) { animation-delay: -0.16s; }
+.ai-loading-dot:nth-child(3) { animation-delay: 0s; }
+
+@keyframes aiDotPulse {
+    0%, 80%, 100% {
+        transform: scale(0.6);
+        opacity: 0.35;
+    }
+    40% {
+        transform: scale(1.15);
+        opacity: 1;
+    }
+}
+
+/* 打字机流式光标 */
+.typing-cursor {
+    display: inline-block;
+    width: 2px;
+    height: 14px;
+    background-color: var(--gov-blue);
+    margin-left: 2px;
+    vertical-align: middle;
+    animation: blinkCursor 0.8s infinite;
+}
+
+@keyframes blinkCursor {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0; }
+}
+
+/* 输入框底部栏 */
+.chat-input-area {
+    padding: 14px 20px;
+    background: #ffffff;
+    border-top: 1px solid var(--gov-border);
+}
+
+.input-box-wrapper {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    background: #f4f5f8;
+    border: 1px solid var(--gov-border);
+    border-radius: 6px;
+    padding: 6px 12px;
+    transition: border-color 0.2s;
+}
+
+.input-box-wrapper:focus-within {
+    border-color: var(--gov-blue);
+    background: #fff;
+    box-shadow: 0 0 0 2px rgba(22, 93, 255, 0.1);
+}
+
+.chat-input {
+    flex: 1;
+    border: none;
+    background: transparent;
+    font-size: 14px;
+    outline: none;
+    color: var(--gov-text-primary);
+    padding: 6px 0;
+}
+
+/* 模态弹窗 Modal */
+.gov-modal-mask {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+}
+
+.gov-modal {
+    background: white;
+    border-radius: 8px;
+    width: 600px;
+    max-width: 90vw;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+    overflow: hidden;
+}
+
+.modal-header {
+    background: #f7f8fa;
+    padding: 14px 20px;
+    border-bottom: 1px solid var(--gov-border);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.modal-header h3 {
+    font-size: 16px;
+    color: var(--gov-text-primary);
+}
+
+.modal-close-btn {
+    background: none;
+    border: none;
+    font-size: 18px;
+    cursor: pointer;
+    color: var(--gov-text-muted);
+}
+
+.modal-body {
+    padding: 20px;
+    max-height: 70vh;
+    overflow-y: auto;
+    font-size: 14px;
+    line-height: 1.7;
+}
+
+/* 表单组件 */
+.form-group {
+    margin-bottom: 14px;
+}
+
+.form-label {
+    display: block;
+    font-size: 13px;
+    font-weight: 500;
+    margin-bottom: 6px;
+    color: var(--gov-text-secondary);
+}
+
+.form-input, .form-textarea, .form-select {
+    width: 100%;
+    padding: 8px 12px;
+    border: 1px solid var(--gov-border);
+    border-radius: 4px;
+    font-size: 14px;
+    outline: none;
+}
+
+.form-input:focus, .form-textarea:focus, .form-select:focus {
+    border-color: var(--gov-blue);
+}
+
+.form-textarea {
+    resize: vertical;
+    min-height: 80px;
+}
+
+/* 真实民情与诉求办结案例公示专区 */
+.gov-case-section {
+    margin-top: 24px;
+    background: #ffffff;
+    border-radius: 8px;
+    border: 1px solid var(--gov-border);
+    padding: 20px 24px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.02);
+}
+
+.case-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 2px solid #f0f2f5;
+    padding-bottom: 12px;
+    margin-bottom: 16px;
+}
+
+.case-header-title {
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--gov-text-primary);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.case-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+}
+
+.case-card {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 6px;
+    padding: 14px 16px;
+    transition: all 0.25s ease;
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.case-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 14px rgba(22, 93, 255, 0.12);
+    border-color: var(--gov-blue);
+    background: #ffffff;
+}
+
+.case-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+}
+
+.case-tag-dept {
+    font-size: 11px;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-weight: 600;
+    background: #e8f3ff;
+    color: var(--gov-blue);
+}
+
+.case-tag-status {
+    font-size: 11px;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-weight: 600;
+    background: #e8ffea;
+    color: #00b42a;
+}
+
+.case-card-title {
+    font-size: 13px;
+    font-weight: 700;
+    color: #1d2129;
+    margin-bottom: 6px;
+    line-height: 1.5;
+}
+
+.case-card-reply {
+    font-size: 12px;
+    color: #4e5969;
+    line-height: 1.6;
+    background: #ffffff;
+    border-left: 3px solid #00b42a;
+    padding: 6px 10px;
+    border-radius: 0 4px 4px 0;
+    margin-top: 6px;
+}
+
+/* 意图澄清多轮追问卡片 */
+.clarify-card-container {
+    margin-top: 14px;
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    padding: 14px 16px;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.03);
+}
+
+.clarify-card-header {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--gov-text-primary);
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.clarify-options-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.clarify-option-btn {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: #ffffff;
+    border: 1px solid #d9e1ec;
+    padding: 9px 14px;
+    border-radius: 6px;
+    cursor: pointer;
+    text-align: left;
+    transition: all 0.2s;
+    font-size: 13px;
+    color: #1d2129;
+}
+
+.clarify-option-btn:hover {
+    border-color: var(--gov-blue);
+    background: #e8f3ff;
+    color: var(--gov-blue);
+    transform: translateX(4px);
+}
+
+.clarify-opt-arrow {
+    color: var(--gov-blue);
+    font-weight: bold;
+    font-size: 12px;
+}
+
+/* “高效办成一件事”链式关联推荐 */
+.recommend-chain-container {
+    margin-top: 14px;
+    padding-top: 12px;
+    border-top: 1px dashed #e2e8f0;
+}
+
+.recommend-chain-title {
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--gov-blue);
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.recommend-chain-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.recommend-chain-chip {
+    font-size: 12px;
+    background: #f0f5ff;
+    color: #1d39c4;
+    border: 1px solid #d6e4ff;
+    padding: 5px 12px;
+    border-radius: 16px;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: inline-flex;
+    align-items: center;
+}
+
+.recommend-chain-chip:hover {
+    background: #1d39c4;
+    color: #ffffff;
+    border-color: #1d39c4;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 6px rgba(29, 57, 196, 0.2);
+}
+
+/* 页脚 Footer */
+.gov-footer {
+    text-align: center;
+    padding: 20px 0;
+    font-size: 12px;
+    color: var(--gov-text-muted);
+    border-top: 1px solid var(--gov-border);
+    margin-top: 30px;
+}

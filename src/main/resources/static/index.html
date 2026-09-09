@@ -1,0 +1,641 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>智能政务咨询与导办系统 - 高效办成一件事</title>
+    <link rel="stylesheet" href="/css/gov-style.css?v=20260909_1208">
+    <!-- Vue 3 & 简洁图标库 -->
+    <script src="https://cdn.jsdelivr.net/npm/vue@3.3.4/dist/vue.global.prod.js"></script>
+</head>
+<body>
+<div id="app">
+    <!-- 顶部政务红蓝信息栏 -->
+    <header class="gov-top-bar">
+        <div>
+            <span>全国一体化在线政务服务平台 · 智能政务便民协同中枢</span>
+        </div>
+        <div>
+            <span>服务热线：12345 (24小时受理)</span>
+            <a v-if="currentUser && currentUser.role === 'ADMIN'" href="/admin.html" target="_blank" style="margin-left: 14px; font-weight: bold; color: #ffeb3b;">
+                进入政务管理与民情研判大屏 ➔
+            </a>
+        </div>
+    </header>
+
+    <!-- 主导航 Header -->
+    <nav class="gov-main-header">
+        <div class="gov-logo-area">
+            <div class="gov-emblem">政</div>
+            <div class="gov-title-group">
+                <h1>智能政务咨询与导办系统</h1>
+                <p>基于 SpringBoot + SpringAI 驱动 · 政策严格溯源 · 智能导办直通车</p>
+            </div>
+        </div>
+        <div class="gov-nav-links">
+            <button class="gov-btn gov-btn-outline" @click="show12345Modal = true">
+                <span>📞 12345接诉即办</span>
+            </button>
+
+            <!-- 仅超级管理员登录后才能在首页看到数据看板与后台入口 -->
+            <a v-if="currentUser && currentUser.role === 'ADMIN'" href="/admin.html" class="gov-btn gov-btn-primary" style="background: linear-gradient(90deg, #b71c1c 0%, #d32f2f 100%);">
+                <span>📊 数据看板与后台</span>
+            </a>
+
+            <!-- 未登录状态：展示注册登录按钮 -->
+            <button v-if="!currentUser" class="gov-btn" style="background: #e8f3ff; color: var(--gov-blue); font-weight: 600; border: 1px solid #b7dcff;" @click="openAuthModal()">
+                <span>🔑 注册 / 登录</span>
+            </button>
+
+            <!-- 已登录状态：展示身份铭牌与退出登录按钮 -->
+            <div v-else style="display: flex; align-items: center; gap: 8px; margin-left: 4px;">
+                <span style="font-size: 13px; color: var(--gov-text-primary); background: #f0f2f5; padding: 4px 10px; border-radius: 20px; border: 1px solid #e4e7ed;">
+                    <span v-if="currentUser.role === 'ADMIN'" style="color: #d93025; font-weight: bold;">🛡️ {{ currentUser.name }}</span>
+                    <span v-else style="color: #165dff;">👤 {{ currentUser.name }}</span>
+                </span>
+                <button class="gov-btn gov-btn-outline" style="padding: 4px 10px; font-size: 12px;" @click="logout()">
+                    退出
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- 主内容容器 -->
+    <main class="gov-container">
+        <!-- 庄重大气党政大 Banner (华表长城红绸背景) -->
+        <section class="gov-hero-banner">
+            <div class="gov-hero-content">
+                <h2>
+                    <span style="background: #ffd54f; color: #b71c1c; font-size: 13px; font-weight: 800; padding: 3px 8px; border-radius: 4px; display: inline-flex; align-items: center; letter-spacing: 0;">★ 重点推进</span>
+                    <span>推进“高效办成一件事” · 建设人民满意的服务型政府</span>
+                </h2>
+                <p>坚持以人民为中心的发展思想 · 政策严格溯源 · 智能导办直通 · 接诉即办协同联动</p>
+                <div style="display: flex; gap: 12px; margin-top: 14px; font-size: 13px;">
+                    <span style="background: rgba(255,255,255,0.22); padding: 4px 12px; border-radius: 20px; border: 1px solid rgba(255,255,255,0.4); display: inline-flex; align-items: center; gap: 4px;">
+                        ⭐ 法定公文严格溯源
+                    </span>
+                    <span style="background: rgba(255,255,255,0.22); padding: 4px 12px; border-radius: 20px; border: 1px solid rgba(255,255,255,0.4); display: inline-flex; align-items: center; gap: 4px;">
+                        📜 申报材料动态核验
+                    </span>
+                    <span style="background: rgba(255,255,255,0.22); padding: 4px 12px; border-radius: 20px; border: 1px solid rgba(255,255,255,0.4); display: inline-flex; align-items: center; gap: 4px;">
+                        🏛️ 12345 诉求闭环联动
+                    </span>
+                </div>
+            </div>
+            <div class="gov-hero-actions">
+                <button class="gov-btn gov-btn-outline" style="background: #ffffff; color: #b71c1c; font-weight: bold; border-color: #ffd54f; box-shadow: 0 4px 10px rgba(0,0,0,0.15);" @click="sendQuickPrompt('如何办理高校毕业生人才落户？')">
+                    🚀 体验人才落户智能导办
+                </button>
+            </div>
+        </section>
+
+        <!-- 咨询主体布局 -->
+        <div class="gov-chat-layout">
+            <!-- 左侧边栏：热点问题与政策直通车 -->
+            <aside class="gov-sidebar">
+                <div>
+                    <h3 class="sidebar-section-title">政务服务专题</h3>
+                    <div class="category-tabs">
+                        <span v-for="cat in categories" :key="cat"
+                              :class="['category-chip', currentCategory === cat ? 'active' : '']"
+                              @click="selectCategory(cat)">
+                            {{ cat }}
+                        </span>
+                    </div>
+                </div>
+
+                <div>
+                    <div style="display: flex; gap: 8px; border-bottom: 2px solid #f0f2f5; margin-bottom: 12px; padding-bottom: 4px;">
+                        <button :class="['sidebar-tab-btn', sidebarTab === 'hot' ? 'active' : '']" @click="sidebarTab = 'hot'"
+                                style="background: none; border: none; font-size: 13px; font-weight: 700; cursor: pointer; padding: 4px 6px; border-bottom: 2px solid transparent;"
+                                :style="sidebarTab === 'hot' ? 'color: var(--gov-blue); border-bottom-color: var(--gov-blue);' : 'color: var(--gov-text-muted);'">
+                            🔥 高频热点
+                        </button>
+                        <button :class="['sidebar-tab-btn', sidebarTab === 'cases' ? 'active' : '']" @click="sidebarTab = 'cases'"
+                                style="background: none; border: none; font-size: 13px; font-weight: 700; cursor: pointer; padding: 4px 6px; border-bottom: 2px solid transparent;"
+                                :style="sidebarTab === 'cases' ? 'color: var(--gov-blue); border-bottom-color: var(--gov-blue);' : 'color: var(--gov-text-muted);'">
+                            🏛️ 12345案例
+                        </button>
+                    </div>
+
+                    <!-- 选项卡 1：高频热点问题 -->
+                    <ul v-if="sidebarTab === 'hot'" class="hot-question-list">
+                        <li v-for="(q, idx) in filteredHotQuestions" :key="idx" 
+                            class="hot-question-item" @click="sendQuickPrompt(q.text)">
+                            <span class="hot-tag">TOP{{ idx + 1 }}</span>
+                            <span>{{ q.text }}</span>
+                        </li>
+                    </ul>
+
+                    <!-- 选项卡 2：真实民情案例精选（紧凑型侧边展示，与咨询实时联动） -->
+                    <div v-if="sidebarTab === 'cases'" style="display: flex; flex-direction: column; gap: 8px; max-height: 460px; overflow-y: auto;">
+                        <div v-for="(c, idx) in realGovCases" :key="idx" 
+                             style="padding: 10px 12px; border-radius: 6px; background: #fafbfc; border: 1px solid #e5e6eb; cursor: pointer; transition: all 0.2s;"
+                             @click="clickCaseCard(c)" title="点击立即向AI咨询该事项">
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+                                <span style="font-size: 11px; font-weight: bold; color: var(--gov-blue); background: #e8f3ff; padding: 1px 6px; border-radius: 3px;">{{ c.dept }}</span>
+                                <span style="font-size: 10px; color: #00b42a; font-weight: 600;">✓ {{ c.status }}</span>
+                            </div>
+                            <div style="font-size: 12px; font-weight: 700; color: #1d2129; line-height: 1.4; margin-bottom: 4px;">{{ c.title }}</div>
+                            <div style="font-size: 11px; color: #4e5969; line-height: 1.4; background: #fff; border-left: 2px solid #00b42a; padding: 4px 6px; border-radius: 0 3px 3px 0;">
+                                {{ c.reply }}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 12345 直通车卡片 -->
+                <div class="hotline-card">
+                    <h4><span>📢 12345 民情直通车</span></h4>
+                    <p>若您的诉求暂未收录于知识库或遇政策疑难，可直接提报12345工单，责任部门将限时受理并答复。</p>
+                    <button class="gov-btn gov-btn-red" style="width: 100%; font-size: 13px;" @click="openWorkOrderModal()">
+                        一键转接 12345 工单
+                    </button>
+                    <a href="javascript:void(0)" @click="showCasesModal = true" style="font-size: 11px; color: #d25f00; text-decoration: underline; display: block; margin-top: 8px; text-align: center;">
+                        🏛️ 查阅民情案例公示回音壁 ➔
+                    </a>
+                </div>
+            </aside>
+
+            <!-- 右侧对话主区域 -->
+            <section class="gov-chat-main">
+                <!-- 消息滚动列表 -->
+                <div class="chat-history" ref="chatScrollBox">
+                    <div v-for="(msg, index) in messageList" :key="index"
+                         :class="['msg-row', msg.role === 'user' ? 'user-msg' : 'ai-msg']">
+                        <div :class="['msg-avatar', msg.role === 'user' ? 'user-avatar' : 'ai-avatar']">
+                            {{ msg.role === 'user' ? '民' : '政' }}
+                        </div>
+                        <div class="msg-content">
+                            <!-- 政策出处溯源徽章 -->
+                            <div v-if="msg.citation" class="citation-badge" @click="openCitationModal(msg.citation)">
+                                <span>📜 法定依据：{{ msg.citation.docTitle }} ({{ msg.citation.clauseNo }})</span>
+                                <span style="text-decoration: underline;">[查看原文件]</span>
+                            </div>
+
+                            <!-- 正文内容 (支持换行与打字机光标) -->
+                            <div v-if="msg.content" style="white-space: pre-wrap;">{{ msg.content }}<span v-if="isGenerating && index === messageList.length - 1" class="typing-cursor"></span></div>
+
+                            <!-- 等待大模型首字返回前的检索动画 (融入气泡内部，避免出现多余气泡) -->
+                            <div v-if="msg.role === 'assistant' && !msg.content && !msg.clarifyCard && !msg.requireLogin" class="ai-loading-status">
+                                <span class="ai-loading-dot"></span>
+                                <span class="ai-loading-dot"></span>
+                                <span class="ai-loading-dot"></span>
+                                <span style="color: var(--gov-text-muted); font-size: 13px; margin-left: 6px;">正在检索本地权威政策库并拟制解答...</span>
+                            </div>
+
+                            <!-- 结构化智能导办卡片 (边聊边办) -->
+                            <div v-if="msg.guideCard" class="guide-card-container">
+                                <div class="guide-card-header">
+                                    <div>
+                                        <div class="guide-card-title">📋 办事指南导办：{{ msg.guideCard.affairName }}</div>
+                                        <div style="font-size: 12px; color: var(--gov-text-muted); margin-top: 4px;">
+                                            编码：{{ msg.guideCard.affairCode }} | 实施单位：{{ msg.guideCard.handlingAddress }}
+                                        </div>
+                                    </div>
+                                    <span class="guide-speed-badge">承诺 {{ msg.guideCard.promisedLimitDays }} 个工作日办结</span>
+                                </div>
+
+                                <!-- 准入条件 -->
+                                <div style="font-size: 12px; background: #f7f8fa; padding: 8px 12px; border-radius: 4px; margin-bottom: 10px;">
+                                    <strong>准入条件：</strong>{{ msg.guideCard.qualifications }}
+                                </div>
+
+                                <!-- 材料动态清单 (用户可勾选核对) -->
+                                <div class="material-checklist-title">申报材料核验清单 (点击复选框确认已备齐)：</div>
+                                <div v-for="mat in msg.guideCard.materials" :key="mat.id" class="material-item-row">
+                                    <input type="checkbox" :id="'mat-' + mat.id" class="material-checkbox" v-model="mat.checked">
+                                    <label :for="'mat-' + mat.id" style="flex: 1; cursor: pointer;">
+                                        <span>{{ mat.name }}</span>
+                                        <span v-if="mat.mandatory" class="material-tag-mandatory">必备要件</span>
+                                        <span v-else class="material-tag-exempt">容缺后补</span>
+                                        <span style="font-size: 11px; color: var(--gov-text-muted); margin-left: 6px;">({{ mat.sampleTip }})</span>
+                                    </label>
+                                </div>
+
+                                <!-- 办事流程横向指示 -->
+                                <div class="step-flow-bar" v-if="msg.guideCard.processSteps">
+                                    <div v-for="step in msg.guideCard.processSteps" :key="step.stepNo" class="step-flow-item active">
+                                        <div>环节{{ step.stepNo }}: {{ step.stepName }}</div>
+                                        <div style="font-size: 10px; color: #86909c;">{{ step.timeCost }}</div>
+                                    </div>
+                                </div>
+
+                                <!-- 导办动作按钮 -->
+                                <div class="guide-actions">
+                                    <button class="gov-btn gov-btn-outline" style="font-size: 12px;" @click="checkMaterialCompletion(msg.guideCard)">
+                                        📋 材料自检完成度
+                                    </button>
+                                    <button class="gov-btn gov-btn-primary" style="font-size: 12px;" @click="openApplyModal(msg.guideCard)">
+                                        🚀 在线预约申报 ➔
+                                    </button>
+                                    <a :href="msg.guideCard.onlineHandleUrl || 'https://s.nia.gov.cn/'" target="_blank" 
+                                       class="gov-btn gov-btn-outline" 
+                                       style="font-size: 12px; color: var(--gov-blue); border-color: var(--gov-blue); text-decoration: none;"
+                                       title="在新窗口打开国家/省级官方政务服务大厅">
+                                        🌐 官方大厅直达 ➔
+                                    </a>
+                                </div>
+                            </div>
+
+                            <!-- 意图澄清多轮追问卡片 (多轮交互式导办) -->
+                            <div v-if="msg.clarifyCard" class="clarify-card-container">
+                                <div class="clarify-card-header">
+                                    <span style="font-size: 16px;">🎯</span>
+                                    <strong>{{ msg.clarifyCard.question }}</strong>
+                                </div>
+                                <div class="clarify-options-grid">
+                                    <button v-for="(opt, oIdx) in msg.clarifyCard.options" :key="oIdx"
+                                            class="clarify-option-btn"
+                                            @click="sendQuickPrompt(opt.query)"
+                                            :title="'点击选择此项进行精准咨询：' + opt.query">
+                                        <span style="display: flex; align-items: center; gap: 8px;">
+                                            <span style="font-size: 16px;">{{ opt.icon }}</span>
+                                            <span style="font-weight: 600;">{{ opt.label }}</span>
+                                        </span>
+                                        <span class="clarify-opt-arrow">➔</span>
+                                    </button>
+                                </div>
+                            </div>
+
+                            <!-- 高效办成一件事 · 链式关联事项推荐 (猜你想问) -->
+                            <div v-if="msg.recommendCard && msg.recommendCard.length" class="recommend-chain-container">
+                                <div class="recommend-chain-title">
+                                    <span>🔗 高效办成一件事 · 关联联办推荐（猜您想问）：</span>
+                                </div>
+                                <div class="recommend-chain-chips">
+                                    <span v-for="(rec, rIdx) in msg.recommendCard" :key="rIdx"
+                                          class="recommend-chain-chip"
+                                          @click="sendQuickPrompt(rec.query)"
+                                          :title="'点击直接发起关联咨询：' + rec.title">
+                                        {{ rec.title }}
+                                    </span>
+                                </div>
+                            </div>
+
+                            <!-- 12345 工单建议卡片 -->
+                            <div v-if="msg.showOrderCard" style="margin-top: 10px; padding: 12px; background: #fffbe6; border: 1px solid #ffe58f; border-radius: 6px;">
+                                <div style="font-weight: 600; color: #d46b08; font-size: 13px;">💡 本地官方知识库暂无对应细则，已为您开启 12345 绿色受理通道</div>
+                                <div style="font-size: 12px; color: #873800; margin: 4px 0 8px;">您可以直接点击下方按钮提交诉求，相关委办局工作人员将在 24 小时内正式核查答复。</div>
+                                <button class="gov-btn gov-btn-red" style="font-size: 12px;" @click="openWorkOrderModal(inputQuestion)">
+                                    登记并派发 12345 工单
+                                </button>
+                            </div>
+
+                            <!-- 未登录实名认证引导卡片 -->
+                            <div v-if="msg.requireLogin" style="margin-top: 14px; padding: 14px 16px; background: #e8f3ff; border: 1px solid #b7dcff; border-radius: 6px; display: flex; justify-content: space-between; align-items: center;">
+                                <div style="font-size: 13px; color: var(--gov-blue-dark); font-weight: 500;">
+                                    🔒 依据国家政务服务规范，请完成统一身份认证后获取完整办件指导
+                                </div>
+                                <button class="gov-btn gov-btn-primary" style="font-size: 12px; padding: 7px 16px; white-space: nowrap;" @click="openAuthModal()">
+                                    🔑 立即实名登录 / 注册 ➔
+                                </button>
+                            </div>
+
+                            <!-- 好差评操作栏 (仅在回答完成且有内容后显示，生成中或无内容时不显示) -->
+                            <div v-if="msg.role === 'assistant' && !msg.requireLogin && msg.content && (!isGenerating || index < messageList.length - 1)" class="feedback-actions">
+                                <span>评价本条解答：</span>
+                                <button class="feedback-btn" :class="{active: msg.rated === 1}" @click="rateMessage(msg, 1)">
+                                    👍 有帮助
+                                </button>
+                                <button class="feedback-btn" :class="{active: msg.rated === -1}" @click="rateMessage(msg, -1)">
+                                    👎 没解决
+                                </button>
+                                <span v-if="msg.rateTip" style="color: #00b42a; font-size: 11px;">{{ msg.rateTip }}</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 底部输入框区域 -->
+                <div class="chat-input-area">
+                    <div class="input-box-wrapper">
+                        <input type="text" class="chat-input" v-model="inputQuestion" 
+                               placeholder="请用自然语言描述您的政务诉求（例如：我是大专应届生，在海口如何落户？）"
+                               @keyup.enter="sendMessage()" :disabled="isGenerating">
+                        <button class="gov-btn gov-btn-primary" @click="sendMessage()" :disabled="isGenerating || !inputQuestion.trim()">
+                            <span>发送咨询</span>
+                        </button>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; font-size: 11px; color: var(--gov-text-muted); margin-top: 6px; padding: 0 4px;">
+                        <span>🔒 个人隐私受等保安全防护，手机号/身份证自动脱敏</span>
+                        <span>按 Enter 发送</span>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <!-- 政策出处原文件查看弹窗 (Modal) -->
+    <div v-if="showCitationModal" class="gov-modal-mask" @click.self="showCitationModal = false">
+        <div class="gov-modal">
+            <div class="modal-header">
+                <h3>📜 官方红头公文法定依据详情</h3>
+                <button class="modal-close-btn" @click="showCitationModal = false">×</button>
+            </div>
+            <div class="modal-body">
+                <div style="background: #fafbfc; border-left: 4px solid var(--gov-blue); padding: 10px 14px; margin-bottom: 14px;">
+                    <div style="font-weight: bold; color: var(--gov-blue-dark); font-size: 15px;">{{ activeCitation.docTitle }}</div>
+                    <div style="font-size: 12px; color: var(--gov-text-secondary); margin-top: 4px;">
+                        发文字号：{{ activeCitation.docNumber }} | 颁发单位：{{ activeCitation.issuerDept }}
+                    </div>
+                </div>
+                <div style="font-weight: 600; margin-bottom: 6px; color: #d4380d;">{{ activeCitation.clauseNo }}：</div>
+                <div style="background: #fffbe6; padding: 12px; border-radius: 4px; font-size: 13px; line-height: 1.8; color: #595959; white-space: pre-wrap;">{{ activeCitation.clauseText }}</div>
+                <div style="margin-top: 14px; font-size: 12px; color: var(--gov-text-muted);">
+                    * 声明：本条款摘录自海口市政务公开公报现行有效版本，具有法定行政效力。
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 12345 模拟工单提报弹窗 (Modal) -->
+    <div v-if="show12345Modal" class="gov-modal-mask" @click.self="show12345Modal = false">
+        <div class="gov-modal">
+            <div class="modal-header">
+                <h3>📢 提报 12345 政务服务民情诉求工单</h3>
+                <button class="modal-close-btn" @click="show12345Modal = false">×</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label class="form-label">市民姓名 (自动脱敏保护)：</label>
+                    <input type="text" class="form-input" v-model="workOrderForm.userName" placeholder="请输入您的姓名">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">联系电话 (用于接收承办反馈短信)：</label>
+                    <input type="text" class="form-input" v-model="workOrderForm.userPhone" placeholder="请输入手机号码">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">诉求类别：</label>
+                    <select class="form-select" v-model="workOrderForm.category">
+                        <option value="户籍管理">户籍管理 (落户/身份证/准迁证)</option>
+                        <option value="住房保障">住房保障 (公积金提取/贷款/租房补贴)</option>
+                        <option value="医疗保险">医疗保险 (医保报销/灵活就业缴费)</option>
+                        <option value="企业开办">企业开办 (营业执照/公章/税务)</option>
+                        <option value="出入境服务">出入境服务 (港澳通行证/护照/签注)</option>
+                        <option value="综合咨询">综合疑难诉求与行政投诉</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                        <label class="form-label" style="margin-bottom: 0;">具体诉求或疑难事实描述：</label>
+                        <button type="button" class="gov-btn gov-btn-outline" 
+                                style="font-size: 12px; padding: 3px 10px; border-color: var(--gov-blue); color: var(--gov-blue);" 
+                                :disabled="isTriaging" 
+                                @click="doAiTriage()">
+                            <span v-if="isTriaging">⏳ 大模型研判中...</span>
+                            <span v-else>🤖 AI 智能辅助归口研判</span>
+                        </button>
+                    </div>
+                    <textarea class="form-textarea" v-model="workOrderForm.appealContent" placeholder="请详述您的诉求背景、遇阻环节或争议事实（填写后可点击右上角【AI智能辅助归口研判】由大模型自动提炼公文摘要并精准推断派发责任单位）"></textarea>
+                </div>
+
+                <!-- AI 智能研判结果回填提示卡片 -->
+                <div v-if="aiTriageResult" style="background: #f0f7ff; border: 1px solid #adc6ff; border-radius: 6px; padding: 12px 14px; margin-bottom: 12px; font-size: 12px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                        <span style="font-weight: 700; color: #165dff; display: flex; align-items: center; gap: 4px;">
+                            <span>🤖</span> 12345 大模型智能研判与派单建议
+                        </span>
+                        <span style="background: #e6f7ff; color: #096dd9; padding: 2px 8px; border-radius: 4px; font-weight: 600;">
+                            {{ aiTriageResult.urgentLevel }}
+                        </span>
+                    </div>
+                    <div style="color: #1d2129; line-height: 1.6;">
+                        <div><strong>【建议责任归口】</strong> <span style="color: #b71c1c; font-weight: bold;">{{ aiTriageResult.suggestedDept }}</span></div>
+                        <div style="margin-top: 2px;"><strong>【精炼公文摘要】</strong> {{ aiTriageResult.summary }}</div>
+                        <div style="font-size: 11px; color: #52c41a; margin-top: 4px;">✓ 已自动为您匹配并锁定最佳处置部门与诉求分类</div>
+                    </div>
+                </div>
+
+                <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 16px;">
+                    <button class="gov-btn gov-btn-outline" @click="show12345Modal = false">取消</button>
+                    <button class="gov-btn gov-btn-primary" @click="submitWorkOrder()">提交并生成12345工单流水</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 一网通办在线智能申报与预约弹窗 (Modal) -->
+    <div v-if="showApplyModal" class="gov-modal-mask" @click.self="showApplyModal = false">
+        <div class="gov-modal" style="max-width: 600px;">
+            <div class="modal-header">
+                <h3>🚀 一网通办 · 在线智能申报与预约直通车</h3>
+                <button class="modal-close-btn" @click="showApplyModal = false">×</button>
+            </div>
+            <div class="modal-body" v-if="activeApplyAffair">
+                <div style="background: #e8f3ff; border-left: 4px solid var(--gov-blue); padding: 12px 14px; margin-bottom: 14px; border-radius: 4px;">
+                    <div style="font-weight: 700; color: var(--gov-blue-dark); font-size: 15px;">
+                        {{ activeApplyAffair.affairName }}
+                    </div>
+                    <div style="font-size: 12px; color: var(--gov-text-secondary); margin-top: 4px; display: flex; gap: 16px;">
+                        <span>业务代码：{{ activeApplyAffair.affairCode }}</span>
+                        <span>承诺办结：<strong style="color: #d93025;">{{ activeApplyAffair.promisedLimitDays }} 个工作日</strong></span>
+                        <span>办理形式：一窗受理·极简审批</span>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">申报申请人姓名：</label>
+                    <input type="text" class="form-input" v-model="applyForm.applicantName" placeholder="申请人真实姓名">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">联系电话 (用于接收预约受理短信)：</label>
+                    <input type="text" class="form-input" v-model="applyForm.applicantPhone" placeholder="手机号码">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">身份证号码：</label>
+                    <input type="text" class="form-input" v-model="applyForm.applicantIdCard" placeholder="公民身份证号码">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">拟前往办理网点/窗口：</label>
+                    <input type="text" class="form-input" v-model="applyForm.selectedBranch" placeholder="办证中心窗口">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">预约办理时段：</label>
+                    <select class="form-select" v-model="applyForm.appointmentDate">
+                        <option value="明天上午 09:00 - 11:30 (绿色专窗)">明天上午 09:00 - 11:30 (绿色免排队专窗)</option>
+                        <option value="明天下午 14:30 - 17:00 (智能一体机专区)">明天下午 14:30 - 17:00 (智能一体机专区)</option>
+                        <option value="后天上午 09:00 - 11:30 (错峰便民时段)">后天上午 09:00 - 11:30 (错峰便民时段)</option>
+                    </select>
+                </div>
+
+                <div style="background: #f6ffed; border: 1px solid #b7eb8f; padding: 10px 12px; border-radius: 4px; font-size: 12px; color: #389e0d; margin-bottom: 16px;">
+                    ✅ 办证提醒：政务服务大厅已全面实行“免填纸质申请表”，请携带已核验的身份证原件及相片回执前往即可。
+                </div>
+
+                <div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid var(--gov-border); padding-top: 14px;">
+                    <a :href="activeApplyAffair.onlineHandleUrl" target="_blank" style="font-size: 12px; color: var(--gov-blue); text-decoration: underline;">
+                        🔗 访问官方政务外网门户 ➔
+                    </a>
+                    <div style="display: flex; gap: 10px;">
+                        <button class="gov-btn gov-btn-outline" @click="showApplyModal = false">取消</button>
+                        <button class="gov-btn gov-btn-primary" @click="submitOnlineApply()">
+                            确认提交在线预审与预约
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 国家政务服务平台统一身份认证系统 (合并管理员与市民登录入口) -->
+    <div v-if="showAuthModal" class="gov-modal-mask" @click.self="showAuthModal = false">
+        <div class="gov-modal" style="max-width: 440px;">
+            <div class="modal-header" style="background: #fafbfc; border-bottom: 1px solid var(--gov-border); padding: 14px 20px;">
+                <div style="display: flex; align-items: center; gap: 8px;">
+                    <div style="width: 22px; height: 22px; background: #b71c1c; border-radius: 50%; color: #fff; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: bold;">政</div>
+                    <h3 style="font-size: 16px; font-weight: 700; color: #1d2129;">国家政务服务平台 · 统一身份认证</h3>
+                </div>
+                <button class="modal-close-btn" @click="showAuthModal = false">×</button>
+            </div>
+            <div class="modal-body" style="padding: 24px;">
+                <!-- 登录模式/注册切换 -->
+                <div v-if="authMode === 'login'">
+                    <!-- 方式切换 Tabs -->
+                    <div style="display: flex; gap: 8px; border-bottom: 2px solid #f0f2f5; margin-bottom: 20px; padding-bottom: 8px;">
+                        <button :class="['admin-tab', loginMethod === 'pwd' ? 'active' : '']" @click="loginMethod = 'pwd'" style="flex: 1; text-align: center; border: none;">
+                            账号密码登录
+                        </button>
+                        <button :class="['admin-tab', loginMethod === 'sms' ? 'active' : '']" @click="loginMethod = 'sms'" style="flex: 1; text-align: center; border: none;">
+                            手机快捷登录
+                        </button>
+                    </div>
+
+                    <!-- 账号密码统一登录 -->
+                    <div v-if="loginMethod === 'pwd'">
+                        <div class="form-group">
+                            <label class="form-label">登录账号：</label>
+                            <input type="text" class="form-input" v-model="loginForm.account" placeholder="用户名 / 手机号 / 身份证号">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">登录密码：</label>
+                            <input type="password" class="form-input" v-model="loginForm.password" placeholder="请输入登录密码" @keyup.enter="handleUnifiedLogin()">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">图形验证码：</label>
+                            <div style="display: flex; gap: 10px;">
+                                <input type="text" class="form-input" v-model="loginForm.captcha" placeholder="4位验证码" @keyup.enter="handleUnifiedLogin()">
+                                <div style="background: #f2f3f5; border: 1px solid #dcdfe6; padding: 6px 14px; font-family: monospace; font-size: 18px; font-weight: bold; letter-spacing: 4px; color: #b71c1c; border-radius: 4px; user-select: none; cursor: pointer; display: flex; align-items: center;" title="点击更换验证码" @click="refreshCaptcha()">
+                                    {{ currentCaptcha }}
+                                </div>
+                            </div>
+                        </div>
+                        <button class="gov-btn gov-btn-primary" style="width: 100%; justify-content: center; padding: 10px; font-size: 15px; margin-top: 10px;" @click="handleUnifiedLogin()">
+                            登 录
+                        </button>
+                        <div style="display: flex; justify-content: space-between; font-size: 12px; margin-top: 16px;">
+                            <a href="javascript:void(0)" @click="authMode = 'register'" style="color: var(--gov-blue); text-decoration: none;">新用户实名注册 ➔</a>
+                            <span style="color: var(--gov-text-muted);">国家信息安全等级保护认证</span>
+                        </div>
+                    </div>
+
+                    <!-- 手机验证码快捷登录 -->
+                    <div v-if="loginMethod === 'sms'">
+                        <div class="form-group">
+                            <label class="form-label">手机号码：</label>
+                            <input type="text" class="form-input" v-model="smsLoginForm.phone" placeholder="请输入11位手机号码">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">短信验证码：</label>
+                            <div style="display: flex; gap: 10px;">
+                                <input type="text" class="form-input" v-model="smsLoginForm.code" placeholder="6位短信验证码" @keyup.enter="handleSmsLogin()">
+                                <button class="gov-btn gov-btn-outline" style="white-space: nowrap; font-size: 12px;" @click="sendMockSms()">
+                                    {{ smsCountdown > 0 ? smsCountdown + '秒后重发' : '获取验证码' }}
+                                </button>
+                            </div>
+                        </div>
+                        <button class="gov-btn gov-btn-primary" style="width: 100%; justify-content: center; padding: 10px; font-size: 15px; margin-top: 10px;" @click="handleSmsLogin()">
+                            验证并登录
+                        </button>
+                        <div style="display: flex; justify-content: space-between; font-size: 12px; margin-top: 16px;">
+                            <a href="javascript:void(0)" @click="authMode = 'register'" style="color: var(--gov-blue); text-decoration: none;">新用户实名注册 ➔</a>
+                            <span style="color: var(--gov-text-muted);">未注册手机号验证后自动建档</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 新用户实名注册表单 -->
+                <div v-if="authMode === 'register'">
+                    <div style="font-size: 15px; font-weight: bold; color: var(--gov-text-primary); margin-bottom: 14px; display: flex; justify-content: space-between; align-items: center;">
+                        <span>公民实名账号建档注册</span>
+                        <a href="javascript:void(0)" @click="authMode = 'login'" style="font-size: 12px; color: var(--gov-blue); text-decoration: none;">已有账号，去登录 ➔</a>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">设置用户名：</label>
+                        <input type="text" class="form-input" v-model="registerForm.username" placeholder="4-16位字母或数字">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">公民真实姓名：</label>
+                        <input type="text" class="form-input" v-model="registerForm.name" placeholder="与身份证件保持一致">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">身份证号码：</label>
+                        <input type="text" class="form-input" v-model="registerForm.idCard" placeholder="18位居民身份证号码">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">手机号码：</label>
+                        <input type="text" class="form-input" v-model="registerForm.phone" placeholder="11位手机号码">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">设置登录密码：</label>
+                        <input type="password" class="form-input" v-model="registerForm.password" placeholder="6-20位密码">
+                    </div>
+                    <button class="gov-btn gov-btn-primary" style="width: 100%; justify-content: center; padding: 10px; font-size: 14px; margin-top: 10px;" @click="handleRegister()">
+                        同意《个人信息保护与政务服务协议》并注册
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 12345 真实民情案例公示回音壁弹窗 (Modal) -->
+    <div v-if="showCasesModal" class="gov-modal-mask" @click.self="showCasesModal = false">
+        <div class="gov-modal" style="max-width: 880px;">
+            <div class="modal-header">
+                <div style="display: flex; align-items: center; gap: 8px;">
+                    <span style="font-size: 20px;">🏛️</span>
+                    <h3>12345 真实民情接诉即办 · 典型案例公示与政策答疑回音壁</h3>
+                </div>
+                <button class="modal-close-btn" @click="showCasesModal = false">×</button>
+            </div>
+            <div class="modal-body" style="max-height: 70vh; overflow-y: auto; padding: 20px;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; background: #f7f8fa; padding: 10px 14px; border-radius: 6px;">
+                    <span style="font-size: 13px; color: var(--gov-text-secondary);">
+                        已累计办结答复 <strong>128,450</strong> 件 · 群众满意率 <strong>98.6%</strong> · 点击案例即可一键调起智能政务咨询
+                    </span>
+                    <span style="font-size: 12px; color: var(--gov-blue); font-weight: bold;">
+                        共收录 {{ realGovCases.length }} 篇典型办结案例
+                    </span>
+                </div>
+                <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px;">
+                    <div v-for="(c, idx) in realGovCases" :key="idx" 
+                         style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 8px; padding: 14px 16px; cursor: pointer; transition: all 0.2s;"
+                         @click="showCasesModal = false; clickCaseCard(c)" title="点击立即向政务AI咨询该事项">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                            <span style="font-size: 11px; padding: 2px 8px; border-radius: 4px; font-weight: 600; background: #e8f3ff; color: #165dff;">{{ c.dept }}</span>
+                            <span style="font-size: 11px; padding: 2px 8px; border-radius: 4px; font-weight: 600; background: #e8ffea; color: #00b42a;">✓ {{ c.status }}</span>
+                        </div>
+                        <div style="font-size: 13px; font-weight: 700; color: #1d2129; margin-bottom: 6px; line-height: 1.5;">{{ c.title }}</div>
+                        <div style="font-size: 12px; color: #4e5969; line-height: 1.5; margin-bottom: 8px;">{{ c.summary }}</div>
+                        <div style="font-size: 12px; color: #4e5969; line-height: 1.6; background: #f8fafc; border-left: 3px solid #00b42a; padding: 8px 10px; border-radius: 0 4px 4px 0;">
+                            <strong style="color: #00b42a;">【经办答复】</strong> {{ c.reply }}
+                            <div style="text-align: right; margin-top: 6px; font-size: 11px; color: #165dff; font-weight: 600;">
+                                🚀 体验此项智能导办 ➔
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 页脚 -->
+    <footer class="gov-footer">
+        <p>海南政务智能咨询与导办系统 · 软件工程实训项目 1.0 版本</p>
+        <p>本平台已接入全国一体化政务服务平台标准规范 · 承办热线：12345</p>
+    </footer>
+</div>
+
+<script src="/js/app.js?v=20260909_1208"></script>
+</body>
+</html>
