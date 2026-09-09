@@ -4,6 +4,8 @@ import com.example.myai.common.Result;
 import com.example.myai.repository.WorkOrderRepository;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 
 @RestController
@@ -25,10 +27,11 @@ public class GovDashboardController {
         int thumbsDown = GovChatController.thumbsDownCount.get();
         double satRate = (double) thumbsUp / (thumbsUp + thumbsDown) * 100.0;
 
-        data.put("totalConsultations", 1582);
+        data.put("totalConsultations", GovChatController.totalConsultationCount.get());
         data.put("totalWorkOrders", workOrderRepository.findAll().size());
         data.put("satisfactionRate", String.format("%.1f%%", satRate));
         data.put("avgResponseTime", "0.78s");
+        data.put("syncTime", LocalDateTime.now().format(DateTimeFormatter.ofPattern("HH:mm:ss")));
 
         // 业务分类占比
         List<Map<String, Object>> catDist = new ArrayList<>();

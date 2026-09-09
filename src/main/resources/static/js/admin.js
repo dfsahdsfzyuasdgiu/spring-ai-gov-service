@@ -12,6 +12,12 @@ createApp({
         const activeOrder = ref({});
         const replyText = ref('');
 
+        // 刷新状态与反馈
+        const isRefreshing = ref(false);
+        const lastRefreshTime = ref('');
+        const refreshToast = ref('');
+        let toastTimer = null;
+
         // 身份鉴权与权限拦截
         const currentUser = ref(null);
         const isAuthorized = ref(false);
@@ -194,11 +200,31 @@ createApp({
             }
         };
 
-        const refreshAll = () => {
-            loadStats();
-            loadOrders();
-            loadPolicies();
-            loadAffairs();
+        const refreshAll = async () => {
+            if (isRefreshing.value) return;
+            isRefreshing.value = true;
+            try {
+                await Promise.all([
+                    loadStats(),
+                    loadOrders(),
+                    loadPolicies(),
+                    loadAffairs()
+                ]);
+                const now = new Date();
+                const timeStr = now.toTimeString().split(' ')[0];
+                lastRefreshTime.value = timeStr;
+                refreshToast.value = `大屏监控指标与工单数据已同步刷新完成！（${timeStr}）`;
+                if (toastTimer) clearTimeout(toastTimer);
+                toastTimer = setTimeout(() => {
+                    refreshToast.value = '';
+                }, 2500);
+            } catch (e) {
+                console.error('刷新异常', e);
+            } finally {
+                setTimeout(() => {
+                    isRefreshing.value = false;
+                }, 500);
+            }
         };
 
         onMounted(() => {
@@ -223,6 +249,9 @@ createApp({
             replyText,
             currentUser,
             isAuthorized,
+            isRefreshing,
+            lastRefreshTime,
+            refreshToast,
             quickAdminAuth,
             logout,
             openReplyModal,

@@ -111,10 +111,51 @@
         .status-badge.wait { background: #fff7e8; color: #ff7d00; border: 1px solid #ffe58f; }
         .status-badge.doing { background: #e8f3ff; color: #165dff; border: 1px solid #b7dcff; }
         .status-badge.done { background: #e8ffea; color: #00b42a; border: 1px solid #aff0b5; }
+
+        /* 刷新按钮旋转微动效与 Toast 提示 */
+        .spin-icon {
+            display: inline-block;
+            animation: spinRotate 0.8s linear infinite;
+        }
+        @keyframes spinRotate {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+        .admin-refresh-toast {
+            position: fixed;
+            top: 28px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #00b42a;
+            color: #fff;
+            padding: 10px 24px;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 600;
+            box-shadow: 0 6px 18px rgba(0, 180, 42, 0.4);
+            z-index: 99999;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .toast-fade-enter-active, .toast-fade-leave-active {
+            transition: opacity 0.3s, transform 0.3s;
+        }
+        .toast-fade-enter-from, .toast-fade-leave-to {
+            opacity: 0;
+            transform: translate(-50%, -15px);
+        }
     </style>
 </head>
 <body>
 <div id="adminApp">
+    <!-- 刷新全局反馈 Toast 提示 -->
+    <transition name="toast-fade">
+        <div v-if="refreshToast" class="admin-refresh-toast">
+            <span>{{ refreshToast }}</span>
+        </div>
+    </transition>
+
     <!-- 顶部政务红蓝信息栏 -->
     <header class="gov-top-bar">
         <div>
@@ -139,8 +180,9 @@
             </div>
         </div>
         <div class="gov-nav-links">
-            <button class="gov-btn gov-btn-outline" @click="refreshAll()">
-                <span>🔄 刷新实时数据</span>
+            <button class="gov-btn gov-btn-outline" :disabled="isRefreshing" @click="refreshAll()">
+                <span :class="{'spin-icon': isRefreshing}">🔄</span>
+                <span>{{ isRefreshing ? ' 正在同步...' : ' 刷新实时数据' }}</span>
             </button>
             <a href="/index.html" class="gov-btn gov-btn-primary">
                 <span>进入前端办事门户</span>
@@ -166,10 +208,17 @@
                     </span>
                 </div>
             </div>
-            <div class="gov-hero-actions">
-                <button class="gov-btn" style="background: #ffffff; color: #b71c1c; font-weight: bold; border-color: #ffd54f; box-shadow: 0 4px 10px rgba(0,0,0,0.15);" @click="refreshAll()">
-                    🔄 刷新大屏监控指标
+            <div class="gov-hero-actions" style="display: flex; flex-direction: column; align-items: flex-end; gap: 8px;">
+                <button class="gov-btn" 
+                        style="background: #ffffff; color: #b71c1c; font-weight: bold; border-color: #ffd54f; box-shadow: 0 4px 10px rgba(0,0,0,0.15); display: inline-flex; align-items: center; gap: 6px;" 
+                        :disabled="isRefreshing" 
+                        @click="refreshAll()">
+                    <span :class="{'spin-icon': isRefreshing}">🔄</span>
+                    <span>{{ isRefreshing ? '正在同步大屏监控指标...' : '刷新大屏监控指标' }}</span>
                 </button>
+                <div v-if="lastRefreshTime" style="font-size: 11px; color: rgba(255,255,255,0.95); background: rgba(0,0,0,0.25); padding: 3px 10px; border-radius: 12px; display: inline-flex; align-items: center; gap: 4px;">
+                    <span>⏱️ 最近同步：{{ lastRefreshTime }}</span>
+                </div>
             </div>
         </section>
 
@@ -363,6 +412,6 @@
     </footer>
 </div>
 
-<script src="/js/admin.js?v=20260909_1010"></script>
+<script src="/js/admin.js?v=20260909_1545"></script>
 </body>
 </html>

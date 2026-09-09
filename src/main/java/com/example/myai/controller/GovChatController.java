@@ -19,7 +19,8 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class GovChatController {
 
     private final GovAiService govAiService;
-    // 统计好差评指标
+    // 统计好差评指标与咨询量
+    public static final AtomicInteger totalConsultationCount = new AtomicInteger(1582);
     public static final AtomicInteger thumbsUpCount = new AtomicInteger(128);
     public static final AtomicInteger thumbsDownCount = new AtomicInteger(6);
     public static final Map<String, String> feedbackReasons = new ConcurrentHashMap<>();
@@ -47,6 +48,7 @@ public class GovChatController {
                     ChatResponseChunk.done()
             );
         }
+        totalConsultationCount.incrementAndGet();
         return govAiService.streamConsultation(request);
     }
 
