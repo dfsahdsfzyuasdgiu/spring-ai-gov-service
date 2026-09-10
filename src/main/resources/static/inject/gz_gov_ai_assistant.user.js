@@ -82,7 +82,7 @@
       height: 66px;
       border-radius: 50%;
       background: linear-gradient(135deg, #006ed5 0%, #003a8c 100%);
-      box-shadow: 0 8px 24px rgba(0, 58, 140, 0.35), 0 2px 6px rgba(0, 0, 0, 0.15);
+      box-shadow: 0 4px 16px rgba(0, 58, 140, 0.32), 0 2px 6px rgba(0, 0, 0, 0.15);
       cursor: pointer;
       display: flex;
       flex-direction: column;
@@ -91,39 +91,16 @@
       position: relative;
       user-select: none;
       border: 2px solid #ffffff;
-      transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.25s ease;
-      animation: gzFloat 3.5s ease-in-out infinite;
+      transition: box-shadow 0.2s ease, opacity 0.2s ease;
     }
 
     .gz-launcher:hover {
-      transform: translateY(-5px) scale(1.04);
-      box-shadow: 0 12px 32px rgba(0, 58, 140, 0.45), 0 4px 10px rgba(0, 0, 0, 0.2);
+      box-shadow: 0 6px 20px rgba(0, 58, 140, 0.45);
+      opacity: 0.95;
     }
 
     .gz-launcher:active {
-      transform: scale(0.96);
-    }
-
-    /* 柔和的政务蓝呼吸外光环 */
-    .gz-launcher::before {
-      content: '';
-      position: absolute;
-      inset: -5px;
-      border-radius: 50%;
-      background: radial-gradient(circle, rgba(0, 110, 213, 0.35) 0%, rgba(194, 5, 5, 0.18) 70%, transparent 100%);
-      z-index: -1;
-      animation: gzAura 2.8s cubic-bezier(0.25, 1, 0.5, 1) infinite;
-    }
-
-    @keyframes gzFloat {
-      0%, 100% { transform: translateY(0); }
-      50% { transform: translateY(-7px); }
-    }
-
-    @keyframes gzAura {
-      0% { transform: scale(0.95); opacity: 0.8; }
-      50% { transform: scale(1.25); opacity: 0.1; }
-      100% { transform: scale(1.3); opacity: 0; }
+      opacity: 0.88;
     }
 
     .launcher-seal {
