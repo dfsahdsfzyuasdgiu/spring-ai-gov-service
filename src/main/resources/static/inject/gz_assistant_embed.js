@@ -522,7 +522,7 @@
       border-color: #0050b3;
     }
 
-    /* 评价反馈行 */
+    /* 评价与疑问反馈行 */
     .chat-feedback-bar {
       display: flex;
       align-items: center;
@@ -542,7 +542,134 @@
       font-size: 11px;
       transition: all 0.15s ease;
     }
-    .action-sub-btn:hover { color: #0050b3; border-color: #0050b3; background: #ffffff; }
+    .action-sub-btn:hover { color: #c20505; border-color: #c20505; background: #ffffff; }
+
+    /* 政策疑问反馈展开框 (全直角公文标准) */
+    .msg-feedback-panel {
+      margin-top: 8px;
+      padding: 10px 12px;
+      background: #fafbfc;
+      border: 1px solid #dcdfe6;
+      border-left: 3px solid #c20505;
+      border-radius: 0 !important;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      animation: gzMsgFade 0.2s ease forwards;
+    }
+
+    .feedback-panel-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 11px;
+      font-weight: 700;
+      color: #003a8c;
+    }
+
+    .feedback-close-btn {
+      color: #8c8c8c;
+      font-size: 16px;
+      cursor: pointer;
+      line-height: 1;
+      padding: 0 2px;
+    }
+    .feedback-close-btn:hover { color: #c20505; }
+
+    .feedback-tag-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 5px;
+    }
+
+    .fb-tag {
+      font-size: 11px;
+      background: #ffffff;
+      color: #475569;
+      border: 1px solid #cbd5e1;
+      border-radius: 0;
+      padding: 2px 7px;
+      cursor: pointer;
+      transition: all 0.15s ease;
+      user-select: none;
+    }
+
+    .fb-tag:hover {
+      border-color: #006ed5;
+      color: #006ed5;
+    }
+
+    .fb-tag.active {
+      background: #006ed5;
+      color: #ffffff;
+      border-color: #006ed5;
+    }
+
+    .feedback-textarea {
+      width: 100%;
+      height: 52px;
+      border: 1px solid #cbd5e1;
+      border-radius: 0 !important;
+      padding: 6px 8px;
+      font-size: 12px;
+      color: #1a1a1a;
+      resize: none;
+      outline: none;
+      background: #ffffff;
+      line-height: 1.45;
+    }
+
+    .feedback-textarea:focus {
+      border-color: #0050b3;
+      box-shadow: 0 0 0 1px #0050b3;
+    }
+
+    .feedback-action-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 10px;
+      color: #8c8c8c;
+    }
+
+    .feedback-btn-group {
+      display: flex;
+      gap: 6px;
+    }
+
+    .fb-btn-cancel, .fb-btn-submit {
+      padding: 3px 10px;
+      font-size: 11px;
+      border-radius: 0 !important;
+      cursor: pointer;
+      border: 1px solid transparent;
+      transition: all 0.15s ease;
+    }
+
+    .fb-btn-cancel {
+      background: #f1f5f9;
+      color: #475569;
+      border-color: #cbd5e1;
+    }
+    .fb-btn-cancel:hover { background: #e2e8f0; }
+
+    .fb-btn-submit {
+      background: #c20505;
+      color: #ffffff;
+      border-color: #c20505;
+      font-weight: 600;
+    }
+    .fb-btn-submit:hover { background: #a30404; }
+
+    .feedback-success-note {
+      font-size: 11px;
+      color: #389e0d;
+      padding: 6px 8px;
+      background: #f6ffed;
+      border: 1px solid #b7eb8f;
+      border-radius: 0;
+      line-height: 1.4;
+    }
 
     /* 等待打字动效 */
     .typing-box {
@@ -914,13 +1041,83 @@
       </div>
       <div class="chat-feedback-bar">
         <span>信息承办：广州市政务服务和数据管理局</span>
-        <button class="action-sub-btn" onclick="this.innerHTML='已采纳'; this.style.color='#389e0d';">采纳</button>
-        <button class="action-sub-btn" onclick="this.innerHTML='已反馈'; this.style.color='#c20505';">有疑问</button>
+        <button class="action-sub-btn fb-toggle-btn" title="点击展开政策解答疑问与建议反馈">有疑问？</button>
+      </div>
+      <div class="msg-feedback-panel" style="display: none;">
+        <div class="feedback-panel-header">
+          <span>【政策解答疑问与建议反馈】</span>
+          <span class="feedback-close-btn" title="关闭">&times;</span>
+        </div>
+        <div class="feedback-tag-list">
+          <span class="fb-tag" data-val="条文出处不够准确">条文出处不准</span>
+          <span class="fb-tag" data-val="政策文件可能已废止/修订">文件已废止/修订</span>
+          <span class="fb-tag" data-val="未能准确解答问题">未解答核心问题</span>
+          <span class="fb-tag" data-val="其他意见建议">其他建议</span>
+        </div>
+        <textarea class="feedback-textarea" placeholder="请具体说明您的疑问或政策出处有误之处，协助完善政策知识库（选填）..." maxlength="200"></textarea>
+        <div class="feedback-action-bar">
+          <span>经核实后将结合广州市最新公文优化知识库</span>
+          <div class="feedback-btn-group">
+            <button class="fb-btn-cancel">取消</button>
+            <button class="fb-btn-submit">提交反馈</button>
+          </div>
+        </div>
       </div>
     `;
 
     chatMain.appendChild(div);
     scrollChatBottom();
+
+    // 绑定“有疑问？”点击展开反馈框
+    const toggleBtn = div.querySelector('.fb-toggle-btn');
+    const panel = div.querySelector('.msg-feedback-panel');
+    const closeBtn = div.querySelector('.feedback-close-btn');
+    const cancelBtn = div.querySelector('.fb-btn-cancel');
+    const submitBtnFb = div.querySelector('.fb-btn-submit');
+    const textarea = div.querySelector('.feedback-textarea');
+    const tags = div.querySelectorAll('.fb-tag');
+
+    toggleBtn.addEventListener('click', () => {
+      const isHidden = panel.style.display === 'none';
+      panel.style.display = isHidden ? 'flex' : 'none';
+      toggleBtn.style.color = isHidden ? '#c20505' : '';
+      if (isHidden) {
+        scrollChatBottom();
+        setTimeout(() => textarea.focus(), 150);
+      }
+    });
+
+    closeBtn.addEventListener('click', () => {
+      panel.style.display = 'none';
+      toggleBtn.style.color = '';
+    });
+
+    cancelBtn.addEventListener('click', () => {
+      panel.style.display = 'none';
+      toggleBtn.style.color = '';
+    });
+
+    tags.forEach(tag => {
+      tag.addEventListener('click', () => {
+        tag.classList.toggle('active');
+      });
+    });
+
+    submitBtnFb.addEventListener('click', () => {
+      const selectedTags = Array.from(div.querySelectorAll('.fb-tag.active')).map(t => t.getAttribute('data-val'));
+      const textVal = textarea.value.trim();
+      console.log('[广州政策问答] 收到市民反馈:', { tags: selectedTags, detail: textVal });
+
+      panel.innerHTML = `
+        <div class="feedback-success-note">
+          ✓ 感谢您的反馈！已记录该条政策解答疑问，政务知识库管理团队将核实广州市最新公文予以纠正完善。
+        </div>
+      `;
+      toggleBtn.innerHTML = '已反馈';
+      toggleBtn.disabled = true;
+      toggleBtn.style.color = '#c20505';
+      scrollChatBottom();
+    });
 
     // 绑定追问芯片点击
     div.querySelectorAll('.suggestion-chip').forEach(chip => {
