@@ -47,6 +47,7 @@
 - [8. 安全合规与仿真沙箱机制说明](#8-安全合规与仿真沙箱机制说明)
 - [9. 海口市高频政务咨询场景与测试基准库 (35项)](#9-海口市高频政务咨询场景与测试基准库-35项)
 - [10. 海口全域政务知识库扩充规划与标准化架构](#10-海口全域政务知识库扩充规划与标准化架构)
+- [11. 广州市人民政府门户网站 (gz.gov.cn) 右下角圆形 AI 问答小助手前端脚本](#11-广州市人民政府门户网站-gzgovcn-右下角圆形-ai-问答小助手前端脚本)
 
 ---
 
@@ -769,6 +770,50 @@ Started SpringAiAlibabaApplication in 3.x seconds
 由纯内存静态硬编码升级为**外置标准 JSON 资产持久化与自愈机制**：
 - 资产路径：`src/main/resources/data/haikou_policies.json` 与 `src/main/resources/data/haikou_affairs.json`；
 - 加载机制：通过 Jackson 与 Spring `ResourceLoader` 在服务启动时自动解析注入 `PolicyRepository` 和 `AffairRepository`，保持与前端大屏指标实时联动（50+ / 50+）。
+
+---
+
+## 11. 广州市人民政府门户网站 (gz.gov.cn) 右下角圆形 AI 问答小助手前端脚本
+
+### 11.1 需求背景与设计定位
+针对将智能问答与导办能力无缝嵌入**广州市人民政府门户网站**（`https://www.gz.gov.cn/`）的业务需求，系统封装了一套专业级、即插即用的前端独立注入脚本。
+- **职责边界明晰**：前端专精于拟生动效、样式无缝适配与流式交互，后端由协作同学负责接口与数据库对接；
+- **视觉风格高度融合**：严格遵循广州市政府官网视觉规范，以岭南政务蓝（`#006ed5`）为主色调，搭配广州木棉红（`#d73816`）与政务金（`#fa8c16`），字体、卡片圆角及阴影与官网浑然一体。
+
+### 11.2 Shadow DOM 完全样式隔离
+为彻底杜绝第三方宿主网页（`gz.gov.cn` 原有全局 CSS 如 `table`, `a`, `button`, `body` 等）对小助手界面的样式干扰，脚本采用 **Shadow DOM (`attachShadow({ mode: 'open' })`)** 隔离架构：
+- 页面仅挂载单一宿主节点 `<div id="gz-gov-ai-root"></div>`；
+- 所有 CSS 规则、DOM 树完全内嵌于 Shadow Root 内部，实现**零样式泄露、零样式冲突**。
+
+### 11.3 核心拟生动效与交互体验
+1. **3D 微浮动运动 (`gzFloat`)**：右下角 66px 正圆形图标呈现纵向柔和悬浮运动，周期 3.2s，极具生命力；
+2. **呼吸光晕脉冲 (`gzAura`)**：悬浮球周围以径向渐变扩散呼吸光环，周期 2.6s，提供柔和的视觉焦点；
+3. **主动迎宾气泡 (`gz-ai-speech-bubble`)**：用户进入页面 2.5 秒后，悬浮球左侧平滑滑出迎宾提示卡片（“您好！我是穗政AI小助手…”），点击可直接呼出主对话框；
+4. **弹簧阻尼升起开合 (`cubic-bezier(0.16, 1, 0.3, 1)`)**：点击圆形小助手后，以右下角为锚点弹性形变升起为 440×680 现代化对话窗口；点击最小化或关闭时平滑缩回；
+5. **流式打字与导办卡片**：输出内容支持逐字打字机动画、红头政策依据展开卡（`穗府办规`）、六级十二项办事指南交互核验 Checklist 及一键直达网上申办。
+
+### 11.4 交付产物与使用方式
+系统提供三种灵活的使用形态，满足本地测试、线上演示与浏览器注入场景：
+
+| 交付文件 | 存放路径 | 适用场景与使用说明 |
+| :--- | :--- | :--- |
+| **独立嵌入脚本** | `src/main/resources/static/inject/gz_assistant_embed.js` | 可在浏览器 DevTools 控制台直接贴入执行，或在任意 HTML 中通过 `<script src="..."></script>` 引入 |
+| **Tampermonkey 油猴脚本** | `src/main/resources/static/inject/gz_gov_ai_assistant.user.js` | 适用于 Chrome/Edge 浏览器油猴插件一键安装，自动匹配 `https://www.gz.gov.cn/*` 并在打开官网时自动挂载小助手 |
+| **仿真测试预览页** | `src/main/resources/static/test_gz_assistant.html` | 本地内嵌仿真的广州市人民政府官网首页，浏览器直接访问 `http://localhost:8080/test_gz_assistant.html` 即可直观查看动效并测试问答 |
+
+### 11.5 与同学后端数据库的联调配置指南
+脚本内部实现了**双模通信适配器**，同学负责完成后端与数据库后，联调极为简便：
+```javascript
+// 修改 window.GzGovAiConfig 配置项（位于 gz_assistant_embed.js 顶部）
+window.GzGovAiConfig = {
+  apiEndpoint: 'http://localhost:8080/api/v1/gov/chat/stream', // 同学编写的问答接口
+  mockIfOffline: true, // 保持为 true 时：若后端离线或未启动，自动启动离线仿真知识库引擎，确保演示绝不翻车
+  assistantName: '穗小宝',
+  department: '广州市政务服务和数据管理局'
+};
+```
+- **接口请求格式**：`POST`，Body 为 JSON：`{ "prompt": "咨询内容" }`；
+- **接口返回格式**：JSON 包含 `content`（回答正文）、`policy`（可选红头法规依据）、`affair`（可选六级十二项标准事项指南）。
 
 ---
 *文档编制日期：2026年9月*  

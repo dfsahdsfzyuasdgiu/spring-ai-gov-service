@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>广州市人民政府门户网站 - 仿真测试平台 (已注入穗政AI右下角圆形小助手)</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", sans-serif;
+    }
+    body {
+      background: #f4f6fa;
+      color: #333;
+    }
+    /* 顶部政务红栏 */
+    .gov-topbar {
+      background: #c20505;
+      color: #fff;
+      padding: 6px 40px;
+      font-size: 13px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .gov-topbar a { color: #fff; text-decoration: none; margin-left: 15px; }
+    /* 广州主头部 */
+    .gov-header {
+      background: linear-gradient(135deg, #0050b3 0%, #006ed5 100%);
+      color: #fff;
+      padding: 30px 40px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .gov-brand {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+    .gov-emblem {
+      width: 48px;
+      height: 48px;
+      background: #fff;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #c20505;
+      font-weight: 900;
+      font-size: 20px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+    }
+    .gov-title h1 {
+      font-size: 26px;
+      letter-spacing: 1px;
+    }
+    .gov-title p {
+      font-size: 12px;
+      opacity: 0.85;
+      margin-top: 4px;
+    }
+    /* 导航菜单 */
+    .gov-nav {
+      background: #003a8c;
+      padding: 0 40px;
+      display: flex;
+      gap: 30px;
+    }
+    .gov-nav-item {
+      color: #fff;
+      text-decoration: none;
+      padding: 14px 0;
+      font-size: 15px;
+      font-weight: 500;
+      border-bottom: 3px solid transparent;
+      transition: all 0.2s;
+    }
+    .gov-nav-item:hover, .gov-nav-item.active {
+      border-bottom-color: #ffd666;
+      color: #ffd666;
+    }
+    /* 搜索栏与Banner */
+    .gov-search-section {
+      background: #ffffff;
+      padding: 36px 40px;
+      text-align: center;
+      border-bottom: 1px solid #e2e8f0;
+    }
+    .search-box {
+      max-width: 640px;
+      margin: 0 auto;
+      display: flex;
+      box-shadow: 0 4px 16px rgba(0, 110, 213, 0.12);
+      border-radius: 8px;
+      overflow: hidden;
+      border: 2px solid #006ed5;
+    }
+    .search-box input {
+      flex: 1;
+      padding: 12px 20px;
+      font-size: 15px;
+      border: none;
+      outline: none;
+    }
+    .search-box button {
+      background: #006ed5;
+      color: #fff;
+      border: none;
+      padding: 0 28px;
+      font-size: 16px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+    .search-keywords {
+      margin-top: 12px;
+      font-size: 13px;
+      color: #64748b;
+    }
+    .search-keywords a {
+      color: #006ed5;
+      margin: 0 6px;
+      text-decoration: none;
+    }
+    /* 主体内容区 */
+    .gov-container {
+      max-width: 1200px;
+      margin: 30px auto;
+      padding: 0 20px;
+      display: grid;
+      grid-template-columns: 2fr 1fr;
+      gap: 24px;
+    }
+    .card {
+      background: #ffffff;
+      border-radius: 12px;
+      padding: 24px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.04);
+      border: 1px solid #eef2f6;
+    }
+    .card h2 {
+      font-size: 18px;
+      color: #0f172a;
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      border-left: 4px solid #006ed5;
+      padding-left: 10px;
+    }
+    .news-item {
+      padding: 12px 0;
+      border-bottom: 1px dashed #e2e8f0;
+      display: flex;
+      justify-content: space-between;
+      font-size: 14px;
+    }
+    .news-item a { color: #334155; text-decoration: none; }
+    .news-item a:hover { color: #006ed5; }
+    .news-date { color: #94a3b8; font-size: 12px; }
+
+    /* 快捷办事网格 */
+    .service-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+    }
+    .service-btn {
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+      padding: 14px 10px;
+      text-align: center;
+      text-decoration: none;
+      color: #1e293b;
+      font-size: 13px;
+      transition: all 0.2s;
+    }
+    .service-btn:hover {
+      background: #eff6ff;
+      border-color: #93c5fd;
+      color: #1d4ed8;
+      transform: translateY(-2px);
+    }
+    .service-icon { font-size: 22px; display: block; margin-bottom: 6px; }
+
+    /* 脚本调试提示条 */
+    .dev-badge {
+      background: #f0fdf4;
+      border: 1px solid #bbf7d0;
+      color: #166534;
+      padding: 12px 20px;
+      border-radius: 8px;
+      margin-bottom: 20px;
+      font-size: 13px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- 顶部状态栏 -->
+  <div class="gov-topbar">
+    <div>欢迎访问广州市人民政府门户网站（www.gz.gov.cn）</div>
+    <div>
+      <a href="javascript:;">无障碍浏览</a>
+      <a href="javascript:;">政务服务</a>
+      <a href="javascript:;">穗好办APP</a>
+      <a href="javascript:;">12345热线</a>
+    </div>
+  </div>
+
+  <!-- 头部Logo区 -->
+  <header class="gov-header">
+    <div class="gov-brand">
+      <div class="gov-emblem">穗</div>
+      <div class="gov-title">
+        <h1>广州市人民政府门户网站</h1>
+        <p>The People's Government of Guangzhou Municipality · 广东政务服务网广州专区</p>
+      </div>
+    </div>
+  </header>
+
+  <!-- 导航栏 -->
+  <nav class="gov-nav">
+    <a href="javascript:;" class="gov-nav-item active">网站首页</a>
+    <a href="javascript:;" class="gov-nav-item">政务公开</a>
+    <a href="javascript:;" class="gov-nav-item">政务服务</a>
+    <a href="javascript:;" class="gov-nav-item">互动交流</a>
+    <a href="javascript:;" class="gov-nav-item">营商环境</a>
+    <a href="javascript:;" class="gov-nav-item">魅力广州</a>
+  </nav>
+
+  <!-- 搜索栏 -->
+  <section class="gov-search-section">
+    <div class="search-box">
+      <input type="text" placeholder="请输入政策文件名称、办事事项或关键字..." />
+      <button>搜 索</button>
+    </div>
+    <div class="search-keywords">
+      热搜词：
+      <a href="javascript:;">公租房申请</a>
+      <a href="javascript:;">积分入户</a>
+      <a href="javascript:;">中小客车摇号</a>
+      <a href="javascript:;">企业开办一网通</a>
+      <a href="javascript:;">医保异地结算</a>
+    </div>
+  </section>
+
+  <!-- 仿真页面主体 -->
+  <main class="gov-container">
+    <div class="left-col">
+      <div class="dev-badge">
+        <span>✅ <strong>[仿真运行环境]</strong> 页面已成功加载右下角<strong>“穗政AI小助手”</strong>脚本，注意观察右下角的圆形悬浮图标与呼吸动效。</span>
+        <span style="font-size:12px; color:#15803d;">支持点击形变升起与问答交互</span>
+      </div>
+
+      <div class="card">
+        <h2>政务要闻 · 工作动态</h2>
+        <div class="news-item">
+          <a href="javascript:;">广州市召开深化推进“高效办成一件事”打造一流营商环境部署会</a>
+          <span class="news-date">2026-09-09</span>
+        </div>
+        <div class="news-item">
+          <a href="javascript:;">广州市发布2026年度来穗人员积分制入户申请指南及指标分配方案</a>
+          <span class="news-date">2026-09-07</span>
+        </div>
+        <div class="news-item">
+          <a href="javascript:;">《广州市公共租赁住房保障办法》全面落实“减材料、秒审批”新政</a>
+          <span class="news-date">2026-09-05</span>
+        </div>
+        <div class="news-item">
+          <a href="javascript:;">广州推进个体工商户直接转型升级为有限责任公司（个转企）便民通道</a>
+          <span class="news-date">2026-09-02</span>
+        </div>
+        <div class="news-item">
+          <a href="javascript:;">广州交警全面布设“警医邮”微体检一体机，驾驶证期满换证立等可办</a>
+          <span class="news-date">2026-08-28</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="right-col">
+      <div class="card">
+        <h2>“高效办成一件事”专区</h2>
+        <div class="service-grid">
+          <a href="javascript:;" class="service-btn">
+            <span class="service-icon">🏠</span>
+            <span>公租房申请</span>
+          </a>
+          <a href="javascript:;" class="service-btn">
+            <span class="service-icon">🌟</span>
+            <span>积分入户</span>
+          </a>
+          <a href="javascript:;" class="service-btn">
+            <span class="service-icon">🏢</span>
+            <span>企业开办</span>
+          </a>
+          <a href="javascript:;" class="service-btn">
+            <span class="service-icon">🏥</span>
+            <span>异地医保</span>
+          </a>
+          <a href="javascript:;" class="service-btn">
+            <span class="service-icon">🛂</span>
+            <span>港澳签注</span>
+          </a>
+          <a href="javascript:;" class="service-btn">
+            <span class="service-icon">🚗</span>
+            <span>车牌摇号</span>
+          </a>
+        </div>
+      </div>
+
+      <div class="card" style="margin-top: 20px;">
+        <h2>穗好办 · 便民直通车</h2>
+        <p style="font-size: 13px; color: #64748b; line-height: 1.6;">
+          如需快速咨询政务政策或查询六级十二项办理指南，请直接点击<strong>屏幕右下角的圆形 AI 问答小助手（穗小宝）</strong>，支持 7×24 小时全天候智能咨询。
+        </p>
+      </div>
+    </div>
+  </main>
+
+  <!-- 页面注入右下角 AI 小助手脚本 -->
+  <script src="/inject/gz_assistant_embed.js"></script>
+
+</body>
+</html>
