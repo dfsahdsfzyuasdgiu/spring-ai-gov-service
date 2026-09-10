@@ -7,7 +7,10 @@
 // @match        https://www.gz.gov.cn/*
 // @match        http://www.gz.gov.cn/*
 // @match        https://zwfw.gd.gov.cn/*
-// @match        http://localhost:*/*
+// @match        http://localhost:8080/*
+// @match        http://127.0.0.1:8080/*
+// @include      /^http:\/\/localhost:[^/]*?\/.*?$/
+// @include      /^http:\/\/127\.0\.0\.1:[^/]*?\/.*?$/
 // @icon         https://www.gz.gov.cn/favicon.ico
 // @grant        none
 // @run-at       document-end
