@@ -1593,11 +1593,24 @@
         <div style="color:#595959; font-size:11px;">${escapeText(stepData.guidance || '')}</div>
       `;
     } else {
+      const stepsList = (stepData.processSteps || []).map(s => `
+        <div style="margin-bottom:4px; font-size:11px; color:#1e293b;">
+          <strong>第${s.stepNo}步【${escapeText(s.stepName)}】</strong>：${escapeText(s.description)}
+          <span style="color:#8c8c8c; font-size:10px;">（预计耗时：${escapeText(s.timeCost)}）</span>
+        </div>
+      `).join('');
+
       contentHtml = `
-        <div style="margin-bottom:6px; font-weight:600; color:#003a8c;">【线上申办通道直达】</div>
+        <div style="margin-bottom:6px; font-weight:600; color:#003a8c;">【全流程文字办事指引】</div>
         <div style="margin-bottom:6px; color:#1e293b;">承诺办结时限：<strong>${stepData.promisedLimitDays || 1} 个工作日</strong></div>
-        <a href="${escapeText(stepData.onlineHandleUrl || '#')}" target="_blank" style="display:inline-block; padding:4px 10px; background:#006ed5; color:#ffffff; text-decoration:none; font-weight:600; font-size:11px; margin-bottom:6px;">直通广东政务服务网/穗好办申办 ➔</a>
-        <div style="color:#595959; font-size:11px;">${escapeText(stepData.guidance || '')}</div>
+        ${stepsList ? `<div style="background:#f8fafc; border:1px solid #e2e8f0; padding:6px 8px; margin-bottom:6px;">${stepsList}</div>` : ''}
+        <div style="background:#f0f5ff; border-left:3px solid #0050b3; padding:6px 8px; margin-bottom:6px; font-size:11px; color:#1e293b; line-height:1.5;">
+          <div style="font-weight:600; color:#003a8c; margin-bottom:2px;">【线上办理文字指引】</div>
+          打开手机微信搜索“穗好办”小程序或登录广东政务服务网广州站，在搜索栏输入“${escapeText(stepData.affairName || '此事项')}”，完成人脸识别实名认证后，系统将自动核验并免提交核心证照，核对后在线确认申报即可。<br/>
+          <div style="font-weight:600; color:#003a8c; margin-top:5px; margin-bottom:2px;">【线下办事网点】</div>
+          ${escapeText(stepData.handlingAddress || '广州市各区及街道政务服务中心综合窗口')}。
+        </div>
+        <div style="color:#595959; font-size:11px; line-height:1.4; white-space:pre-wrap;">${escapeText(stepData.guidance || '')}</div>
       `;
     }
 

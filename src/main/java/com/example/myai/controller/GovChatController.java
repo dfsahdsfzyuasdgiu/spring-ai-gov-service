@@ -154,13 +154,17 @@ public class GovChatController {
             resp.put("materials", affair.getMaterials());
             resp.put("guidance", "已为您自动筛查该事项的申报材料清单。大部分核心材料已支持‘电子证照免提交’或大数据自动联网比对。");
             resp.put("nextStep", 3);
-            resp.put("nextStepName", "网办通道直达");
+            resp.put("nextStepName", "办事路径与时限");
         } else {
-            resp.put("stepName", "网办通道");
-            resp.put("onlineHandleUrl", affair.getOnlineHandleUrl());
+            resp.put("stepName", "办事指引");
             resp.put("promisedLimitDays", affair.getPromisedLimitDays());
+            resp.put("handlingAddress", affair.getHandlingAddress());
             resp.put("processSteps", affair.getProcessSteps());
-            resp.put("guidance", "该事项承诺 " + affair.getPromisedLimitDays() + " 个工作日办结，您可以点击直通广东政务服务网或“穗好办”进行在线极速申报。");
+            resp.put("guidance", "【全流程文字办事指引】\n" +
+                    "1. 承诺办结时限：" + affair.getPromisedLimitDays() + " 个工作日。\n" +
+                    "2. 线上办理路径：微信打开“穗好办”小程序或登录广东政务服务网广州专区，在顶部搜索栏输入“" + affair.getAffairName() + "”，刷脸完成实名认证后，系统自动调用免提交证照核验，核对无误即可在线确认提交。\n" +
+                    "3. 线下网点办理：可前往 " + (affair.getHandlingAddress() != null ? affair.getHandlingAddress() : "广州市各区或街道政务服务中心综合窗口") + "，持身份证原件办理。\n" +
+                    "4. 办结短信提醒：审批通过后，办理结果将以政务短信通知并下发电子凭据。");
         }
 
         return Result.success(resp);

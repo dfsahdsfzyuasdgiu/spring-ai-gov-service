@@ -8,6 +8,9 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 
 @Controller
 public class GovPortalController {
@@ -25,6 +28,23 @@ public class GovPortalController {
             }
         } catch (Exception e) {
             return "// gz_assistant_embed.js load error: " + e.getMessage();
+        }
+    }
+
+    @GetMapping(value = "/gz_gov_ai_assistant.user.js", produces = "text/javascript;charset=UTF-8")
+    @ResponseBody
+    public String getUserScript() {
+        try {
+            Path path = Paths.get("gz_gov_ai_assistant.user.js");
+            if (Files.exists(path)) {
+                return Files.readString(path, StandardCharsets.UTF_8);
+            }
+            Resource resource = new ClassPathResource("static/gz_gov_ai_assistant.user.js");
+            try (InputStream is = resource.getInputStream()) {
+                return new String(is.readAllBytes(), StandardCharsets.UTF_8);
+            }
+        } catch (Exception e) {
+            return "// user.js load error: " + e.getMessage();
         }
     }
 

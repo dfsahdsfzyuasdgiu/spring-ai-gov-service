@@ -268,9 +268,9 @@ public class GovAiService {
 
         Map<String, String> step3 = new LinkedHashMap<>();
         step3.put("step", "3");
-        step3.put("name", "线上通道");
-        step3.put("desc", "广东政务服务网/穗好办直通");
-        step3.put("prompt", "我想在网上申办【" + affair.getAffairName() + "】，请提供线上办理入口与流程指引");
+        step3.put("name", "办事指引");
+        step3.put("desc", "线上与线下办事文字指引");
+        step3.put("prompt", "我想办理【" + affair.getAffairName() + "】，请提供详细的线上与线下办事文字路径指引");
         steps.add(step3);
 
         card.put("steps", steps);
