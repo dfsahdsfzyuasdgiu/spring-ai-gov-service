@@ -411,6 +411,197 @@
     }
 
     /* ========================================================
+       3.1 政策结论速览块 (定性定量一锤定音)
+       ======================================================== */
+    .policy-conclusion-box {
+      background: #f0f7ff;
+      border: 1px solid #b0cbe8;
+      border-left: 3px solid #0050b3;
+      border-radius: 0 !important;
+      padding: 7px 9px;
+      margin-bottom: 7px;
+      font-size: 12px;
+      line-height: 1.55;
+      color: #1a1a1a;
+    }
+
+    .conclusion-title {
+      font-size: 10.5px;
+      font-weight: 700;
+      color: #003a8c;
+      margin-bottom: 3px;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .conclusion-tag {
+      background: #0050b3;
+      color: #ffffff;
+      padding: 0 4px;
+      font-size: 9.5px;
+      border-radius: 0;
+      font-weight: 600;
+    }
+
+    /* ========================================================
+       3.2 双视角对照卡 (通俗解读 VS 官方条文对照)
+       ======================================================== */
+    .policy-dual-card {
+      background: #ffffff;
+      border: 1px solid #dcdfe6;
+      border-top: 2px solid #003a8c;
+      border-radius: 0 !important;
+      margin: 7px 0;
+      overflow: hidden;
+    }
+
+    .dual-card-header {
+      background: #f4f6f9;
+      border-bottom: 1px solid #e2e8f0;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0 4px;
+      user-select: none;
+    }
+
+    .dual-tabs-wrap {
+      display: flex;
+      gap: 1px;
+    }
+
+    .dual-tab-btn {
+      padding: 5px 8px;
+      font-size: 11px;
+      font-weight: 600;
+      color: #64748b;
+      background: transparent;
+      border: none;
+      border-bottom: 2px solid transparent;
+      cursor: pointer;
+      transition: all 0.15s ease;
+      display: flex;
+      align-items: center;
+      gap: 3px;
+      border-radius: 0;
+    }
+
+    .dual-tab-btn:hover {
+      color: #003a8c;
+    }
+
+    .dual-tab-btn.active {
+      color: #003a8c;
+      background: #ffffff;
+      border-bottom-color: #c20505;
+      font-weight: 700;
+    }
+
+    .tab-badge {
+      font-size: 9px;
+      padding: 0 3px;
+      background: #e6f4ff;
+      color: #0050b3;
+      border-radius: 0;
+    }
+
+    .tab-badge.red {
+      background: #fff1f0;
+      color: #cf1322;
+    }
+
+    .dual-expand-btn {
+      font-size: 10px;
+      color: #0050b3;
+      background: #ffffff;
+      border: 1px solid #b0cbe8;
+      border-radius: 0;
+      padding: 1px 6px;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+
+    .dual-expand-btn:hover {
+      background: #f0f7ff;
+      border-color: #0050b3;
+      color: #003a8c;
+    }
+
+    .dual-body {
+      padding: 7px 9px;
+      font-size: 12px;
+      line-height: 1.6;
+    }
+
+    .dual-panel {
+      display: none;
+    }
+
+    .dual-panel.active {
+      display: block;
+    }
+
+    /* 并排对照模式 (上下叠层展开全景) */
+    .policy-dual-card.side-by-side .dual-panel {
+      display: block !important;
+      margin-bottom: 8px;
+      padding-bottom: 8px;
+      border-bottom: 1px dashed #e2e8f0;
+    }
+
+    .policy-dual-card.side-by-side .dual-panel:last-child {
+      margin-bottom: 0;
+      padding-bottom: 0;
+      border-bottom: none;
+    }
+
+    .dual-panel-label {
+      font-size: 10px;
+      font-weight: 700;
+      padding: 1px 5px;
+      display: inline-block;
+      margin-bottom: 4px;
+      border-radius: 0;
+    }
+
+    .dual-panel-label.plain {
+      background: #e6f4ff;
+      color: #0050b3;
+      border-left: 2px solid #0050b3;
+    }
+
+    .dual-panel-label.statute {
+      background: #fff1f0;
+      color: #cf1322;
+      border-left: 2px solid #c20505;
+    }
+
+    .dual-plain-content {
+      color: #262626;
+      font-size: 12px;
+      line-height: 1.6;
+    }
+
+    .dual-plain-content ul {
+      margin: 4px 0 4px 16px;
+      line-height: 1.55;
+    }
+
+    .dual-plain-content li {
+      margin-bottom: 2px;
+    }
+
+    .dual-statute-content {
+      background: #fafafa;
+      border-left: 2px solid #d9d9d9;
+      padding: 5px 7px;
+      font-size: 11.5px;
+      color: #434343;
+      line-height: 1.55;
+    }
+
+    /* ========================================================
        4. 权威政策依据溯源卡 (向量检索原文直溯 - 紧凑公文卡)
        ======================================================== */
     .policy-citation-card {
@@ -526,10 +717,17 @@
     .chat-feedback-bar {
       display: flex;
       align-items: center;
-      gap: 8px;
-      font-size: 10.5px;
+      justify-content: space-between;
+      gap: 6px;
+      font-size: 10px;
       color: #8c8c8c;
-      margin-top: 4px;
+      margin-top: 5px;
+    }
+
+    .action-btn-group {
+      display: flex;
+      align-items: center;
+      gap: 5px;
     }
 
     .action-sub-btn {
@@ -539,10 +737,24 @@
       color: #595959;
       cursor: pointer;
       padding: 1px 6px;
-      font-size: 10.5px;
+      font-size: 10px;
       transition: all 0.15s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 3px;
     }
     .action-sub-btn:hover { color: #c20505; border-color: #c20505; background: #ffffff; }
+
+    .btn-copy-summary:hover {
+      color: #0050b3;
+      border-color: #0050b3;
+    }
+
+    .btn-copy-summary.copied {
+      color: #389e0d;
+      border-color: #52c41a;
+      background: #f6ffed;
+    }
 
     /* 政策疑问反馈展开框 (全直角公文标准 - 紧凑型) */
     .msg-feedback-panel {
@@ -832,12 +1044,22 @@
         <div class="chat-row ai">
           <div class="chat-author">广州市政策法规咨询专窗</div>
           <div class="chat-bubble">
-            您好，欢迎使用<strong>广州市人民政府门户网站</strong>政策法规 AI 智能问答系统。<br><br>
-            本系统深度对接广州市现行政策公文向量知识库，为您提供政策条文精准检索、适用对象判断与官方条款溯源。您可在此输入您想了解的政策问题，例如：
-            <ul style="margin: 6px 0 0 18px; line-height: 1.6; color: #475569;">
-              <li><em>“新就业无房职工申领广州公租房租赁补贴的具体政策规定是什么？”</em></li>
-              <li><em>“广州市对新设立企业免费发放印章和半天办结的规章依据是哪部文件？”</em></li>
-            </ul>
+            <div class="policy-conclusion-box">
+              <div class="conclusion-title">
+                <span class="conclusion-tag">专窗答复规范</span>
+                <span>公文三段式 · 双重视角直溯</span>
+              </div>
+              <div class="conclusion-body">
+                欢迎使用<strong>广州市人民政府门户网站</strong>政策法规 AI 智能问答专窗。本系统依托全市现行政策公文权威数据库，采用<strong>【政策结论速览 + 群众通俗/官方条文双视角对照 + 法定出处直溯】</strong>为您提供精准解答。
+              </div>
+            </div>
+            <div style="font-size: 11.5px; color: #475569; line-height: 1.6;">
+              您可点击上方快捷标签或直接输入具体政策问题，例如：
+              <ul style="margin: 4px 0 0 16px; color: #1e293b;">
+                <li><em>“新就业无房职工申领广州公租房租赁补贴的具体政策规定？”</em></li>
+                <li><em>“广州市对新设立企业免费发放印章和半天办结的规章依据？”</em></li>
+              </ul>
+            </div>
           </div>
           <div class="chat-feedback-bar">
             <span>数据源：广州市人民政府门户网站政策公开专栏</span>
@@ -987,14 +1209,130 @@
     return div;
   }
 
-  // 渲染政策问答结果 (专注于政策解读 + 向量溯源 + 追问延伸)
+  // 格式化文本为结构良好的公文 HTML
+  function formatMarkdownLike(str) {
+    if (!str) return '';
+    let html = escapeText(str)
+      .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+      .replace(/\*(.*?)\*/g, '<em>$1</em>');
+
+    // 处理列表符
+    const lines = html.split('\n');
+    let inList = false;
+    const processed = [];
+
+    for (let i = 0; i < lines.length; i++) {
+      const line = lines[i].trim();
+      if (/^[•\-\*]\s+/.test(line)) {
+        if (!inList) {
+          processed.push('<ul style="margin: 4px 0 4px 16px; line-height: 1.55;">');
+          inList = true;
+        }
+        processed.push('<li style="margin-bottom: 2px;">' + line.replace(/^[•\-\*]\s+/, '') + '</li>');
+      } else {
+        if (inList) {
+          processed.push('</ul>');
+          inList = false;
+        }
+        if (line) {
+          processed.push('<div>' + line + '</div>');
+        }
+      }
+    }
+    if (inList) processed.push('</ul>');
+    return processed.join('');
+  }
+
+  function stripHtml(html) {
+    if (!html) return '';
+    const tmp = document.createElement('div');
+    tmp.innerHTML = html;
+    return tmp.textContent || tmp.innerText || '';
+  }
+
+  // 智能解析大模型返回文本或结构化数据
+  function parsePolicyData(data) {
+    let conclusion = data.conclusion || '';
+    let plainText = data.plainInterpretation || data.plain || '';
+    let statuteText = data.statuteClauses || data.statute || '';
+    const rawContent = data.content || data.reply || '';
+
+    // 若未预拆分，从文本中正则提取公文三段式
+    if (!conclusion && rawContent) {
+      if (rawContent.includes('【政策结论') || rawContent.includes('【群众通俗解读') || rawContent.includes('【官方条文对照')) {
+        const conclusionMatch = rawContent.match(/【政策结论(?:速览)?】\s*([\s\S]*?)(?=【群众通俗解读】|【官方条文对照】|$)/);
+        const plainMatch = rawContent.match(/【群众通俗解读】\s*([\s\S]*?)(?=【官方条文对照】|$)/);
+        const statuteMatch = rawContent.match(/【官方条文对照】\s*([\s\S]*?)$/);
+
+        if (conclusionMatch) conclusion = conclusionMatch[1].trim();
+        if (plainMatch) plainText = plainMatch[1].trim();
+        if (statuteMatch) statuteText = statuteMatch[1].trim();
+      } else {
+        conclusion = rawContent;
+      }
+    }
+
+    return {
+      conclusion: conclusion || '经广州市政策法规数据库检索，相关文件已纳入现行有效目录。',
+      plainText: plainText,
+      statuteText: statuteText,
+      citations: data.citations || (data.policy ? [data.policy] : []),
+      suggestions: data.suggestions || []
+    };
+  }
+
+  // 渲染政策问答结果 (穗政双重视角 · 公文三段式创新答复体系)
   function renderPolicyAnswer(data) {
     const div = document.createElement('div');
     div.className = 'chat-row ai';
+    const parsed = parsePolicyData(data);
 
-    // 1. 政策原文依据卡片组 (Citations)
+    // 1. 第一段：政策结论速览
+    let conclusionHtml = `
+      <div class="policy-conclusion-box">
+        <div class="conclusion-title">
+          <span class="conclusion-tag">政策结论速览</span>
+          <span>广州政务权威研判</span>
+        </div>
+        <div class="conclusion-body">${formatMarkdownLike(parsed.conclusion)}</div>
+      </div>
+    `;
+
+    // 2. 第二段：双视角对照卡 (通俗解读 VS 官方条文对照)
+    let dualCardHtml = '';
+    if (parsed.plainText || parsed.statuteText) {
+      dualCardHtml = `
+        <div class="policy-dual-card">
+          <div class="dual-card-header">
+            <div class="dual-tabs-wrap">
+              <button class="dual-tab-btn active" data-tab="plain" title="点击查看群众大白话解读">
+                <span class="tab-badge">白话</span>
+                <span>群众通俗解读</span>
+              </button>
+              <button class="dual-tab-btn" data-tab="statute" title="点击查看官方规范条文原话">
+                <span class="tab-badge red">条文</span>
+                <span>官方条文对照</span>
+              </button>
+            </div>
+            <button class="dual-expand-btn" title="点击展开通俗版与条文版上下并排对照">展开并排对照 ▾</button>
+          </div>
+          <div class="dual-body">
+            <div class="dual-panel plain active">
+              <div class="dual-panel-label plain">💡 群众通俗解读视角</div>
+              <div class="dual-plain-content">${formatMarkdownLike(parsed.plainText || '暂无通俗解读细则。')}</div>
+            </div>
+            <div class="dual-panel statute">
+              <div class="dual-panel-label statute">📜 规范法言条文视角</div>
+              <div class="dual-statute-content">${formatMarkdownLike(parsed.statuteText || '暂无法规条款原话。')}</div>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    // 3. 第三段：政策原文依据直溯卡 (Citations)
     let citationsHtml = '';
-    const citeList = data.citations || (data.policy ? [data.policy] : []);
+    const citeList = parsed.citations;
     if (citeList && citeList.length > 0) {
       citationsHtml = citeList.map((c) => `
         <div class="policy-citation-card">
@@ -1017,10 +1355,10 @@
       `).join('');
     }
 
-    // 2. 智能政策延伸推荐 (Suggestions)
+    // 4. 智能政策延伸推荐 (Suggestions)
     let suggestionsHtml = '';
-    if (data.suggestions && data.suggestions.length > 0) {
-      const chips = data.suggestions.map((s) => `
+    if (parsed.suggestions && parsed.suggestions.length > 0) {
+      const chips = parsed.suggestions.map((s) => `
         <span class="suggestion-chip" data-prompt="${escapeText(s)}">${escapeText(s)}</span>
       `).join('');
 
@@ -1035,13 +1373,17 @@
     div.innerHTML = `
       <div class="chat-author">广州市政策法规咨询专窗</div>
       <div class="chat-bubble">
-        <div class="typing-target"></div>
+        ${conclusionHtml}
+        ${dualCardHtml}
         ${citationsHtml}
         ${suggestionsHtml}
       </div>
       <div class="chat-feedback-bar">
         <span>信息承办：广州市政务服务和数据管理局</span>
-        <button class="action-sub-btn fb-toggle-btn" title="点击展开政策解答疑问与建议反馈">有疑问？</button>
+        <div class="action-btn-group">
+          <button class="action-sub-btn btn-copy-summary" title="一键复制规范格式的政策咨询备忘单">复制公文摘要</button>
+          <button class="action-sub-btn fb-toggle-btn" title="点击展开政策解答疑问与建议反馈">有疑问？</button>
+        </div>
       </div>
       <div class="msg-feedback-panel" style="display: none;">
         <div class="feedback-panel-header">
@@ -1068,7 +1410,66 @@
     chatMain.appendChild(div);
     scrollChatBottom();
 
-    // 绑定“有疑问？”点击展开反馈框
+    // 交互绑定：双视角 Tab 切换与并排展开
+    const dualCard = div.querySelector('.policy-dual-card');
+    if (dualCard) {
+      const tabBtns = dualCard.querySelectorAll('.dual-tab-btn');
+      const panels = dualCard.querySelectorAll('.dual-panel');
+      const expandBtn = dualCard.querySelector('.dual-expand-btn');
+
+      tabBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+          if (dualCard.classList.contains('side-by-side')) {
+            dualCard.classList.remove('side-by-side');
+            expandBtn.textContent = '展开并排对照 ▾';
+          }
+          tabBtns.forEach(b => b.classList.remove('active'));
+          btn.classList.add('active');
+          const targetTab = btn.getAttribute('data-tab');
+          panels.forEach(p => {
+            p.classList.toggle('active', p.classList.contains(targetTab));
+          });
+        });
+      });
+
+      expandBtn.addEventListener('click', () => {
+        const isExpanded = dualCard.classList.toggle('side-by-side');
+        expandBtn.textContent = isExpanded ? '收起并排对照 ▴' : '展开并排对照 ▾';
+        scrollChatBottom();
+      });
+    }
+
+    // 交互绑定：一键复制政策备忘单
+    const copyBtn = div.querySelector('.btn-copy-summary');
+    if (copyBtn) {
+      copyBtn.addEventListener('click', () => {
+        let citeText = '';
+        if (citeList && citeList.length > 0) {
+          citeText = `【法定公文依据】\n文件：《${citeList[0].title}》（${citeList[0].docNumber || '现行有效'}）\n机构：${citeList[0].dept || '广州市人民政府'}\n条款：${citeList[0].clause || citeList[0].snippet || ''}`;
+        }
+        const textToCopy = `【广州市政策法规智能咨询 · 政策备忘单】\n` +
+          `============================================\n` +
+          `【政策结论】\n${stripHtml(parsed.conclusion)}\n\n` +
+          (parsed.plainText ? `【通俗要点】\n${stripHtml(parsed.plainText)}\n\n` : '') +
+          (citeText ? `${citeText}\n============================================\n` : '') +
+          `来源：广州市人民政府门户网站 (www.gz.gov.cn)\n` +
+          `咨询时间：${new Date().toLocaleString('zh-CN', { hour12: false })}`;
+
+        navigator.clipboard.writeText(textToCopy).then(() => {
+          copyBtn.textContent = '✓ 已复制备忘';
+          copyBtn.classList.add('copied');
+          setTimeout(() => {
+            copyBtn.textContent = '复制公文摘要';
+            copyBtn.classList.remove('copied');
+          }, 2500);
+        }).catch(() => {
+          copyBtn.textContent = '复制失败';
+          setTimeout(() => { copyBtn.textContent = '复制公文摘要'; }, 2000);
+        });
+      });
+    }
+
+    // 交互绑定：有疑问展开反馈框
     const toggleBtn = div.querySelector('.fb-toggle-btn');
     const panel = div.querySelector('.msg-feedback-panel');
     const closeBtn = div.querySelector('.feedback-close-btn');
@@ -1119,7 +1520,7 @@
       scrollChatBottom();
     });
 
-    // 绑定追问芯片点击
+    // 交互绑定：追问标签点击
     div.querySelectorAll('.suggestion-chip').forEach(chip => {
       chip.addEventListener('click', () => {
         const p = chip.getAttribute('data-prompt');
@@ -1127,17 +1528,6 @@
         handleUserSubmit();
       });
     });
-
-    const targetElem = div.querySelector('.typing-target');
-    runTypeWriter(targetElem, data.content || data.reply || '', 0, 14);
-  }
-
-  function runTypeWriter(element, text, index, speed) {
-    if (index < text.length) {
-      element.innerHTML = text.substring(0, index + 1).replace(/\n/g, '<br/>');
-      scrollChatBottom();
-      setTimeout(() => runTypeWriter(element, text, index + 1, speed), speed);
-    }
   }
 
   function scrollChatBottom() {
@@ -1167,27 +1557,29 @@
     return json.data || json;
   }
 
-  // 广州市政策法规高保真离线向量仿真知识库
+  // 广州市政策法规高保真离线向量仿真知识库 (内置双重视角·三段式公文结构)
   function getGuangzhouPolicyMockData(prompt) {
     const q = prompt.toLowerCase();
 
     // 1. 公租房保障与租赁补贴政策
     if (q.includes('公租房') || q.includes('租房') || q.includes('租赁补贴')) {
       return {
-        content: '根据《广州市公共租赁住房保障办法》，广州市对中等偏下收入住房困难家庭及新就业无房职工实行“实物配租”与“住房租赁补贴”相结合的保障模式。符合条件的新就业无房职工在穗稳定就业且人均年可支配收入低于保障线的，可申领住房租赁补贴，补贴标准按建筑面积每平方米每月最高35元计算，补贴期限最长不超过5年。',
+        conclusion: '新就业无房职工与城市中低收入家庭在广州市符合条件可申领公共租赁住房保障，其中住房租赁补贴按月核发，累计享受期限最长不超过5年。',
+        plainInterpretation: '• 补贴标准：每月按核定租金发放，标准为最高每平方米35元/月（以保障面积40㎡计算，每月约补贴1400元）。\n• 申领门槛：持本市有效居住证、在穗连续缴纳社保满6个月、家庭人均年可支配收入低于规定标准、在穗无自有产权住房。\n• 申办渠道：登录“广东政务服务网·广州专区”或“穗好办”APP全程网办。\n• 互斥说明：已享受公租房实物配租的家庭不得重复申领租赁补贴。',
+        statuteClauses: '《广州市公共租赁住房保障办法》（穗府办规〔2024〕6号）\n第三条第二款：“保障对象包括本市城镇户籍中等偏下收入住房困难家庭，以及在穗稳定就业的新就业职工和外来务工人员。”\n第十一条：“住房租赁补贴按照保障人口、补贴标准及保障面积计算，按月存入保障对象指定的个人银行账户。”',
         citations: [
           {
             title: '广州市公共租赁住房保障办法',
             docNumber: '穗府办规〔2024〕6号',
             dept: '广州市人民政府办公厅',
-            similarity: '98%',
+            similarity: '99%',
             clause: '第三条【保障对象】：本市城镇户籍中等偏下收入住房困难家庭，以及持有本市有效居住证、在穗连续稳定就业的新就业职工及外来务工人员。\n第十一条【租赁补贴】：住房租赁补贴标准为每平方米每月35元，结合保障家庭人口与人均保障建筑面积测算发放。'
           }
         ],
         suggestions: [
-          '新就业无房职工申请补贴的收入门槛是多少？',
+          '新就业无房职工申请公租房租赁补贴的收入门槛是多少？',
           '公租房实物配租与租赁补贴可以同时享受吗？',
-          '租赁补贴累计最长可以享受几年？'
+          '连续缴纳社保满6个月是否包含补缴月份？'
         ]
       };
     }
@@ -1195,20 +1587,22 @@
     // 2. 积分制入户政策
     if (q.includes('积分') || q.includes('入户') || q.includes('落户') || q.includes('户口')) {
       return {
-        content: '根据《广州市积分制入户管理办法》，广州市对来穗人员实行年度积分指标总量调控。申报人须同时符合四项法定准入条件：年龄在45周岁以下、持有在广州市办理的有效《广东省居住证》、在穗合法稳定就业或创业并累计缴纳社会保险满4年、在“广州市来穗人员积分制服务管理信息系统”核定积分达到当年度规定基准值。积分指标按分数由高到低排序确定落户名单。',
+        conclusion: '来穗人员通过积分制申请落户广州，须同时满足年龄在45周岁以下、持有效在穗广东省居住证、在穗依法缴纳社保累计满4年、信用良好四项法定硬性条件。',
+        plainInterpretation: '• 准入四要素：① 年龄未满45周岁；② 持有效广州居住证；③ 广州社保累计满4年（五险齐全）；④ 积分达到当年度入户门槛。\n• 排名规则：依“广州市来穗人员积分制服务管理信息系统”核定积分从高到低统一排序入户，相同分数依社保月份排序。\n• 随迁规定：获得积分入户指标后，其配偶及未成年子女可依法申请同步随迁落户。\n• 办理时限：每年集中开展一次申报审核，拟入户名单在广州门户网站公示5个工作日。',
+        statuteClauses: '《广州市积分制入户管理办法》（穗府规〔2023〕1号）\n第五条：“申请积分制入户应当符合下列条件：（一）年龄在45周岁以下；（二）持有本市有效《广东省居住证》；（三）在本市合法稳定就业或创业并缴纳社会保险累计满4年；（四）在穗信用良好。”\n第六条：“指标总量实行年度调控，按核定积分分值高低确定拟入户人员名单。”',
         citations: [
           {
             title: '广州市积分制入户管理办法',
             docNumber: '穗府规〔2023〕1号',
             dept: '广州市人民政府',
-            similarity: '97%',
+            similarity: '98%',
             clause: '第五条【申报条件】：符合以下条件的来穗人员，可申请积分制入户：\n（一）年龄45周岁以下；\n（二）持本市有效《广东省居住证》；\n（三）在本市合法稳定就业或创业并缴纳社会保险累计满4年；\n（四）在穗信用记录良好，无严重违法犯罪记录。'
           }
         ],
         suggestions: [
-          '社保缴纳满4年是否包含断缴补缴月份？',
-          '来穗人员积分指标体系主要加分项有哪些？',
-          '获得积分入户指标后随迁家属有哪些政策规定？'
+          '社保缴纳满4年是否包含断缴或跨省转移接续月份？',
+          '来穗人员积分指标体系主要加分项包括哪些？',
+          '获得积分入户指标后随迁家属有哪些具体审核规定？'
         ]
       };
     }
@@ -1216,20 +1610,22 @@
     // 3. 企业开办与营商环境扶持政策
     if (q.includes('企业') || q.includes('开公司') || q.includes('营业执照') || q.includes('开办') || q.includes('营商')) {
       return {
-        content: '广州市依据《广东省优化营商环境条例》及《广州市深化企业开办“一网通办”改革的若干意见》，全面推行新开办企业“半天办结、零成本”。新设立企业通过“广州市开办企业一网通平台”申报，营业执照申领、公章刻制、发票领用、就业社保登记与公积金开户实现并联审批，0.5个工作日内完成办结，并由政府财政买单免费向新开办企业赠送4枚防伪印章。',
+        conclusion: '广州市全面推行新开办企业“半天办结、零成本”，设立登记、公章刻制、发票申领与社保公积金开户实现全流程并联审批，0.5个工作日内完成，并免费赠送全套4枚防伪印章。',
+        plainInterpretation: '• 办理时限：全流程网上半天（0.5工作日）办结，无需到大厅跑腿。\n• 费用全免：政府买单免费刻制包含公章、财务章、发票章、法人人名章共4枚防伪实体印章。\n• 一网通办：登录“广州市开办企业一网通平台”，营业执照、税务开户、银行预约、社保登记一表申报。\n• 智能审批：符合标准的有限责任公司及个体工商户支持全流程系统智能核准。',
+        statuteClauses: '《广州市市场监督管理局关于深化企业开办“一网通办”改革的若干意见》（穗市监规〔2024〕2号）\n第二条：“全面深化‘一网通办、半天办结’，将企业设立登记、刻制印章、申领发票、员工就业参保和公积金开户整合为1个环节，开办成本降为零，印章制作费用由政府全额财政承担。”',
         citations: [
           {
             title: '广州市市场监督管理局关于深化企业开办“一网通办”改革的若干意见',
             docNumber: '穗市监规〔2024〕2号',
             dept: '广州市市场监督管理局',
-            similarity: '96%',
+            similarity: '97%',
             clause: '第二条【全流程并联审批】：设立登记、刻制印章、申领发票、员工参保及住房公积金缴存登记实行“一表填报、一次认证、一窗通取”，0.5天内全流程办结，实体印章由各区行政审批局统一免费发放。'
           }
         ],
         suggestions: [
-          '新设企业免费赠送的实体印章包含哪些种类？',
-          '广州对个体工商户转为有限责任公司有何便利扶持？',
-          '企业开办一网通平台电子营业执照如何进行人脸认证？'
+          '新设企业免费赠送的实体印章领取方式有哪些？',
+          '个体工商户转为有限责任公司（个转企）有何扶持？',
+          '企业开办一网通平台电子营业执照如何进行手机实名认证？'
         ]
       };
     }
@@ -1237,10 +1633,12 @@
     // 4. 灵活就业医保与社保政策
     if (q.includes('医保') || q.includes('社保') || q.includes('灵活就业') || q.includes('医疗')) {
       return {
-        content: '根据《广州市医疗保障局 广州市财政局关于灵活就业人员参加本市职工基本医疗保险有关事项的通知》，在法定劳动年龄内的无雇工个体工商户、未在用人单位参加职工医保的非全日制从业人员以及其他灵活就业人员，无论户籍在广州还是外地，均可在就业地参加广州市职工基本医疗保险。缴费基数可在上年度全口径城镇单位就业人员月平均工资的60%至300%之间自主选择，按月享受与企业职工完全相同的门诊和住院报销待遇。',
+        conclusion: '在法定劳动年龄内的灵活就业人员在广州参加职工医保不设户籍壁垒，无论广州户籍还是外地户籍均可在穗自愿参保，享受与单位在职职工完全相同的住院及门诊报销待遇。',
+        plainInterpretation: '• 参保人群：无雇工个体工商户、未在用人单位参保的非全日制从业人员、新业态平台从业人员等。\n• 缴费基数：按上年度广州城镇单位就业人员月平均工资的60%至300%区间自主选档缴费。\n• 报销待遇：按月缴纳职工医保费，按规定享受统筹基金支付的普通门诊、门诊特定病种及住院待遇。\n• 申报方式：通过“粤税通”微信小程序或办税服务厅凭居民身份证直接办理。',
+        statuteClauses: '《广州市医疗保障局 广州市财政局关于灵活就业人员参加本市职工基本医疗保险有关事项的通知》（穗医保规〔2023〕5号）\n第一条：“未达法定退休年龄的无雇工个体工商户、未在用人单位参加职工医保的非全日制从业人员，凭身份证即可办理参保，破除户籍限制，保障平等参保权益。”',
         citations: [
           {
-            title: '广州市医疗保障局 广州市财政局关于灵活就业人员参加本市职工基本医疗保险有关事项的通知',
+            title: '广州市医疗保障局关于灵活就业人员参加本市职工医保有关事项的通知',
             docNumber: '穗医保规〔2023〕5号',
             dept: '广州市医疗保障局、广州市财政局',
             similarity: '98%',
@@ -1258,13 +1656,15 @@
     // 5. 中小客车指标调控政策
     if (q.includes('车牌') || q.includes('摇号') || q.includes('竞价') || q.includes('指标') || q.includes('客车')) {
       return {
-        content: '根据《广州市中小客车总量调控管理办法》，广州市中小客车增量指标分为节能车增量指标、普通车增量指标（摇号与竞价）。个人申请增量指标须满足：住所地在本市、持有有效机动车驾驶证、名下没有本市登记的中小客车。非本市户籍人员申请还须持有在穗有效居住证，且近两年内在广州累计缴纳基本医疗保险满24个月。',
+        conclusion: '个人申请广州中小客车增量指标（摇号/竞价），非广州户籍人员须持有效在穗居住证且近2年在本市累计缴纳职工医保满24个月，名下无本市登记中小客车并持有有效驾驶证。',
+        plainInterpretation: '• 资格硬指标：① 广州有效居住证；② 申请之日前2年内累计缴纳广州医保满24个月（允许累计）；③ 持有效驾照且名下无粤A小客车。\n• 节能车摇号：符合条件的个人可选择申请节能车增量指标摇号（中签率显著高于普通车）。\n• 申报平台：登录“广州市中小客车指标调控管理信息系统”每月8日24时前完成申报，26日统一摇号竞价。',
+        statuteClauses: '《广州市中小客车总量调控管理办法》（穗府办规〔2023〕15号）\n第十六条：“住所地在本市的个人包括：（一）本市户籍人员；（二）持有效《广东省居住证》且近2年在本市累计缴纳职工社会医疗保险满24个月的非本市户籍人员。申请人须名下无本市登记中小客车并持有效驾驶证。”',
         citations: [
           {
             title: '广州市中小客车总量调控管理办法',
             docNumber: '穗府办规〔2023〕15号',
             dept: '广州市人民政府办公厅',
-            similarity: '95%',
+            similarity: '96%',
             clause: '第十六条【个人申请条件】：住所地在本市的情形包括本市户籍人员、驻穗部队现役军人，以及持有效《广东省居住证》且近2年在本市连续缴纳职工医保满24个月的非本市户籍人员。'
           }
         ],
@@ -1279,13 +1679,15 @@
     // 6. 出入境与港澳签注政策
     if (q.includes('港澳') || q.includes('通行证') || q.includes('签注') || q.includes('出入境') || q.includes('出境')) {
       return {
-        content: '依据国家移民管理局《关于全面实施出入境证件“全国通办”的规定》，中国内地居民自2019年起可在全国任一公安出入境管理窗口申请办理往来港澳通行证及赴香港、澳门团队旅游签注，申办手续与户籍地一致。申请人仅需提供本人有效居民身份证即可办理，免交户口簿与居住证明，一般7个工作日内签发。',
+        conclusion: '内地居民在广州办理往来港澳通行证及团队旅游签注全面实行“全国通办”，免提交居住证与户籍材料，持有效居民身份证即可异地就近办理，首次办证一般7个工作日办结。',
+        plainInterpretation: '• 全国通办政策：不受户籍地限制，全国居民均可在广州公安出入境窗口就近申办。\n• 携带材料：仅需携带本人二代居民身份证原件，未满16周岁须监护人陪同并携带户口簿。\n• 智能签注立等可取：持有效往来港澳通行证再次申请赴港澳旅游签注的，可在全市智能签注机实现“立等可取”。\n• 预约渠道：通过“广州公安”微信公众号或“移民局”小程序提前预约就近网点。',
+        statuteClauses: '国家移民管理局《关于进一步调整优化出入境管理政策措施的公告》（国移发〔2023〕18号）\n第一条：“自2023年5月15日起，全面恢复实行内地居民赴港澳团队旅游签注‘全国通办’；内地居民可向全国任一公安机关出入境管理机构提交申请，申办手续与户籍地一致。”',
         citations: [
           {
             title: '关于全面实施出入境证件“全国通办”的规定',
             docNumber: '国移发〔2023〕18号',
             dept: '国家移民管理局',
-            similarity: '94%',
+            similarity: '95%',
             clause: '第一条【全国通办】：内地居民可在全国任一出入境管理窗口申请往来港澳通行证及团队旅游签注，不受户籍地限制，无需提交居住证或社保证明。'
           }
         ],
@@ -1298,13 +1700,15 @@
 
     // 兜底政务政策回答
     return {
-      content: `关于您咨询的问题：“${prompt}”，经广州市政策法规数据库检索，广州市人民政府及各委办局现行政策文件库已全面落实信息公开规范。您可通过广州市人民政府门户网站“政务公开-政策法规”专栏，依文号、发布年份与部门进行精准全文查阅。`,
+      conclusion: '广州市现行规章、行政规范性文件已全面纳入广州市人民政府门户网站政策公开专栏，实行统一登记、统一编号、统一印发与动态清理机制。',
+      plainInterpretation: '• 检索方式：市民可通过广州市人民政府门户网站“政务公开-政策法规”栏目，按发布年份、主管委办局或文件主题分类检索。\n• 有效性认定：规章文件施行期满未明确延续的自动失效，各部门定期公示已废止与现行有效文件目录。\n• 建议渠道：若需了解特定行业或新出台政策执行细则，可直接拨打12345热线或向主管委办局申请政务公开。',
+      statuteClauses: '《广州市行政规范性文件管理规定》（广州市人民政府令第192号）\n第二十三条：“行政规范性文件应当自公布之日起在政府门户网站统一向社会公开，并同步发布权威政策解读文本。”\n第二十九条：“制定机关应当每隔两年对行政规范性文件组织清理，及时向社会公布清理结果。”',
       citations: [
         {
           title: '广州市行政规范性文件管理规定',
           docNumber: '广州市人民政府令第192号',
           dept: '广州市人民政府',
-          similarity: '90%',
+          similarity: '92%',
           clause: '第二十三条【公开与解读】：行政规范性文件应当自公布之日起在政府门户网站统一向社会公开，并同步发布权威政策解读文本。'
         }
       ],
