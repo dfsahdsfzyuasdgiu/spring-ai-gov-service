@@ -258,23 +258,6 @@
     .header-main {
       display: flex;
       align-items: center;
-      gap: 10px;
-    }
-
-    .header-seal-box {
-      width: 32px;
-      height: 32px;
-      background: #c20505;
-      border: 1px solid #ffd666;
-      border-radius: 0;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 16px;
-      font-weight: 900;
-      color: #ffffff;
-      flex-shrink: 0;
-      box-shadow: inset 0 0 4px rgba(0,0,0,0.3);
     }
 
     .header-titles h3 {
@@ -697,7 +680,6 @@
       <!-- 顶栏与控制按钮 -->
       <div class="gz-window-header">
         <div class="header-main">
-          <div class="header-seal-box">穗</div>
           <div class="header-titles">
             <h3>广州市人民政府门户网站 · 政务智能咨询</h3>
             <p>广州市政务服务和数据管理局主办 ｜ 12345热线协同</p>
