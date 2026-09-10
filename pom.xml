@@ -49,6 +49,16 @@
 			<artifactId>spring-ai-alibaba-starter</artifactId>
 			<version>1.0.0-M2.1</version>
 		</dependency>
+		<!-- 4. 关系数据库与 JDBC 依赖 (支持政策、办事流程、对话历史持久化) -->
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-jdbc</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>com.h2database</groupId>
+			<artifactId>h2</artifactId>
+			<scope>runtime</scope>
+		</dependency>
 	</dependencies>
 
 	<build>
@@ -60,8 +70,13 @@
 		</plugins>
 	</build>
 
-	<!-- 配置 Spring 官方 Milestone 仓库 -->
+	<!-- 配置 Maven 仓库 -->
 	<repositories>
+		<repository>
+			<id>aliyun</id>
+			<name>Aliyun Maven</name>
+			<url>https://maven.aliyun.com/repository/public</url>
+		</repository>
 		<repository>
 			<id>spring-milestones</id>
 			<name>Spring Milestones</name>

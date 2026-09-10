@@ -1,13 +1,14 @@
 /**
  * 广州市人民政府门户网站 (www.gz.gov.cn)
- * 政策法规 AI 智能问答专窗 · 前端独立注入插件
+ * 政策法规 AI 智能问答专窗 · 前端独立注入插件 (完备版)
  * 
- * 核心定位：
- * 1. 深度对接“广州市政策法规文本向量数据库 (Vector DB + RAG)”
- * 2. 聚焦政策智能解读、红头公文依据溯源、法条条款原文摘录与智能政策追问
- * 3. 彻底剥离与政策无关的办事指南表单、材料勾选 Checklist 及外部跳转按钮
- * 4. 严格契合官方视觉体系：全直角公文标准、广州政务蓝红配色、无任何卡通图标与 Emoji
- * 5. 纯静态稳固悬浮微标，Shadow DOM 双向样式物理隔离
+ * 核心指标与功能集成：
+ * 1. 深度对接广州市政务公文与办事数据（关系数据库 H2 + 真实广州规章）
+ * 2. 对接 Spring AI 多轮会话上下文持久化管理（带会话记忆与历史查验）
+ * 3. 扩展功能一：政务知识图谱关联展现（法定依据 ➔ 主管机关 ➔ 业务联办 ➔ 适用人群 三元组链路）
+ * 4. 扩展功能二：办事流程引导式对话向导（资格自查 -> 材料准备 -> 网办通道直达）
+ * 5. 严格契合官方视觉体系：全直角公文标准、广州政务蓝红配色、无任何卡通图标与 Emoji (Emoji = 0)
+ * 6. "快速答疑" 标志性徽章、一键极简 "复制"、Shadow DOM 物理样式隔离、双模无缝切换
  */
 
 (function () {
@@ -19,10 +20,17 @@
     return;
   }
 
-  // 全局对接配置 (为同学对接向量数据库与大模型后端提供标准入口)
+  // 会话标识保持
+  let currentSessionId = window.gzGovSessionId || ('gz-session-' + Date.now() + '-' + Math.random().toString(36).substring(2, 7));
+  window.gzGovSessionId = currentSessionId;
+
+  // 全局对接配置
   window.GzGovAiConfig = Object.assign({
-    apiEndpoint: 'http://localhost:8080/api/v1/gov/chat/stream', // 同学向量数据库/RAG问答接口
-    mockIfOffline: true,                                       // 后端服务离线时自动切换为内置高保真政策知识库
+    apiEndpoint: 'http://localhost:8080/api/v1/gov/chat/stream',
+    historyEndpoint: 'http://localhost:8080/api/v1/gov/chat/history',
+    guideStepEndpoint: 'http://localhost:8080/api/v1/gov/chat/guide-step',
+    graphEndpoint: 'http://localhost:8080/api/v1/gov/chat/graph',
+    mockIfOffline: true,
     assistantName: '广州市政策法规智能咨询专窗',
     authority: '广州市人民政府门户网站',
     organizer: '广州市政务服务和数据管理局',
@@ -35,7 +43,7 @@
   document.body.appendChild(host);
   const shadow = host.attachShadow({ mode: 'open' });
 
-  // 注入量身定制的官方公文直角视觉样式
+  // 注入官方公文全直角样式
   const style = document.createElement('style');
   style.textContent = `
     * {
@@ -46,7 +54,7 @@
       -webkit-font-smoothing: antialiased;
     }
 
-    /* 悬浮球及弹窗宿主容器 */
+    /* 宿主容器 */
     .gz-gov-shell {
       position: fixed;
       bottom: 20px;
@@ -55,9 +63,7 @@
       pointer-events: none;
     }
 
-    /* ========================================================
-       1. 右下角悬浮徽标 (纯静态展示，无晃动无呼吸光晕)
-       ======================================================== */
+    /* 悬浮微标 (纯静态无晃动) */
     .gz-launcher {
       pointer-events: auto;
       width: 56px;
@@ -75,16 +81,23 @@
       border: 2px solid #ffffff;
       transition: box-shadow 0.2s ease, opacity 0.2s ease;
     }
-
     .gz-launcher:hover {
       box-shadow: 0 6px 18px rgba(0, 58, 140, 0.45);
       opacity: 0.95;
     }
-
-    .gz-launcher:active {
-      opacity: 0.88;
+    .launcher-tag {
+      position: absolute;
+      top: -4px;
+      right: -4px;
+      background: #c20505;
+      color: #ffffff;
+      font-size: 9px;
+      font-weight: 700;
+      padding: 1px 4px;
+      border-radius: 0;
+      border: 1px solid #ffffff;
+      line-height: 1.1;
     }
-
     .launcher-seal {
       font-size: 18px;
       font-weight: 900;
@@ -93,443 +106,319 @@
       letter-spacing: 1px;
       text-shadow: 0 1px 3px rgba(0, 20, 60, 0.4);
     }
-
     .launcher-caption {
       font-size: 9px;
       font-weight: 700;
       color: #ffd666;
       margin-top: 2px;
-      letter-spacing: 0.3px;
-      transform: scale(0.92);
+      line-height: 1;
     }
 
-    .launcher-tag {
-      position: absolute;
-      top: -3px;
-      right: -3px;
-      background: #c20505;
-      color: #ffffff;
-      font-size: 9px;
-      font-weight: 700;
-      padding: 0 4px;
-      border-radius: 0;
-      border: 1px solid #ffffff;
-      letter-spacing: 0.5px;
-      box-shadow: 0 2px 4px rgba(194, 5, 5, 0.35);
-    }
-
-    /* ========================================================
-       2. 欢迎公文卡片提示 (静态通告条)
-       ======================================================== */
+    /* 迎宾卡片 */
     .gz-greeting-card {
       pointer-events: auto;
       position: absolute;
-      right: 68px;
-      bottom: 6px;
-      width: 250px;
+      bottom: 70px;
+      right: 0;
+      width: 280px;
       background: #ffffff;
       border: 1px solid #b0cbe8;
-      border-top: 3px solid #c20505;
+      border-top: 3px solid #006ed5;
       border-radius: 0;
+      box-shadow: 0 6px 18px rgba(0, 40, 100, 0.16);
       padding: 10px 12px;
-      box-shadow: 0 6px 20px rgba(0, 30, 80, 0.16);
-      display: flex;
-      flex-direction: column;
-      gap: 5px;
+      display: none;
       cursor: pointer;
-      opacity: 0;
-      transform: translateX(16px);
-      transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-      z-index: 999999;
+      animation: gzCardIn 0.25s cubic-bezier(0.25, 1, 0.5, 1) forwards;
     }
-
-    .gz-greeting-card.show {
-      opacity: 1;
-      transform: translateX(0);
-    }
-
-    .gz-greeting-card::after {
-      content: '';
-      position: absolute;
-      right: -8px;
-      top: 50%;
-      transform: translateY(-50%);
-      border-width: 7px 0 7px 8px;
-      border-style: solid;
-      border-color: transparent transparent transparent #b0cbe8;
-    }
-
+    .gz-greeting-card.show { display: block; }
     .greeting-header {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      font-size: 12px;
+      font-size: 11px;
       font-weight: 700;
       color: #003a8c;
-      border-bottom: 1px solid #eef2f7;
-      padding-bottom: 4px;
+      margin-bottom: 4px;
     }
-
     .greeting-close {
       color: #8c8c8c;
-      font-size: 15px;
+      font-size: 14px;
       cursor: pointer;
-      padding: 0 2px;
       line-height: 1;
     }
     .greeting-close:hover { color: #c20505; }
-
     .greeting-body {
-      font-size: 12px;
-      color: #333333;
-      line-height: 1.55;
+      font-size: 11px;
+      color: #4a4a4a;
+      line-height: 1.5;
     }
 
-    /* ========================================================
-       3. 政策问答大厅主弹窗 (全直角公文结构 - 紧凑型优雅比例)
-       ======================================================== */
+    /* 政策问答大厅主窗口 (全直角公文标准 420x570) */
     .gz-dialog-window {
       pointer-events: auto;
-      position: fixed;
-      bottom: 20px;
-      right: 20px;
-      width: 380px;
-      height: 520px;
-      max-width: calc(100vw - 32px);
-      max-height: calc(100vh - 56px);
+      position: absolute;
+      bottom: 0;
+      right: 0;
+      width: 420px;
+      height: 570px;
+      max-width: calc(100vw - 24px);
+      max-height: calc(100vh - 24px);
       background: #ffffff;
       border: 1px solid #003a8c;
-      border-top: 3px solid #c20505; /* 广州政务红头线 */
-      border-radius: 0 !important;   /* 彻底直角 */
-      box-shadow: 0 12px 36px rgba(0, 30, 80, 0.22);
-      display: flex;
+      border-radius: 0 !important;
+      box-shadow: 0 10px 30px rgba(0, 30, 80, 0.25), 0 2px 8px rgba(0, 0, 0, 0.12);
+      display: none;
       flex-direction: column;
       overflow: hidden;
-      opacity: 0;
-      transform: scale(0.92) translateY(20px);
-      transform-origin: bottom right;
-      transition: all 0.24s cubic-bezier(0.16, 1, 0.3, 1);
-      z-index: 100000000;
-      visibility: hidden;
+      animation: gzWinOpen 0.22s ease-out forwards;
+    }
+    .gz-dialog-window.open { display: flex; }
+
+    @keyframes gzWinOpen {
+      from { transform: translateY(16px); opacity: 0; }
+      to { transform: translateY(0); opacity: 1; }
+    }
+    @keyframes gzCardIn {
+      from { transform: translateY(8px); opacity: 0; }
+      to { transform: translateY(0); opacity: 1; }
+    }
+    @keyframes gzMsgFade {
+      from { opacity: 0; transform: translateY(4px); }
+      to { opacity: 1; transform: translateY(0); }
     }
 
-    .gz-dialog-window.open {
-      opacity: 1;
-      transform: scale(1) translateY(0);
-      visibility: visible;
-    }
-
-    /* 顶栏：广州政务蓝 + 极简矢量 SVG 控制按钮 (紧凑直角) */
+    /* 顶部红蓝双色公文标头 */
     .gz-window-header {
-      background: linear-gradient(90deg, #0050b3 0%, #006ed5 100%);
+      background: linear-gradient(90deg, #003a8c 0%, #0050b3 60%, #006ed5 100%);
       color: #ffffff;
-      padding: 9px 12px;
+      padding: 8px 12px;
       display: flex;
+      align-items: center;
       justify-content: space-between;
-      align-items: center;
-      border-bottom: 1px solid #003a8c;
       user-select: none;
+      border-bottom: 2px solid #c20505;
+      flex-shrink: 0;
     }
-
-    .header-main {
-      display: flex;
-      align-items: center;
-    }
-
     .header-titles h3 {
-      font-size: 13px;
+      font-size: 13.5px;
       font-weight: 700;
-      letter-spacing: 0.3px;
-      color: #ffffff;
-      line-height: 1.3;
+      letter-spacing: 0.6px;
     }
-
     .header-titles p {
-      font-size: 10.5px;
-      color: #d6e4ff;
-      letter-spacing: 0.2px;
+      font-size: 9.5px;
+      color: #e6f0ff;
       margin-top: 1px;
     }
-
-    /* 极简矢量控制按钮 (不折行) */
     .header-controls {
       display: flex;
       align-items: center;
       gap: 3px;
     }
-
     .win-ctrl-btn {
       width: 24px;
       height: 24px;
-      background: transparent;
-      border: 1px solid transparent;
-      border-radius: 0;
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      background: rgba(255, 255, 255, 0.12);
+      border-radius: 0 !important;
       color: #ffffff;
       cursor: pointer;
       display: flex;
       align-items: center;
       justify-content: center;
-      transition: background 0.18s ease, border-color 0.18s ease;
-      padding: 0;
+      font-size: 11px;
+      transition: background 0.15s ease;
     }
+    .win-ctrl-btn:hover { background: rgba(255, 255, 255, 0.28); }
+    .win-ctrl-btn.close-btn:hover { background: #c20505; border-color: #c20505; }
+    .win-ctrl-btn svg { width: 12px; height: 12px; fill: none; stroke: currentColor; stroke-width: 2.2; stroke-linecap: square; }
 
-    .win-ctrl-btn svg {
-      width: 13px;
-      height: 13px;
-      fill: none;
-      stroke: #ffffff;
-      stroke-width: 2;
-      stroke-linecap: square;
-      stroke-linejoin: miter;
-    }
-
-    .win-ctrl-btn:hover {
-      background: rgba(255, 255, 255, 0.18);
-      border-color: rgba(255, 255, 255, 0.35);
-    }
-
-    .win-ctrl-btn.close-btn:hover {
-      background: #c20505;
-      border-color: #c20505;
-    }
-
-    /* 官方通告横幅 */
+    /* 通告栏 */
     .gz-notice-banner {
-      background: #f0f7ff;
-      border-bottom: 1px solid #d6e4ff;
-      padding: 5px 10px;
-      font-size: 10.5px;
-      color: #003a8c;
+      background: #fdfbf7;
+      border-bottom: 1px solid #faecd8;
+      color: #8c5d1e;
+      font-size: 10px;
+      padding: 4px 10px;
       display: flex;
       align-items: center;
       gap: 6px;
-      line-height: 1.35;
-    }
-
-    .notice-badge {
-      background: #c20505;
-      color: #ffffff;
-      font-size: 9.5px;
-      font-weight: 700;
-      padding: 1px 4px;
-      border-radius: 0;
       flex-shrink: 0;
-      letter-spacing: 0.5px;
+    }
+    .notice-badge {
+      background: #fa8c16;
+      color: #ffffff;
+      font-size: 9px;
+      font-weight: 700;
+      padding: 0 3px;
+      border-radius: 0;
+      line-height: 1.2;
     }
 
-    /* 政策高频热搜直角标签 */
+    /* 快捷分类标签条 */
     .gz-quick-bar {
-      padding: 6px 10px;
-      background: #fafafa;
-      border-bottom: 1px solid #e8e8e8;
+      background: #f5f8fc;
+      border-bottom: 1px solid #d9e6f2;
+      padding: 5px 8px;
       display: flex;
-      gap: 5px;
+      gap: 4px;
       overflow-x: auto;
       white-space: nowrap;
-      scrollbar-width: none;
+      flex-shrink: 0;
     }
-    .gz-quick-bar::-webkit-scrollbar { display: none; }
-
+    .gz-quick-bar::-webkit-scrollbar { height: 2px; }
+    .gz-quick-bar::-webkit-scrollbar-thumb { background: #adc6ff; }
     .quick-chip {
-      font-size: 11px;
       background: #ffffff;
-      color: #003a8c;
       border: 1px solid #b0cbe8;
       border-radius: 0;
-      padding: 3px 8px;
+      color: #003a8c;
+      font-size: 10.5px;
+      padding: 2px 7px;
       cursor: pointer;
-      transition: all 0.18s ease;
+      transition: all 0.15s ease;
+      line-height: 1.3;
       user-select: none;
     }
-
     .quick-chip:hover {
       background: #0050b3;
       color: #ffffff;
       border-color: #0050b3;
     }
 
-    /* 对话内容主展示区 */
+    /* 消息对话主视窗 */
     .gz-chat-main {
       flex: 1;
       overflow-y: auto;
-      padding: 12px;
+      padding: 10px 12px;
+      background: #f8fafc;
       display: flex;
       flex-direction: column;
       gap: 12px;
-      background: #f7f9fc;
     }
+    .gz-chat-main::-webkit-scrollbar { width: 5px; }
+    .gz-chat-main::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 0; }
 
     .chat-row {
       display: flex;
       flex-direction: column;
-      max-width: 96%;
       animation: gzMsgFade 0.2s ease forwards;
     }
-
-    @keyframes gzMsgFade {
-      from { opacity: 0; transform: translateY(6px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-
-    .chat-row.user {
-      align-self: flex-end;
-      align-items: flex-end;
-    }
-
-    .chat-row.ai {
-      align-self: flex-start;
-      align-items: flex-start;
-    }
-
+    .chat-row.user { align-items: flex-end; }
+    .chat-row.ai { align-items: flex-start; }
     .chat-author {
-      font-size: 11px;
+      font-size: 10px;
       color: #64748b;
-      margin-bottom: 4px;
-      padding: 0 2px;
+      margin-bottom: 3px;
+      font-weight: 600;
     }
+    .chat-row.user .chat-author { color: #0050b3; }
 
     .chat-bubble {
-      padding: 10px 12px;
+      max-width: 95%;
       border-radius: 0 !important;
-      font-size: 12.5px;
+      font-size: 12px;
       line-height: 1.6;
       word-break: break-word;
+      padding: 8px 10px;
     }
-
     .chat-row.user .chat-bubble {
       background: #006ed5;
       color: #ffffff;
       border: 1px solid #0050b3;
     }
-
     .chat-row.ai .chat-bubble {
       background: #ffffff;
       color: #1a1a1a;
       border: 1px solid #dcdfe6;
-      border-left: 3px solid #0050b3;
-      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04);
+      border-top: 2px solid #0050b3;
+      box-shadow: 0 1px 4px rgba(0, 0, 0, 0.04);
+      width: 100%;
     }
 
-    /* ========================================================
-       3.1 政策一句话明白纸 (核心结论 · 直截了当)
-       ======================================================== */
+    /* 【快速答疑】标志性摘要框 */
     .mingbai-summary-box {
       background: #f0f7ff;
-      border: 1px solid #b0cbe8;
-      border-left: 3px solid #0050b3;
+      border: 1px solid #bae0ff;
+      border-left: 3px solid #006ed5;
       border-radius: 0 !important;
-      padding: 8px 10px;
-      margin-bottom: 7px;
-      font-size: 12px;
-      line-height: 1.6;
-      color: #1a1a1a;
+      padding: 7px 9px;
+      margin-bottom: 8px;
     }
-
     .mingbai-summary-title {
-      font-size: 11px;
-      font-weight: 700;
-      color: #003a8c;
-      margin-bottom: 4px;
       display: flex;
       align-items: center;
       gap: 5px;
+      margin-bottom: 3px;
     }
-
     .mingbai-tag {
-      background: #0050b3;
+      background: #006ed5;
       color: #ffffff;
-      padding: 1px 5px;
       font-size: 9.5px;
-      border-radius: 0;
       font-weight: 700;
-      letter-spacing: 0.3px;
+      padding: 1px 4px;
+      border-radius: 0;
+      letter-spacing: 0.5px;
+    }
+    .mingbai-summary-body {
+      font-size: 12px;
+      font-weight: 600;
+      color: #003a8c;
+      line-height: 1.55;
     }
 
-    /* ========================================================
-       3.2 老百姓明白账 · 办事四要素 (大白话智能翻译)
-       ======================================================== */
+    /* 【办事要点】条目卡片 */
     .mingbai-details-card {
-      background: #ffffff;
+      background: #fafbfc;
       border: 1px solid #e2e8f0;
       border-radius: 0 !important;
-      padding: 9px 10px;
-      margin-bottom: 7px;
+      padding: 6px 8px;
+      margin-bottom: 8px;
       display: flex;
       flex-direction: column;
-      gap: 7px;
+      gap: 6px;
     }
-
     .mb-item {
-      border-left: 2px solid #b0cbe8;
-      padding-left: 7px;
+      font-size: 11.5px;
+      line-height: 1.5;
+      color: #334155;
     }
-
     .mb-item-title {
-      font-size: 11px;
       font-weight: 700;
       color: #003a8c;
       margin-bottom: 2px;
-      display: flex;
-      align-items: center;
-      gap: 4px;
+      font-size: 11px;
     }
+    .mb-item.warn .mb-item-title { color: #c20505; }
+    .mb-item-content { color: #1e293b; font-size: 11.5px; }
 
-    .mb-item-title.warn {
-      color: #b45309;
-    }
-
-    .mb-item.warn {
-      border-left-color: #f59e0b;
-    }
-
-    .mb-item-content {
-      font-size: 11.5px;
-      color: #334155;
-      line-height: 1.55;
-    }
-
-    .mb-item-content ul {
-      margin: 2px 0 2px 14px;
-      line-height: 1.55;
-    }
-
-    .mb-item-content li {
-      margin-bottom: 2px;
-    }
-
-    /* ========================================================
-       4. 官方政策依据直溯 (严谨背书 · 支持点击查看法条原文)
-       ======================================================== */
+    /* 官方政策依据直溯 */
     .mingbai-source-card {
       background: #fdfbf7;
       border: 1px solid #faecd8;
       border-left: 3px solid #c20505;
       border-radius: 0 !important;
-      padding: 7px 9px;
+      padding: 6px 8px;
       margin-top: 6px;
       font-size: 11px;
     }
-
     .source-card-top {
       display: flex;
       justify-content: space-between;
       align-items: center;
       gap: 6px;
     }
-
     .source-doc-info {
       font-weight: 700;
       color: #1a1a1a;
       font-size: 11px;
       line-height: 1.35;
     }
-
     .source-doc-meta {
       font-size: 10px;
       color: #64748b;
       margin-top: 2px;
     }
-
     .source-btn-toggle {
       color: #c20505;
       background: #ffffff;
@@ -542,12 +431,10 @@
       flex-shrink: 0;
       user-select: none;
     }
-
     .source-btn-toggle:hover {
       background: #fff1f0;
       border-color: #c20505;
     }
-
     .source-clause-drawer {
       margin-top: 6px;
       padding-top: 6px;
@@ -559,58 +446,184 @@
       background: rgba(255, 255, 255, 0.7);
       padding: 6px 8px;
     }
+    .source-clause-drawer.open { display: block; }
+    .source-clause-drawer strong { color: #003a8c; }
 
-    .source-clause-drawer.open {
-      display: block;
+    /* 扩展功能一：政务知识图谱关联卡片 (三元组关系链路) */
+    .mingbai-graph-card {
+      background: #f6f9fc;
+      border: 1px solid #cce1f7;
+      border-left: 3px solid #0050b3;
+      border-radius: 0 !important;
+      padding: 6px 8px;
+      margin-top: 6px;
+      font-size: 11px;
     }
-
-    .source-clause-drawer strong {
+    .graph-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 5px;
+    }
+    .graph-title {
+      font-weight: 700;
       color: #003a8c;
+      font-size: 11px;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+    }
+    .graph-badge {
+      font-size: 9px;
+      background: #0050b3;
+      color: #ffffff;
+      padding: 1px 4px;
+      border-radius: 0;
+      font-weight: 600;
+    }
+    .graph-node-list {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+    .graph-relation-row {
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 3px;
+      font-size: 10px;
+      line-height: 1.4;
+      background: #ffffff;
+      padding: 3px 6px;
+      border: 1px solid #e2e8f0;
+    }
+    .graph-node {
+      font-weight: 600;
+      color: #1e293b;
+    }
+    .graph-arrow {
+      color: #0050b3;
+      font-weight: 700;
+      font-size: 10px;
+    }
+    .graph-rel-tag {
+      font-size: 9px;
+      padding: 0 4px;
+      background: #e6f4ff;
+      color: #0958d9;
+      border: 1px solid #91caff;
+      border-radius: 0;
+    }
+    .graph-rel-desc {
+      font-size: 9.5px;
+      color: #64748b;
+      margin-left: 2px;
     }
 
-    /* ========================================================
-       5. 智能政策延伸推荐 (相关追问引导 - 紧凑标签)
-       ======================================================== */
+    /* 扩展功能二：办事流程引导式对话向导卡片 (分步导办) */
+    .mingbai-guided-card {
+      background: #fdfdfd;
+      border: 1px solid #d9d9d9;
+      border-left: 3px solid #389e0d;
+      border-radius: 0 !important;
+      padding: 6px 8px;
+      margin-top: 6px;
+      font-size: 11px;
+    }
+    .guided-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 5px;
+    }
+    .guided-title {
+      font-weight: 700;
+      color: #237804;
+      font-size: 11px;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+    }
+    .guided-badge {
+      font-size: 9px;
+      background: #389e0d;
+      color: #ffffff;
+      padding: 1px 4px;
+      border-radius: 0;
+      font-weight: 600;
+    }
+    .guided-steps-group {
+      display: flex;
+      gap: 5px;
+      margin-top: 4px;
+      flex-wrap: wrap;
+    }
+    .guided-step-btn {
+      flex: 1;
+      min-width: 85px;
+      padding: 4px 5px;
+      background: #ffffff;
+      border: 1px solid #b7eb8f;
+      color: #135200;
+      font-size: 10px;
+      font-weight: 600;
+      cursor: pointer;
+      text-align: center;
+      border-radius: 0 !important;
+      transition: all 0.16s ease;
+      display: flex;
+      flex-direction: column;
+      gap: 1px;
+    }
+    .guided-step-btn:hover {
+      background: #f6ffed;
+      border-color: #52c41a;
+      color: #237804;
+      box-shadow: 0 1px 3px rgba(82, 196, 26, 0.2);
+    }
+    .step-sub {
+      font-size: 8.5px;
+      font-weight: 400;
+      color: #8c8c8c;
+    }
+
+    /* 延伸推荐 */
     .policy-suggestions-wrap {
-      margin-top: 8px;
-      padding-top: 6px;
+      margin-top: 6px;
+      padding-top: 5px;
       border-top: 1px dashed #e2e8f0;
       display: flex;
       flex-direction: column;
-      gap: 5px;
+      gap: 4px;
     }
-
     .suggestions-label {
-      font-size: 10.5px;
+      font-size: 10px;
       font-weight: 700;
       color: #64748b;
     }
-
     .suggestions-chips-group {
       display: flex;
       flex-wrap: wrap;
-      gap: 5px;
+      gap: 4px;
     }
-
     .suggestion-chip {
-      font-size: 10.5px;
+      font-size: 10px;
       background: #f0f7ff;
       color: #0050b3;
       border: 1px solid #d6e4ff;
       border-radius: 0;
-      padding: 3px 6px;
+      padding: 2px 5px;
       cursor: pointer;
-      transition: all 0.16s ease;
+      transition: all 0.15s ease;
       line-height: 1.3;
     }
-
     .suggestion-chip:hover {
       background: #0050b3;
       color: #ffffff;
       border-color: #0050b3;
     }
 
-    /* 评价与疑问反馈行 */
+    /* 操作栏与复制反馈 */
     .chat-feedback-bar {
       display: flex;
       align-items: center;
@@ -620,13 +633,11 @@
       color: #8c8c8c;
       margin-top: 5px;
     }
-
     .action-btn-group {
       display: flex;
       align-items: center;
       gap: 5px;
     }
-
     .action-sub-btn {
       background: #f5f5f5;
       border: 1px solid #d9d9d9;
@@ -641,25 +652,11 @@
       gap: 3px;
     }
     .action-sub-btn:hover { color: #c20505; border-color: #c20505; background: #ffffff; }
+    .btn-copy-mingbai { color: #003a8c; font-weight: 600; }
+    .btn-copy-mingbai:hover { background: #0050b3; color: #ffffff; border-color: #0050b3; }
+    .btn-copy-mingbai.copied { color: #389e0d; border-color: #52c41a; background: #f6ffed; }
 
-    .btn-copy-mingbai {
-      color: #003a8c;
-      font-weight: 600;
-    }
-
-    .btn-copy-mingbai:hover {
-      background: #0050b3;
-      color: #ffffff;
-      border-color: #0050b3;
-    }
-
-    .btn-copy-mingbai.copied {
-      color: #389e0d;
-      border-color: #52c41a;
-      background: #f6ffed;
-    }
-
-    /* 政策疑问反馈展开框 (全直角公文标准 - 紧凑型) */
+    /* 政策疑问反馈展开框 */
     .msg-feedback-panel {
       margin-top: 6px;
       padding: 8px 10px;
@@ -669,10 +666,9 @@
       border-radius: 0 !important;
       display: flex;
       flex-direction: column;
-      gap: 6px;
+      gap: 5px;
       animation: gzMsgFade 0.2s ease forwards;
     }
-
     .feedback-panel-header {
       display: flex;
       justify-content: space-between;
@@ -681,112 +677,125 @@
       font-weight: 700;
       color: #003a8c;
     }
-
-    .feedback-close-btn {
-      color: #8c8c8c;
-      font-size: 15px;
-      cursor: pointer;
-      line-height: 1;
-      padding: 0 2px;
-    }
+    .feedback-close-btn { color: #8c8c8c; font-size: 14px; cursor: pointer; }
     .feedback-close-btn:hover { color: #c20505; }
-
-    .feedback-tag-list {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 4px;
-    }
-
+    .feedback-tag-list { display: flex; flex-wrap: wrap; gap: 4px; }
     .fb-tag {
-      font-size: 10px;
+      font-size: 9.5px;
       background: #ffffff;
       color: #475569;
       border: 1px solid #cbd5e1;
       border-radius: 0;
-      padding: 1px 5px;
+      padding: 1px 4px;
       cursor: pointer;
-      transition: all 0.15s ease;
       user-select: none;
     }
-
-    .fb-tag:hover {
-      border-color: #006ed5;
-      color: #006ed5;
-    }
-
-    .fb-tag.active {
-      background: #006ed5;
-      color: #ffffff;
-      border-color: #006ed5;
-    }
-
+    .fb-tag:hover { border-color: #006ed5; color: #006ed5; }
+    .fb-tag.active { background: #006ed5; color: #ffffff; border-color: #006ed5; }
     .feedback-textarea {
       width: 100%;
-      height: 44px;
+      height: 40px;
       border: 1px solid #cbd5e1;
       border-radius: 0 !important;
-      padding: 4px 6px;
-      font-size: 11px;
-      color: #1a1a1a;
+      padding: 3px 5px;
+      font-size: 10.5px;
       resize: none;
       outline: none;
       background: #ffffff;
-      line-height: 1.4;
     }
-
-    .feedback-textarea:focus {
-      border-color: #0050b3;
-      box-shadow: 0 0 0 1px #0050b3;
-    }
-
-    .feedback-action-bar {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      font-size: 9.5px;
-      color: #8c8c8c;
-    }
-
-    .feedback-btn-group {
-      display: flex;
-      gap: 5px;
-    }
-
+    .feedback-textarea:focus { border-color: #0050b3; }
+    .feedback-action-bar { display: flex; justify-content: space-between; align-items: center; font-size: 9px; color: #8c8c8c; }
+    .feedback-btn-group { display: flex; gap: 4px; }
     .fb-btn-cancel, .fb-btn-submit {
-      padding: 2px 8px;
-      font-size: 10.5px;
+      padding: 2px 7px;
+      font-size: 10px;
       border-radius: 0 !important;
       cursor: pointer;
       border: 1px solid transparent;
+    }
+    .fb-btn-cancel { background: #f1f5f9; color: #475569; border-color: #cbd5e1; }
+    .fb-btn-submit { background: #c20505; color: #ffffff; font-weight: 600; }
+    .feedback-success-note { font-size: 10px; color: #389e0d; padding: 4px; background: #f6ffed; border: 1px solid #b7eb8f; }
+
+    /* 会话历史抽屉 */
+    .gz-history-drawer {
+      position: absolute;
+      top: 45px;
+      left: 0;
+      right: 0;
+      bottom: 45px;
+      background: #ffffff;
+      z-index: 100;
+      display: none;
+      flex-direction: column;
+      border-bottom: 1px solid #d9d9d9;
+      animation: gzMsgFade 0.2s ease forwards;
+    }
+    .gz-history-drawer.open { display: flex; }
+    .history-drawer-header {
+      padding: 7px 10px;
+      background: #f0f5ff;
+      border-bottom: 1px solid #d6e4ff;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 11px;
+      font-weight: 700;
+      color: #003a8c;
+    }
+    .history-clear-btn {
+      font-size: 9.5px;
+      color: #c20505;
+      background: #fff1f0;
+      border: 1px solid #ffa39e;
+      padding: 1px 5px;
+      cursor: pointer;
+      border-radius: 0;
+    }
+    .history-clear-btn:hover { background: #c20505; color: #ffffff; }
+    .history-list {
+      flex: 1;
+      overflow-y: auto;
+      padding: 8px 10px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .history-item {
+      padding: 5px 8px;
+      background: #fafafa;
+      border: 1px solid #e8e8e8;
+      border-radius: 0;
+      cursor: pointer;
       transition: all 0.15s ease;
     }
-
-    .fb-btn-cancel {
-      background: #f1f5f9;
-      color: #475569;
-      border-color: #cbd5e1;
+    .history-item:hover {
+      background: #f0f7ff;
+      border-color: #adc6ff;
     }
-    .fb-btn-cancel:hover { background: #e2e8f0; }
-
-    .fb-btn-submit {
-      background: #c20505;
-      color: #ffffff;
-      border-color: #c20505;
+    .history-item-q {
       font-weight: 600;
+      color: #003a8c;
+      font-size: 11px;
+      margin-bottom: 2px;
     }
-    .fb-btn-submit:hover { background: #a30404; }
-
-    .feedback-success-note {
-      font-size: 10.5px;
-      color: #389e0d;
-      padding: 4px 6px;
-      background: #f6ffed;
-      border: 1px solid #b7eb8f;
-      border-radius: 0;
+    .history-item-a {
+      font-size: 10px;
+      color: #595959;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
       line-height: 1.4;
     }
+    .history-item-time {
+      font-size: 8.5px;
+      color: #bfbfbf;
+      margin-top: 2px;
+      text-align: right;
+    }
 
-    /* 等待打字动效 */
+    /* 等待打字动效 (直角矩形) */
     .typing-box {
       display: inline-flex;
       align-items: center;
@@ -796,7 +805,6 @@
       border: 1px solid #dcdfe6;
       border-radius: 0;
     }
-
     .typing-block {
       width: 5px;
       height: 5px;
@@ -806,74 +814,50 @@
     }
     .typing-block:nth-child(2) { animation-delay: 0.2s; }
     .typing-block:nth-child(3) { animation-delay: 0.4s; }
-
     @keyframes typePulse {
       0%, 80%, 100% { transform: scale(0.6); opacity: 0.4; }
       40% { transform: scale(1.15); opacity: 1; }
     }
 
-    /* 底部政务输入区 (紧凑比例) */
+    /* 底部政务输入区 */
     .gz-input-footer {
       background: #ffffff;
       border-top: 1px solid #e8e8e8;
-      padding: 8px 10px;
+      padding: 7px 10px;
       display: flex;
       flex-direction: column;
-      gap: 4px;
+      gap: 3px;
     }
-
-    .input-wrapper {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-    }
-
+    .input-wrapper { display: flex; align-items: center; gap: 6px; }
     .gz-text-input {
       flex: 1;
-      height: 34px;
+      height: 32px;
       border: 1px solid #b0cbe8;
       border-radius: 0 !important;
-      padding: 0 10px;
-      font-size: 12px;
+      padding: 0 8px;
+      font-size: 11.5px;
       color: #1a1a1a;
       outline: none;
       background: #ffffff;
-      transition: border-color 0.18s ease;
     }
-
-    .gz-text-input:focus {
-      border-color: #0050b3;
-      box-shadow: 0 0 0 2px rgba(0, 110, 213, 0.15);
-    }
-
+    .gz-text-input:focus { border-color: #0050b3; }
     .gz-submit-btn {
-      height: 34px;
-      padding: 0 14px;
+      height: 32px;
+      padding: 0 12px;
       border-radius: 0 !important;
       border: none;
       background: #006ed5;
       color: #ffffff;
       cursor: pointer;
-      font-size: 12px;
+      font-size: 11.5px;
       font-weight: 600;
-      transition: background 0.18s ease;
-      letter-spacing: 0.5px;
     }
-
-    .gz-submit-btn:hover {
-      background: #0050b3;
-    }
-
-    .gz-submit-btn:disabled {
-      background: #bfbfbf;
-      cursor: not-allowed;
-    }
-
+    .gz-submit-btn:hover { background: #0050b3; }
+    .gz-submit-btn:disabled { background: #bfbfbf; cursor: not-allowed; }
     .footer-authority-note {
-      font-size: 9.5px;
+      font-size: 9px;
       color: #8c8c8c;
       text-align: center;
-      letter-spacing: 0.2px;
     }
   `;
   shadow.appendChild(style);
@@ -882,7 +866,7 @@
   const container = document.createElement('div');
   container.className = 'gz-gov-shell';
   container.innerHTML = `
-    <!-- 右下角悬浮圆形徽章 (静态无晃动) -->
+    <!-- 右下角悬浮圆形徽章 -->
     <div class="gz-launcher" id="gzLauncher" title="点击呼出广州市政策法规智能咨询专窗">
       <div class="launcher-tag">政策</div>
       <div class="launcher-seal">穗</div>
@@ -896,11 +880,11 @@
         <span class="greeting-close" id="gzGreetingClose" title="关闭提示">&times;</span>
       </div>
       <div class="greeting-body">
-        市民您好！本专窗依托<strong>广州市政策法规知识库</strong>，支持查询住房保障、积分入户、营商扶企、社保医保等现行政策条例与精准条款直溯。
+        市民您好！本专窗依托<strong>广州市现行政策法规知识库</strong>，支持查询公租房保障、积分入户、营商扶企、社保医保等现行政策条例与精准条款直溯。
       </div>
     </div>
 
-    <!-- 政策咨询大厅主弹窗 (全直角公文结构) -->
+    <!-- 政策咨询大厅主弹窗 -->
     <div class="gz-dialog-window" id="gzDialogWindow">
       <!-- 顶栏与控制按钮 -->
       <div class="gz-window-header">
@@ -911,6 +895,10 @@
           </div>
         </div>
         <div class="header-controls">
+          <!-- 查看历史按钮 -->
+          <button class="win-ctrl-btn" id="gzBtnHistory" title="查看会话历史记录" aria-label="查看会话历史记录">
+            <svg viewBox="0 0 24 24"><path d="M12 8v4l3 3"/><circle cx="12" cy="12" r="9"/></svg>
+          </button>
           <!-- 刷新清屏 SVG 图标 -->
           <button class="win-ctrl-btn" id="gzBtnReset" title="清空对话记录" aria-label="清空对话记录">
             <svg viewBox="0 0 24 24"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
@@ -929,7 +917,7 @@
       <!-- 官方通告条 -->
       <div class="gz-notice-banner">
         <span class="notice-badge">通告</span>
-        <span>依托全市政策公文数据库，提供精准条文解读与出处直溯</span>
+        <span>依托广州市政策公文数据库与政务知识图谱，提供精准条文解读与出处直溯</span>
       </div>
 
       <!-- 政策高频咨询领域直角标签 -->
@@ -942,6 +930,20 @@
         <span class="quick-chip" data-query="广州市公安出入境管理部门关于往来港澳通行证全国通办的政策依据？">港澳签注通行规定</span>
       </div>
 
+      <!-- 抽屉：会话历史记录 -->
+      <div class="gz-history-drawer" id="gzHistoryDrawer">
+        <div class="history-drawer-header">
+          <span>【多轮会话咨询历史记录】</span>
+          <div style="display:flex; gap:6px; align-items:center;">
+            <button class="history-clear-btn" id="gzBtnClearHistory">清空历史</button>
+            <span style="cursor:pointer; font-size:14px;" id="gzBtnCloseHistory">&times;</span>
+          </div>
+        </div>
+        <div class="history-list" id="gzHistoryList">
+          <div style="font-size:11px; color:#8c8c8c; text-align:center; padding:15px;">加载历史记录中...</div>
+        </div>
+      </div>
+
       <!-- 消息列表流 -->
       <div class="gz-chat-main" id="gzChatMain">
         <div class="chat-row ai">
@@ -952,13 +954,14 @@
                 <span class="mingbai-tag">快速答疑</span>
               </div>
               <div class="mingbai-summary-body">
-                市民您好！本专窗依托广州市现行政策法规数据库，为您提供通俗精准的政策解答，清晰梳理<strong>准入门槛、待遇标准、办理渠道、注意事项</strong>，并提供官方红头公文依据直溯，便利市民群众办事。
+                市民您好！本专窗依托广州市现行政策法规关系数据库与知识图谱，为您提供通俗精准的政策解答，清晰梳理<strong>准入门槛、待遇标准、办理渠道、注意事项</strong>，并提供官方红头公文依据直溯与分步办事向导，便利市民群众办事。
               </div>
             </div>
             <div style="font-size: 11.5px; color: #475569; line-height: 1.6;">
               您可点击上方快捷标签，或直接输入您关心的政策问题，例如：
               <ul style="margin: 4px 0 0 16px; color: #1e293b;">
                 <li><em>“新就业无房职工申领广州公租房租赁补贴的具体规定？”</em></li>
+                <li><em>“外地人在广州怎么申请中小客车增量指标摇号？”</em></li>
                 <li><em>“广州新办企业免费领印章和半天办结的扶持政策？”</em></li>
               </ul>
             </div>
@@ -972,7 +975,7 @@
       <!-- 底部输入栏 -->
       <div class="gz-input-footer">
         <div class="input-wrapper">
-          <input type="text" class="gz-text-input" id="gzTextInput" placeholder="请输入您想查询的广州市政策规章、规范性文件或条款问题..." maxlength="200" />
+          <input type="text" class="gz-text-input" id="gzTextInput" placeholder="请输入您想查询的广州市政策规章、规范性文件或办事流程..." maxlength="200" />
           <button class="gz-submit-btn" id="gzSubmitBtn">发 送</button>
         </div>
         <div class="footer-authority-note">
@@ -989,14 +992,19 @@
   const greetingClose = shadow.getElementById('gzGreetingClose');
   const dialogWindow = shadow.getElementById('gzDialogWindow');
   const btnReset = shadow.getElementById('gzBtnReset');
+  const btnHistory = shadow.getElementById('gzBtnHistory');
   const btnMin = shadow.getElementById('gzBtnMin');
   const btnDismiss = shadow.getElementById('gzBtnDismiss');
   const chatMain = shadow.getElementById('gzChatMain');
   const textInput = shadow.getElementById('gzTextInput');
   const submitBtn = shadow.getElementById('gzSubmitBtn');
   const quickChips = shadow.querySelectorAll('.quick-chip');
+  const historyDrawer = shadow.getElementById('gzHistoryDrawer');
+  const historyList = shadow.getElementById('gzHistoryList');
+  const btnClearHistory = shadow.getElementById('gzBtnClearHistory');
+  const btnCloseHistory = shadow.getElementById('gzBtnCloseHistory');
 
-  // 页面加载 2.4 秒后弹出迎宾提示卡片
+  // 迎宾卡片定时器
   let greetingTimer = setTimeout(() => {
     greetingCard.classList.add('show');
   }, 2400);
@@ -1005,7 +1013,6 @@
     if (e.target.id === 'gzGreetingClose') return;
     openDialog();
   });
-
   greetingClose.addEventListener('click', (e) => {
     e.stopPropagation();
     greetingCard.classList.remove('show');
@@ -1025,12 +1032,13 @@
 
   function closeDialog() {
     dialogWindow.classList.remove('open');
+    historyDrawer.classList.remove('open');
     setTimeout(() => {
       launcher.style.display = 'flex';
     }, 220);
   }
 
-  // 清空对话记录
+  // 清屏重置
   btnReset.addEventListener('click', () => {
     const rows = chatMain.querySelectorAll('.chat-row');
     rows.forEach((row, idx) => {
@@ -1038,11 +1046,63 @@
     });
   });
 
+  // 历史记录抽屉交互
+  btnHistory.addEventListener('click', () => {
+    const isOpen = historyDrawer.classList.toggle('open');
+    if (isOpen) {
+      loadChatHistory();
+    }
+  });
+
+  btnCloseHistory.addEventListener('click', () => {
+    historyDrawer.classList.remove('open');
+  });
+
+  btnClearHistory.addEventListener('click', async () => {
+    try {
+      await fetch(window.GzGovAiConfig.historyEndpoint + '?sessionId=' + encodeURIComponent(window.gzGovSessionId), {
+        method: 'DELETE'
+      });
+      historyList.innerHTML = '<div style="font-size:11px; color:#8c8c8c; text-align:center; padding:15px;">会话历史已清空</div>';
+    } catch (e) {
+      historyList.innerHTML = '<div style="font-size:11px; color:#c20505; text-align:center; padding:15px;">清空历史失败</div>';
+    }
+  });
+
+  async function loadChatHistory() {
+    historyList.innerHTML = '<div style="font-size:11px; color:#8c8c8c; text-align:center; padding:15px;">加载历史记录中...</div>';
+    try {
+      const res = await fetch(window.GzGovAiConfig.historyEndpoint + '?sessionId=' + encodeURIComponent(window.gzGovSessionId) + '&limit=15');
+      const json = await res.json();
+      const list = (json.data && json.data.length > 0) ? json.data : [];
+      if (list.length === 0) {
+        historyList.innerHTML = '<div style="font-size:11px; color:#8c8c8c; text-align:center; padding:15px;">当前会话暂无历史提问记录</div>';
+        return;
+      }
+      historyList.innerHTML = list.map(item => `
+        <div class="history-item" data-prompt="${escapeText(item.userPrompt)}">
+          <div class="history-item-q">${escapeText(item.userPrompt)}</div>
+          <div class="history-item-a">${stripHtml(item.aiReply || '')}</div>
+          <div class="history-item-time">${item.createTime ? new Date(item.createTime).toLocaleTimeString('zh-CN') : ''}</div>
+        </div>
+      `).join('');
+
+      historyList.querySelectorAll('.history-item').forEach(el => {
+        el.addEventListener('click', () => {
+          textInput.value = el.getAttribute('data-prompt');
+          historyDrawer.classList.remove('open');
+          handleUserSubmit();
+        });
+      });
+    } catch (err) {
+      historyList.innerHTML = '<div style="font-size:11px; color:#8c8c8c; text-align:center; padding:15px;">历史服务暂未连通或离线运行</div>';
+    }
+  }
+
   // 快捷标签点击
   quickChips.forEach(chip => {
     chip.addEventListener('click', () => {
-      const q = chip.getAttribute('data-query');
-      textInput.value = q;
+      textInput.value = chip.getAttribute('data-query');
       handleUserSubmit();
     });
   });
@@ -1073,7 +1133,7 @@
         renderPolicyAnswer(res);
       })
       .catch(err => {
-        console.warn('[广州政策问答] 远端向量接口未就绪，无缝启用离线仿真知识库引擎:', err);
+        console.warn('[广州政策问答] 远端向量接口未就绪，无缝启用离线高保真政务知识库:', err);
         loadingElem.remove();
         const mockRes = getGuangzhouPolicyMockData(content);
         renderPolicyAnswer(mockRes);
@@ -1111,14 +1171,12 @@
     return div;
   }
 
-  // 格式化文本为结构良好的公文 HTML
   function formatMarkdownLike(str) {
     if (!str) return '';
     let html = escapeText(str)
       .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
       .replace(/\*(.*?)\*/g, '<em>$1</em>');
 
-    // 处理列表符
     const lines = html.split('\n');
     let inList = false;
     const processed = [];
@@ -1157,18 +1215,19 @@
     let summary = data.summary || data.conclusion || '';
     let sections = data.sections || [];
     let citation = (data.citations && data.citations[0]) || data.citation || data.policy || null;
+    let relations = data.relations || [];
+    let guidedSteps = data.guidedSteps || null;
     const rawContent = data.content || data.reply || '';
 
-    // 若传入的是后端大模型纯文本流，尝试按【快速答疑】与【办事要点】提取
+    // 若传入的是后端流式文本，提取【快速答疑】与【办事要点】
     if ((!summary || sections.length === 0) && rawContent) {
-      if (rawContent.includes('【快速答疑】') || rawContent.includes('【一句话明白纸】') || rawContent.includes('【办事要点】') || rawContent.includes('【老百姓明白账】') || rawContent.includes('【政策结论')) {
-        const sumMatch = rawContent.match(/【(?:快速答疑|一句话明白纸|政策结论(?:速览)?)】\s*([\s\S]*?)(?=【办事要点】|【老百姓明白账】|【群众通俗解读】|【官方政策依据】|$)/);
+      if (rawContent.includes('【快速答疑】') || rawContent.includes('【办事要点】') || rawContent.includes('【官方政策依据】')) {
+        const sumMatch = rawContent.match(/【(?:快速答疑|一句话明白纸|政策结论)】\s*([\s\S]*?)(?=【办事要点】|【老百姓明白账】|【官方政策依据】|$)/);
         if (sumMatch) summary = sumMatch[1].trim();
 
-        const secMatch = rawContent.match(/【(?:办事要点|老百姓明白账|群众通俗解读)】\s*([\s\S]*?)(?=【官方政策依据】|$)/);
+        const secMatch = rawContent.match(/【(?:办事要点|老百姓明白账)】\s*([\s\S]*?)(?=【官方政策依据】|$)/);
         if (secMatch) {
           const rawSecText = secMatch[1].trim();
-          // 尝试将“• 谁能办 / • 给多少 / • 去哪办 / • 提个醒”拆分为独立条目
           const bulletLines = rawSecText.split(/\n(?=[•\-\*\d]+\s*)/);
           if (bulletLines.length > 1) {
             sections = bulletLines.map(line => {
@@ -1183,9 +1242,7 @@
               return { title: '办事要点', text: cleaned };
             });
           } else {
-            sections = [
-              { title: '办事要点', text: rawSecText }
-            ];
+            sections = [{ title: '办事要点', text: rawSecText }];
           }
         }
 
@@ -1205,28 +1262,27 @@
       }
     }
 
-    // 若未分段但有 plainInterpretation，自动组装为标准民生条目
     if (sections.length === 0 && (data.plainInterpretation || data.plainText)) {
-      sections = [
-        { title: '办事要点', text: data.plainInterpretation || data.plainText }
-      ];
+      sections = [{ title: '办事要点', text: data.plainInterpretation || data.plainText }];
     }
 
     return {
       summary: summary || '根据广州市现行政策库检索，相关文件已纳入现行有效公开目录。',
       sections: sections,
       citation: citation,
+      relations: relations,
+      guidedSteps: guidedSteps,
       suggestions: data.suggestions || []
     };
   }
 
-  // 渲染政策问答结果 (老百姓能听懂的“政策明白纸 · 便民翻译官”全新体系)
+  // 渲染政策问答结果 (含知识图谱三元组与分步办事向导)
   function renderPolicyAnswer(data) {
     const div = document.createElement('div');
     div.className = 'chat-row ai';
     const parsed = parsePolicyData(data);
 
-    // 1. 第一层：快速答疑 (直截了当核心结论)
+    // 1. 第一层：快速答疑
     const summaryHtml = `
       <div class="mingbai-summary-box">
         <div class="mingbai-summary-title">
@@ -1236,7 +1292,7 @@
       </div>
     `;
 
-    // 2. 第二层：办事要点 (民生要素)
+    // 2. 第二层：办事要点
     let detailsHtml = '';
     if (parsed.sections && parsed.sections.length > 0) {
       const itemsHtml = parsed.sections.map(sec => `
@@ -1253,7 +1309,7 @@
       `;
     }
 
-    // 3. 第三层：官方政策依据 (权威背书 · 拒绝正文重复堆砌 · 支持点击展开法条原文)
+    // 3. 第三层：官方政策依据
     let sourceHtml = '';
     const c = parsed.citation;
     if (c) {
@@ -1261,20 +1317,76 @@
         <div class="mingbai-source-card">
           <div class="source-card-top">
             <div class="source-doc-info">
-              <div>权威政策依据：《${escapeText(c.title || '广州市现行规章')}》</div>
-              <div class="source-doc-meta">发文字号：${escapeText(c.docNumber || '现行有效')} ｜ 制定机关：${escapeText(c.dept || '广州市人民政府')}</div>
+              <div>权威政策依据：《${escapeText(c.title || c.docTitle || '广州市现行规章')}》</div>
+              <div class="source-doc-meta">发文字号：${escapeText(c.docNumber || '现行有效')} ｜ 制定机关：${escapeText(c.dept || c.issuerDept || '广州市人民政府')}</div>
             </div>
             <button class="source-btn-toggle" title="展开查看严谨的原条款表述">查看条文原文 ▾</button>
           </div>
           <div class="source-clause-drawer">
             <strong>【现行法规条款原文】</strong><br/>
-            ${formatMarkdownLike(c.clause || c.snippet || '该政策条文已纳入广州市现行有效数据库。')}
+            ${formatMarkdownLike(c.clause || c.clauseText || c.snippet || '该政策条文已纳入广州市现行有效数据库。')}
           </div>
         </div>
       `;
     }
 
-    // 4. 第四层：智能政策延伸推荐 (Suggestions)
+    // 4. 第四层：扩展功能一 · 政务知识图谱关联卡片
+    let graphHtml = '';
+    if (parsed.relations && parsed.relations.length > 0) {
+      const relRows = parsed.relations.map(r => {
+        let tagLabel = '法定依据';
+        if (r.relationType === 'JOINT_BUSINESS') tagLabel = '业务联办';
+        else if (r.relationType === 'GOVERNING_DEPT') tagLabel = '主管责任';
+        else if (r.relationType === 'APPLIES_TO') tagLabel = '适用人群';
+        return `
+          <div class="graph-relation-row">
+            <span class="graph-node">${escapeText(r.sourceName)}</span>
+            <span class="graph-arrow">➔</span>
+            <span class="graph-rel-tag">${escapeText(tagLabel)}</span>
+            <span class="graph-arrow">➔</span>
+            <span class="graph-node">${escapeText(r.targetName)}</span>
+            <span class="graph-rel-desc">(${escapeText(r.relationDesc || '')})</span>
+          </div>
+        `;
+      }).join('');
+
+      graphHtml = `
+        <div class="mingbai-graph-card">
+          <div class="graph-header">
+            <span class="graph-title"><span class="graph-badge">知识图谱</span> 政务知识图谱关联</span>
+          </div>
+          <div class="graph-node-list">
+            ${relRows}
+          </div>
+        </div>
+      `;
+    }
+
+    // 5. 第五层：扩展功能二 · 办事流程引导式对话向导卡片
+    let guidedHtml = '';
+    if (parsed.guidedSteps && parsed.guidedSteps.steps) {
+      const gs = parsed.guidedSteps;
+      const stepBtns = gs.steps.map(s => `
+        <button class="guided-step-btn" data-affair-id="${escapeText(String(gs.affairId || '101'))}" data-step="${s.step}" data-prompt="${escapeText(s.prompt || '')}">
+          <span>步骤${s.step}【${escapeText(s.name)}】</span>
+          <span class="step-sub">${escapeText(s.desc)}</span>
+        </button>
+      `).join('');
+
+      guidedHtml = `
+        <div class="mingbai-guided-card">
+          <div class="guided-header">
+            <span class="guided-title"><span class="guided-badge">流程向导</span> 办事流程引导式对话</span>
+            <span style="font-size: 9.5px; color: #8c8c8c;">点击各步骤互动核验</span>
+          </div>
+          <div class="guided-steps-group">
+            ${stepBtns}
+          </div>
+        </div>
+      `;
+    }
+
+    // 6. 第六层：智能政策延伸推荐
     let suggestionsHtml = '';
     if (parsed.suggestions && parsed.suggestions.length > 0) {
       const chips = parsed.suggestions.map((s) => `
@@ -1295,6 +1407,8 @@
         ${summaryHtml}
         ${detailsHtml}
         ${sourceHtml}
+        ${graphHtml}
+        ${guidedHtml}
         ${suggestionsHtml}
       </div>
       <div class="chat-feedback-bar">
@@ -1342,6 +1456,32 @@
       });
     }
 
+    // 交互绑定：分步办事向导按钮交互
+    div.querySelectorAll('.guided-step-btn').forEach(btn => {
+      btn.addEventListener('click', async () => {
+        const affairId = btn.getAttribute('data-affair-id');
+        const stepNo = btn.getAttribute('data-step');
+        const defaultPrompt = btn.getAttribute('data-prompt');
+
+        try {
+          const res = await fetch(window.GzGovAiConfig.guideStepEndpoint, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ affairId: parseInt(affairId), stepNo: parseInt(stepNo) })
+          });
+          const json = await res.json();
+          if (json.data) {
+            renderGuidedStepDetail(json.data);
+            return;
+          }
+        } catch (e) {
+          // fallback
+        }
+        textInput.value = defaultPrompt;
+        handleUserSubmit();
+      });
+    });
+
     // 交互绑定：一键复制政策解答内容
     const copyBtn = div.querySelector('.btn-copy-mingbai');
     if (copyBtn) {
@@ -1352,7 +1492,7 @@
         }
         let citeText = '';
         if (c) {
-          citeText = `【官方政策依据】\n文件：《${c.title}》（${c.docNumber || '现行有效'}）\n发布机构：${c.dept || '广州市人民政府'}`;
+          citeText = `【官方政策依据】\n文件：《${c.title || c.docTitle}》（${c.docNumber || '现行有效'}）\n发布机构：${c.dept || c.issuerDept || '广州市人民政府'}`;
         }
         const textToCopy = `【广州市政策法规智能咨询 · 答复明细】\n` +
           `================================\n` +
@@ -1399,28 +1539,17 @@
       panel.style.display = 'none';
       toggleBtn.style.color = '';
     });
-
     cancelBtn.addEventListener('click', () => {
       panel.style.display = 'none';
       toggleBtn.style.color = '';
     });
 
     tags.forEach(tag => {
-      tag.addEventListener('click', () => {
-        tag.classList.toggle('active');
-      });
+      tag.addEventListener('click', () => tag.classList.toggle('active'));
     });
 
     submitBtnFb.addEventListener('click', () => {
-      const selectedTags = Array.from(div.querySelectorAll('.fb-tag.active')).map(t => t.getAttribute('data-val'));
-      const textVal = textarea.value.trim();
-      console.log('[广州政策问答] 收到市民反馈:', { tags: selectedTags, detail: textVal });
-
-      panel.innerHTML = `
-        <div class="feedback-success-note">
-          已收到您的反馈建议，知识库将持续优化解答准确度与通俗性。
-        </div>
-      `;
+      panel.innerHTML = `<div class="feedback-success-note">已收到您的反馈建议，知识库将持续优化解答准确度与通俗性。</div>`;
       toggleBtn.innerHTML = '已反馈';
       toggleBtn.disabled = true;
       toggleBtn.style.color = '#c20505';
@@ -1430,11 +1559,60 @@
     // 交互绑定：追问标签点击
     div.querySelectorAll('.suggestion-chip').forEach(chip => {
       chip.addEventListener('click', () => {
-        const p = chip.getAttribute('data-prompt');
-        textInput.value = p;
+        textInput.value = chip.getAttribute('data-prompt');
         handleUserSubmit();
       });
     });
+  }
+
+  // 渲染办事向导单步详情卡片
+  function renderGuidedStepDetail(stepData) {
+    const div = document.createElement('div');
+    div.className = 'chat-row ai';
+
+    let contentHtml = '';
+    if (stepData.stepNo === 1) {
+      contentHtml = `
+        <div style="margin-bottom:6px; font-weight:600; color:#003a8c;">【准入资格自查要点】</div>
+        <div style="background:#f0f5ff; padding:6px 8px; border:1px solid #d6e4ff; margin-bottom:6px;">
+          ${escapeText(stepData.qualifications || '')}
+        </div>
+        <div style="color:#595959; font-size:11px;">${escapeText(stepData.guidance || '')}</div>
+      `;
+    } else if (stepData.stepNo === 2) {
+      const matList = (stepData.materials || []).map(m => `
+        <li style="margin-bottom:4px;">
+          <strong>${escapeText(m.name)}</strong>
+          <span style="font-size:9.5px; background:#f6ffed; color:#389e0d; border:1px solid #b7eb8f; padding:0 3px; margin-left:4px;">${escapeText(m.format || '免提交')}</span>
+          <div style="color:#8c8c8c; font-size:10px;">${escapeText(m.sampleTip || '')}</div>
+        </li>
+      `).join('');
+      contentHtml = `
+        <div style="margin-bottom:6px; font-weight:600; color:#003a8c;">【申报材料清单与免提交核查】</div>
+        <ul style="margin-left:16px; margin-bottom:6px;">${matList}</ul>
+        <div style="color:#595959; font-size:11px;">${escapeText(stepData.guidance || '')}</div>
+      `;
+    } else {
+      contentHtml = `
+        <div style="margin-bottom:6px; font-weight:600; color:#003a8c;">【线上申办通道直达】</div>
+        <div style="margin-bottom:6px; color:#1e293b;">承诺办结时限：<strong>${stepData.promisedLimitDays || 1} 个工作日</strong></div>
+        <a href="${escapeText(stepData.onlineHandleUrl || '#')}" target="_blank" style="display:inline-block; padding:4px 10px; background:#006ed5; color:#ffffff; text-decoration:none; font-weight:600; font-size:11px; margin-bottom:6px;">直通广东政务服务网/穗好办申办 ➔</a>
+        <div style="color:#595959; font-size:11px;">${escapeText(stepData.guidance || '')}</div>
+      `;
+    }
+
+    div.innerHTML = `
+      <div class="chat-author">广州市政策法规智能咨询专窗 · 流程向导</div>
+      <div class="chat-bubble" style="border-top:2px solid #389e0d;">
+        <div style="font-size:11.5px; font-weight:700; color:#237804; margin-bottom:4px;">
+          步骤${stepData.stepNo}【${escapeText(stepData.stepName)}】详细指引
+        </div>
+        ${contentHtml}
+      </div>
+    `;
+
+    chatMain.appendChild(div);
+    scrollChatBottom();
   }
 
   function scrollChatBottom() {
@@ -1446,25 +1624,81 @@
     return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
   }
 
-  // 接口请求 (预留对接同学的向量数据库后端)
+  // 接口请求 (优先连接后端 SSE 流式问答，流式解析并提取出处、卡片与知识图谱)
   async function fetchPolicyAnswer(prompt) {
     const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 3500);
+    const timeoutId = setTimeout(() => controller.abort(), 15000);
 
     const response = await fetch(window.GzGovAiConfig.apiEndpoint, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ prompt: prompt }),
+      body: JSON.stringify({
+        sessionId: window.gzGovSessionId,
+        prompt: prompt,
+        category: '',
+        token: 'gz-citizen-token-authed'
+      }),
       signal: controller.signal
     });
     clearTimeout(timeoutId);
 
     if (!response.ok) throw new Error('HTTP Status: ' + response.status);
-    const json = await response.json();
-    return json.data || json;
+
+    const reader = response.body.getReader();
+    const decoder = new TextDecoder('utf-8');
+    let buffer = '';
+    let fullText = '';
+    let citation = null;
+    let guideCard = null;
+    let relations = [];
+    let guidedSteps = null;
+    let recommendations = [];
+
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      buffer += decoder.decode(value, { stream: true });
+      const lines = buffer.split('\n');
+      buffer = lines.pop();
+
+      for (let line of lines) {
+        line = line.trim();
+        if (line.startsWith('data:')) {
+          const jsonStr = line.substring(5).trim();
+          if (jsonStr === '[DONE]') break;
+          try {
+            const chunk = JSON.parse(jsonStr);
+            if (chunk.type === 'chunk' && chunk.content) {
+              fullText += chunk.content;
+            } else if (chunk.type === 'citation' && chunk.data) {
+              citation = chunk.data;
+            } else if (chunk.type === 'guide_card' && chunk.data) {
+              guideCard = chunk.data;
+            } else if (chunk.type === 'graph_card' && chunk.data) {
+              relations = chunk.data;
+            } else if (chunk.type === 'guided_steps_card' && chunk.data) {
+              guidedSteps = chunk.data;
+            } else if (chunk.type === 'recommend_card' && chunk.data) {
+              recommendations = chunk.data;
+            }
+          } catch (e) {
+            // ignore chunk error
+          }
+        }
+      }
+    }
+
+    return {
+      content: fullText,
+      citation: citation,
+      guideCard: guideCard,
+      relations: relations,
+      guidedSteps: guidedSteps,
+      suggestions: recommendations.map(r => r.title || r.query || r)
+    };
   }
 
-  // 广州市政策法规高保真离线向量仿真知识库 (老百姓能听懂的“政策明白纸”大白话民生版)
+  // 广州市政策法规高保真离线向量仿真知识库 (老百姓能听懂的“政策明白纸”广州民生版)
   function getGuangzhouPolicyMockData(prompt) {
     const q = prompt.toLowerCase();
 
@@ -1498,6 +1732,21 @@
           similarity: '99%',
           clause: '第三条【保障对象】：本市城镇户籍中等偏下收入住房困难家庭，以及持有本市有效居住证、在穗连续稳定就业的新就业职工及外来务工人员。\n第十一条【租赁补贴】：住房租赁补贴标准为每平方米每月35元，结合保障家庭人口与人均保障建筑面积测算发放。'
         },
+        relations: [
+          { sourceName: '公租房租赁补贴申领', relationType: 'LEGAL_BASIS', targetName: '广州市公共租赁住房保障办法', relationDesc: '法定实施依据：穗府办规〔2024〕6号' },
+          { sourceName: '公租房租赁补贴申领', relationType: 'JOINT_BUSINESS', targetName: '广州住房公积金无房租赁提取', relationDesc: '民生联办：申领补贴后可联动提取公积金支付剩余房租' },
+          { sourceName: '广州市公共租赁住房保障办法', relationType: 'GOVERNING_DEPT', targetName: '广州市住房和城乡建设局', relationDesc: '文件制定及实施监管主管机关' },
+          { sourceName: '广州市公共租赁住房保障办法', relationType: 'APPLIES_TO', targetName: '新就业无房职工及外来务工人员', relationDesc: '主要受惠与准入保障群体' }
+        ],
+        guidedSteps: {
+          affairId: 101,
+          affairName: '公租房租赁补贴申领',
+          steps: [
+            { step: '1', name: '资格自查', desc: '准入条件核验', prompt: '办理广州公租房租赁补贴的准入资格自查要点是什么？' },
+            { step: '2', name: '材料准备', desc: '免交证照核对', prompt: '办理广州公租房租赁补贴需要哪些材料？哪些免提交？' },
+            { step: '3', name: '线上通道', desc: '穗好办直通', prompt: '公租房租赁补贴线上申请入口与办理流程指引' }
+          ]
+        },
         suggestions: [
           '新就业无房职工申请补贴的家庭人均收入线是多少？',
           '公租房实物配租和租房补贴能同时享受吗？',
@@ -1507,9 +1756,9 @@
     }
 
     // 2. 积分制入户政策
-    if (q.includes('积分') || q.includes('入户') || q.includes('落户') || q.includes('户口')) {
+    if (q.includes('积分') || q.includes('入户') || q.includes('落户') || q.includes('户口') || q.includes('来穗')) {
       return {
-        summary: '能办！长期在广州工作生活的外地朋友，只要符合年龄、居住证、社保满4年这几个硬指标，通过积分排名就可以直接落户广州，全家随迁。',
+        summary: '能办！长期在广州工作生活的外地朋友，只要符合年龄45周岁以下、有效居住证、社保满4年这几个硬指标，通过积分排名就可以直接落户广州，全家随迁。',
         sections: [
           {
             title: '【准入门槛】谁能申办（硬性指标）',
@@ -1534,7 +1783,21 @@
           docNumber: '穗府规〔2023〕1号',
           dept: '广州市人民政府',
           similarity: '98%',
-          clause: '第五条【申报条件】：符合以下条件的来穗人员，可申请积分制入户：（一）年龄45周岁以下；（二）持本市有效《广东省居住证》；（三）在本市合法稳定就业或创业并缴纳社会保险累计满4年；（四）在穗信用良好。\n第六条：指标总量实行年度调控，按核定积分分值高低确定拟入户人员名单。'
+          clause: '第五条【申报条件】：符合以下条件的来穗人员，可申请积分制入户：（一）年龄45周岁以下；（二）持本市有效《广东省居住证》；（三）在本市合法稳定就业或创业并缴纳社会保险累计满4年；（四）在穗信用良好。'
+        },
+        relations: [
+          { sourceName: '来穗人员积分制入户申报', relationType: 'LEGAL_BASIS', targetName: '广州市积分制入户管理办法', relationDesc: '法定实施依据：穗府规〔2023〕1号' },
+          { sourceName: '来穗人员积分制入户申报', relationType: 'JOINT_BUSINESS', targetName: '新引进人才住房补贴申领', relationDesc: '入户后联办服务：落户后可无缝申领安家补贴' },
+          { sourceName: '广州市积分制入户管理办法', relationType: 'GOVERNING_DEPT', targetName: '广州市来穗人员服务管理局', relationDesc: '积分服务主管委办局' }
+        ],
+        guidedSteps: {
+          affairId: 102,
+          affairName: '来穗人员积分制入户申报',
+          steps: [
+            { step: '1', name: '资格自查', desc: '核查年龄与社保', prompt: '广州积分入户年龄和社保条件自查？' },
+            { step: '2', name: '材料准备', desc: '准备居住证与积分', prompt: '积分入户需要提前核定哪些材料？' },
+            { step: '3', name: '线上通道', desc: '来穗积分系统', prompt: '广州来穗人员积分申报系统入口' }
+          ]
         },
         suggestions: [
           '社保满4年算不算跨省转移接续进来的社保？',
@@ -1545,7 +1808,7 @@
     }
 
     // 3. 企业开办与营商环境扶持政策
-    if (q.includes('企业') || q.includes('开公司') || q.includes('营业执照') || q.includes('开办') || q.includes('营商')) {
+    if (q.includes('企业') || q.includes('开公司') || q.includes('营业执照') || q.includes('开办') || q.includes('营商') || q.includes('刻章') || q.includes('印章')) {
       return {
         summary: '不用花一分钱，半天就能办齐！在广州开公司全面推行“零成本、半天办结”，政府不仅全流程网办，还免费赠送全套 4 枚实体防伪印章。',
         sections: [
@@ -1573,6 +1836,20 @@
           dept: '广州市市场监督管理局',
           similarity: '97%',
           clause: '第二条【全流程并联审批】：将设立登记、刻制印章、申领发票、员工参保及住房公积金缴存登记整合为1个环节，0.5天内全流程办结，实体印章由政府全额免费发放。'
+        },
+        relations: [
+          { sourceName: '开办企业一网通办设立登记', relationType: 'LEGAL_BASIS', targetName: '深化企业开办“一网通办”改革若干意见', relationDesc: '改革依据：穗市监规〔2024〕2号' },
+          { sourceName: '开办企业一网通办设立登记', relationType: 'JOINT_BUSINESS', targetName: '食品经营许可告知承诺制审批', relationDesc: '高效办成一件事：开办餐饮公司可联办许可证' },
+          { sourceName: '深化企业开办“一网通办”改革若干意见', relationType: 'GOVERNING_DEPT', targetName: '广州市市场监督管理局', relationDesc: '优化营商环境开办企业主办部门' }
+        ],
+        guidedSteps: {
+          affairId: 104,
+          affairName: '开办企业一网通办',
+          steps: [
+            { step: '1', name: '资格自查', desc: '确认股东与住所', prompt: '开办公司股东资质与住所申报承诺？' },
+            { step: '2', name: '材料准备', desc: '公司章程与身份证', prompt: '企业开办需要哪些线上电子签章材料？' },
+            { step: '3', name: '线上通道', desc: '一网通平台', prompt: '广州开办企业一网通办平台入口' }
+          ]
         },
         suggestions: [
           '免费赠送的4枚印章如何免费邮寄到家？',
@@ -1612,6 +1889,20 @@
           similarity: '98%',
           clause: '第一条【参保范围】：未达到法定退休年龄的灵活就业人员，凭居民身份证可办理本市职工基本医疗保险参保登记，按规定缴纳医疗保险费，不设户籍壁垒限制。'
         },
+        relations: [
+          { sourceName: '灵活就业人员职工医保参保', relationType: 'LEGAL_BASIS', targetName: '广州市灵活就业人员参加职工医保通知', relationDesc: '依据：穗医保规〔2023〕5号' },
+          { sourceName: '灵活就业人员职工医保参保', relationType: 'JOINT_BUSINESS', targetName: '医保个人账户家庭成员共济', relationDesc: '便民联办：参保后可共济给父母子女看病' },
+          { sourceName: '广州市灵活就业人员参加职工医保通知', relationType: 'GOVERNING_DEPT', targetName: '广州市医疗保障局', relationDesc: '医保政策主管局' }
+        ],
+        guidedSteps: {
+          affairId: 105,
+          affairName: '灵活就业人员医保参保',
+          steps: [
+            { step: '1', name: '资格自查', desc: '确认年龄与非退休', prompt: '灵活就业医保参保资格与户籍限制？' },
+            { step: '2', name: '材料准备', desc: '身份证与银行卡', prompt: '灵活就业交医保需要带什么证明？' },
+            { step: '3', name: '线上通道', desc: '粤税通小程序', prompt: '粤税通灵活就业医保办理入口' }
+          ]
+        },
         suggestions: [
           '灵活就业人员每个月最低需要交多少医保费？',
           '医保中途断缴了2个月补交后能报销吗？',
@@ -1649,6 +1940,20 @@
           dept: '广州市人民政府办公厅',
           similarity: '96%',
           clause: '第十六条【个人申请条件】：住所地在本市的情形包括本市户籍人员、驻穗部队现役军人，以及持有效《广东省居住证》且近2年在本市累计缴纳职工社会医疗保险满24个月的非本市户籍人员。申请人须名下无本市登记中小客车并持有效驾驶证。'
+        },
+        relations: [
+          { sourceName: '中小客车个人增量指标摇号', relationType: 'LEGAL_BASIS', targetName: '广州市中小客车总量调控管理办法', relationDesc: '依据：穗府办规〔2023〕15号' },
+          { sourceName: '中小客车个人增量指标摇号', relationType: 'JOINT_BUSINESS', targetName: '机动车驾驶证期满转入换证', relationDesc: '车管业务联办：申请人须持有效驾驶证' },
+          { sourceName: '广州市中小客车总量调控管理办法', relationType: 'GOVERNING_DEPT', targetName: '广州市交通运输局', relationDesc: '指标调控办公室主管部门' }
+        ],
+        guidedSteps: {
+          affairId: 103,
+          affairName: '中小客车指标摇号',
+          steps: [
+            { step: '1', name: '资格自查', desc: '居住证与24月医保', prompt: '外地人广州车牌摇号资格条件核验？' },
+            { step: '2', name: '材料准备', desc: '驾驶证与社保明细', prompt: '申请车牌增量指标摇号需要什么材料？' },
+            { step: '3', name: '线上通道', desc: '广州交通调控系统', prompt: '广州市中小客车指标调控系统网上申请' }
+          ]
         },
         suggestions: [
           '节能车摇号中签之后可以换成纯燃油车牌吗？',
@@ -1688,6 +1993,19 @@
           similarity: '95%',
           clause: '第一条【全国通办】：内地居民可在全国任一出入境管理窗口申请往来港澳通行证及团队旅游签注，不受户籍地限制，无需提交居住证或社保证明。'
         },
+        relations: [
+          { sourceName: '往来港澳通行证及旅游签注', relationType: 'LEGAL_BASIS', targetName: '出入境证件“全国通办”规定', relationDesc: '依据：国移发〔2023〕18号' },
+          { sourceName: '出入境证件“全国通办”规定', relationType: 'GOVERNING_DEPT', targetName: '广州市公安局出入境管理支队', relationDesc: '业务窗口实施主管机关' }
+        ],
+        guidedSteps: {
+          affairId: 106,
+          affairName: '往来港澳通行证申领',
+          steps: [
+            { step: '1', name: '资格自查', desc: '全国居民均可申领', prompt: '外地人在广州办港澳通行证需要什么门槛？' },
+            { step: '2', name: '材料准备', desc: '二代身份证原件', prompt: '首次办港澳通行证要带什么材料？' },
+            { step: '3', name: '线上通道', desc: '广州公安预约通道', prompt: '广州出入境证件网上预约入口' }
+          ]
+        },
         suggestions: [
           '广州哪里的智能签注机支持24小时随时自助办理？',
           '港澳旅游个人签（G签）和团队旅游签（L签）有什么区别？'
@@ -1722,5 +2040,5 @@
     };
   }
 
-  console.log('[广州政策问答] 广州市政策法规 AI 智能问答专窗已注入运行（政策便民翻译官·明白纸规范版）。');
+  console.log('[广州政策问答] 广州市政策法规 AI 智能问答专窗已注入运行（政策便民翻译官·明白纸完备版）。');
 })();

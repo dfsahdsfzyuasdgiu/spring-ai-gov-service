@@ -55,6 +55,20 @@ public class ChatResponseChunk implements Serializable {
         return c;
     }
 
+    public static ChatResponseChunk graphCard(Object graphData) {
+        ChatResponseChunk c = new ChatResponseChunk();
+        c.setType("graph_card");
+        c.setData(graphData);
+        return c;
+    }
+
+    public static ChatResponseChunk guidedStepsCard(Object stepsData) {
+        ChatResponseChunk c = new ChatResponseChunk();
+        c.setType("guided_steps_card");
+        c.setData(stepsData);
+        return c;
+    }
+
     public static ChatResponseChunk custom(String type, String content) {
         ChatResponseChunk c = new ChatResponseChunk();
         c.setType(type);

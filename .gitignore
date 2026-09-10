@@ -37,3 +37,6 @@ build/
 *.zip
 .DS_Store
 Thumbs.db
+data/
+*.mv.db
+

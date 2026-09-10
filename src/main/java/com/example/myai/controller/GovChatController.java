@@ -1,15 +1,22 @@
 package com.example.myai.controller;
 
 import com.example.myai.common.Result;
+import com.example.myai.model.AffairGuide;
+import com.example.myai.model.GovChatHistory;
+import com.example.myai.model.KnowledgeRelation;
 import com.example.myai.model.dto.ChatRequest;
 import com.example.myai.model.dto.ChatResponseChunk;
 import com.example.myai.model.dto.FeedbackDTO;
+import com.example.myai.repository.AffairRepository;
+import com.example.myai.repository.ChatHistoryRepository;
+import com.example.myai.repository.KnowledgeGraphRepository;
 import com.example.myai.service.GovAiService;
+import com.example.myai.service.GovCrawlerService;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Flux;
 
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -19,14 +26,27 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class GovChatController {
 
     private final GovAiService govAiService;
+    private final ChatHistoryRepository chatHistoryRepository;
+    private final KnowledgeGraphRepository knowledgeGraphRepository;
+    private final AffairRepository affairRepository;
+    private final GovCrawlerService govCrawlerService;
+
     // 统计好差评指标与咨询量
     public static final AtomicInteger totalConsultationCount = new AtomicInteger(1582);
     public static final AtomicInteger thumbsUpCount = new AtomicInteger(128);
     public static final AtomicInteger thumbsDownCount = new AtomicInteger(6);
     public static final Map<String, String> feedbackReasons = new ConcurrentHashMap<>();
 
-    public GovChatController(GovAiService govAiService) {
+    public GovChatController(GovAiService govAiService,
+                             ChatHistoryRepository chatHistoryRepository,
+                             KnowledgeGraphRepository knowledgeGraphRepository,
+                             AffairRepository affairRepository,
+                             GovCrawlerService govCrawlerService) {
         this.govAiService = govAiService;
+        this.chatHistoryRepository = chatHistoryRepository;
+        this.knowledgeGraphRepository = knowledgeGraphRepository;
+        this.affairRepository = affairRepository;
+        this.govCrawlerService = govCrawlerService;
     }
 
     /**
@@ -36,7 +56,7 @@ public class GovChatController {
     public Flux<ChatResponseChunk> chatStream(@RequestBody ChatRequest request) {
         if (request.getPrompt() == null || request.getPrompt().trim().isEmpty()) {
             return Flux.just(
-                    ChatResponseChunk.chunk("您好！请问有什么政务政策或办事流程我可以为您效劳？"),
+                    ChatResponseChunk.chunk("您好！请问有什么广州市政务政策或办事流程我可以为您效劳？"),
                     ChatResponseChunk.done()
             );
         }
@@ -66,5 +86,102 @@ public class GovChatController {
             }
         }
         return Result.success("感谢您的宝贵评价！我们将持续优化政务咨询精准度。", "OK");
+    }
+
+    /**
+     * 查询指定会话或全局最近的对话历史 (Spring AI 对话上下文与持久化管理)
+     */
+    @GetMapping("/history")
+    public Result<List<GovChatHistory>> getChatHistory(@RequestParam(required = false) String sessionId,
+                                                      @RequestParam(defaultValue = "10") int limit) {
+        if (sessionId != null && !sessionId.trim().isEmpty()) {
+            return Result.success(chatHistoryRepository.findBySessionId(sessionId, limit));
+        }
+        return Result.success(chatHistoryRepository.findRecent(limit));
+    }
+
+    /**
+     * 清空指定会话的历史记录
+     */
+    @DeleteMapping("/history")
+    public Result<String> clearChatHistory(@RequestParam String sessionId) {
+        int rows = chatHistoryRepository.clearBySessionId(sessionId);
+        return Result.success("会话历史清理成功，已删除 " + rows + " 条记录", "OK");
+    }
+
+    /**
+     * 扩展功能一：政务知识图谱关联检索
+     */
+    @GetMapping("/graph")
+    public Result<List<KnowledgeRelation>> getKnowledgeRelations(@RequestParam(required = false) String entityType,
+                                                                 @RequestParam(required = false) String entityId,
+                                                                 @RequestParam(required = false) String keyword) {
+        if (entityType != null && entityId != null) {
+            return Result.success(knowledgeGraphRepository.findRelated(entityType, entityId));
+        }
+        if (keyword != null && !keyword.trim().isEmpty()) {
+            return Result.success(knowledgeGraphRepository.findByNameLike(keyword));
+        }
+        return Result.success(knowledgeGraphRepository.findAll());
+    }
+
+    /**
+     * 扩展功能二：办事流程引导式对话向导交互接口
+     */
+    @PostMapping("/guide-step")
+    public Result<Map<String, Object>> handleGuideStep(@RequestBody Map<String, Object> body) {
+        Long affairId = body.get("affairId") != null ? Long.parseLong(body.get("affairId").toString()) : 101L;
+        int stepNo = body.get("stepNo") != null ? Integer.parseInt(body.get("stepNo").toString()) : 1;
+
+        AffairGuide affair = affairRepository.findById(affairId).orElse(null);
+        if (affair == null) {
+            return Result.error(404, "未找到对应的办事指南事项");
+        }
+
+        Map<String, Object> resp = new LinkedHashMap<>();
+        resp.put("affairId", affair.getId());
+        resp.put("affairName", affair.getAffairName());
+        resp.put("stepNo", stepNo);
+
+        if (stepNo == 1) {
+            resp.put("stepName", "资格自查");
+            resp.put("qualifications", affair.getQualifications());
+            resp.put("guidance", "请对照上述准入条件确认是否符合申报资质。若符合，请点击进入【步骤二：材料核验】查看必备清单。");
+            resp.put("nextStep", 2);
+            resp.put("nextStepName", "材料清单核验");
+        } else if (stepNo == 2) {
+            resp.put("stepName", "材料清单");
+            resp.put("materials", affair.getMaterials());
+            resp.put("guidance", "已为您自动筛查该事项的申报材料清单。大部分核心材料已支持‘电子证照免提交’或大数据自动联网比对。");
+            resp.put("nextStep", 3);
+            resp.put("nextStepName", "网办通道直达");
+        } else {
+            resp.put("stepName", "网办通道");
+            resp.put("onlineHandleUrl", affair.getOnlineHandleUrl());
+            resp.put("promisedLimitDays", affair.getPromisedLimitDays());
+            resp.put("processSteps", affair.getProcessSteps());
+            resp.put("guidance", "该事项承诺 " + affair.getPromisedLimitDays() + " 个工作日办结，您可以点击直通广东政务服务网或“穗好办”进行在线极速申报。");
+        }
+
+        return Result.success(resp);
+    }
+
+    /**
+     * 广州政务政策与办事公文爬虫采集触发接口
+     */
+    @PostMapping("/crawl")
+    public Result<Object> triggerCrawler(@RequestBody Map<String, String> body) {
+        String url = body.get("url");
+        String category = body.get("category");
+        String html = body.get("html");
+        if ((url == null || url.trim().isEmpty()) && (html == null || html.trim().isEmpty())) {
+            return Result.error(400, "URL 或 HTML 不能为空");
+        }
+        GovCrawlerService.CrawlResult res = govCrawlerService.crawlPolicyByUrl(url != null ? url : "https://www.gz.gov.cn/zwgk/fggw/sample", category, html);
+        if (res.isSuccess()) {
+            return Result.success(res.getMessage(), res.getPolicyDoc());
+        } else {
+            return Result.error(500, res.getMessage());
+        }
     }
 }
