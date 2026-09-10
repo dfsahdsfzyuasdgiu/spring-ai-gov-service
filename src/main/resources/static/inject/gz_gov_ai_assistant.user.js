@@ -966,11 +966,10 @@
           <div class="chat-bubble">
             <div class="mingbai-summary-box">
               <div class="mingbai-summary-title">
-                <span class="mingbai-tag">便民翻译官</span>
-                <span>政策明白纸 · 讲白话办实事</span>
+                <span class="mingbai-tag">快速答疑</span>
               </div>
               <div class="mingbai-summary-body">
-                市民您好！本专窗致力于<strong>用老百姓听得懂的白话语言</strong>解读广州市现行政策。将生涩条例智能翻译为<strong>谁能领、给多少、去哪办、提个醒</strong>，并提供官方红头公文依据，切实便利市民日常生活。
+                市民您好！本专窗依托广州市现行政策法规数据库，为您提供通俗精准的政策解答，清晰梳理<strong>准入门槛、待遇标准、办理渠道、注意事项</strong>，并提供官方红头公文依据直溯，便利市民群众办事。
               </div>
             </div>
             <div style="font-size: 11.5px; color: #475569; line-height: 1.6;">
@@ -1177,13 +1176,13 @@
     let citation = (data.citations && data.citations[0]) || data.citation || data.policy || null;
     const rawContent = data.content || data.reply || '';
 
-    // 若传入的是后端大模型纯文本流，尝试按【一句话明白纸】与【老百姓明白账】提取
+    // 若传入的是后端大模型纯文本流，尝试按【快速答疑】与【办事要点】提取
     if ((!summary || sections.length === 0) && rawContent) {
-      if (rawContent.includes('【一句话明白纸】') || rawContent.includes('【老百姓明白账】') || rawContent.includes('【政策结论')) {
-        const sumMatch = rawContent.match(/【(?:一句话明白纸|政策结论(?:速览)?)】\s*([\s\S]*?)(?=【老百姓明白账】|【群众通俗解读】|【官方政策依据】|$)/);
+      if (rawContent.includes('【快速答疑】') || rawContent.includes('【一句话明白纸】') || rawContent.includes('【办事要点】') || rawContent.includes('【老百姓明白账】') || rawContent.includes('【政策结论')) {
+        const sumMatch = rawContent.match(/【(?:快速答疑|一句话明白纸|政策结论(?:速览)?)】\s*([\s\S]*?)(?=【办事要点】|【老百姓明白账】|【群众通俗解读】|【官方政策依据】|$)/);
         if (sumMatch) summary = sumMatch[1].trim();
 
-        const secMatch = rawContent.match(/【(?:老百姓明白账|群众通俗解读)】\s*([\s\S]*?)(?=【官方政策依据】|$)/);
+        const secMatch = rawContent.match(/【(?:办事要点|老百姓明白账|群众通俗解读)】\s*([\s\S]*?)(?=【官方政策依据】|$)/);
         if (secMatch) {
           const rawSecText = secMatch[1].trim();
           // 尝试将“• 谁能办 / • 给多少 / • 去哪办 / • 提个醒”拆分为独立条目
@@ -1196,17 +1195,13 @@
                 const title = cleaned.substring(0, colonIdx).trim();
                 const text = cleaned.substring(colonIdx + 1).trim();
                 const isWarn = title.includes('提醒') || title.includes('注意') || title.includes('避坑');
-                const isWho = title.includes('谁能') || title.includes('门槛') || title.includes('条件');
-                const isMoney = title.includes('给多少') || title.includes('待遇') || title.includes('带') || title.includes('材料');
-                const isWhere = title.includes('去哪') || title.includes('渠道') || title.includes('办理');
-                const icon = isWarn ? '⚠️ ' : (isWho ? '👤 ' : (isMoney ? '💰 ' : (isWhere ? '📱 ' : '📋 ')));
-                return { title: icon + title, text, isWarn };
+                return { title, text, isWarn };
               }
-              return { title: '📋 办事要点', text: cleaned };
+              return { title: '办事要点', text: cleaned };
             });
           } else {
             sections = [
-              { title: '📋 老百姓明白账 · 办事要点', text: rawSecText }
+              { title: '办事要点', text: rawSecText }
             ];
           }
         }
@@ -1227,10 +1222,10 @@
       }
     }
 
-    // 若未分段但有 plainInterpretation，自动组装为标准民生四问
+    // 若未分段但有 plainInterpretation，自动组装为标准民生条目
     if (sections.length === 0 && (data.plainInterpretation || data.plainText)) {
       sections = [
-        { title: '📋 老百姓明白账 · 办事要点', text: data.plainInterpretation || data.plainText }
+        { title: '办事要点', text: data.plainInterpretation || data.plainText }
       ];
     }
 
@@ -1248,18 +1243,17 @@
     div.className = 'chat-row ai';
     const parsed = parsePolicyData(data);
 
-    // 1. 第一层：一句话明白纸 (直截了当核心结论)
+    // 1. 第一层：快速答疑 (直截了当核心结论)
     const summaryHtml = `
       <div class="mingbai-summary-box">
         <div class="mingbai-summary-title">
-          <span class="mingbai-tag">一句话明白纸</span>
-          <span>老百姓最关心的结果</span>
+          <span class="mingbai-tag">快速答疑</span>
         </div>
         <div class="mingbai-summary-body">${formatMarkdownLike(parsed.summary)}</div>
       </div>
     `;
 
-    // 2. 第二层：老百姓明白账 (大白话民生要素)
+    // 2. 第二层：办事要点 (民生要素)
     let detailsHtml = '';
     if (parsed.sections && parsed.sections.length > 0) {
       const itemsHtml = parsed.sections.map(sec => `
@@ -1284,7 +1278,7 @@
         <div class="mingbai-source-card">
           <div class="source-card-top">
             <div class="source-doc-info">
-              <div>📑 权威政策依据：《${escapeText(c.title || '广州市现行规章')}》</div>
+              <div>权威政策依据：《${escapeText(c.title || '广州市现行规章')}》</div>
               <div class="source-doc-meta">发文字号：${escapeText(c.docNumber || '现行有效')} ｜ 制定机关：${escapeText(c.dept || '广州市人民政府')}</div>
             </div>
             <button class="source-btn-toggle" title="展开查看严谨的原条款表述">查看条文原文 ▾</button>
@@ -1306,7 +1300,7 @@
 
       suggestionsHtml = `
         <div class="policy-suggestions-wrap">
-          <div class="suggestions-label">💡 猜您还想了解相关便民政策：</div>
+          <div class="suggestions-label">相关政策延伸咨询：</div>
           <div class="suggestions-chips-group">${chips}</div>
         </div>
       `;
@@ -1323,7 +1317,7 @@
       <div class="chat-feedback-bar">
         <span>信息承办：广州市政务服务和数据管理局</span>
         <div class="action-btn-group">
-          <button class="action-sub-btn btn-copy-mingbai" title="一键复制格式清晰的政策明白纸发给亲友">复制明白纸发微信</button>
+          <button class="action-sub-btn btn-copy-mingbai" title="点击复制政策解答内容">复制</button>
           <button class="action-sub-btn fb-toggle-btn" title="点击展开政策解答疑问与建议反馈">有疑问？</button>
         </div>
       </div>
@@ -1365,7 +1359,7 @@
       });
     }
 
-    // 交互绑定：一键复制政策明白纸发微信
+    // 交互绑定：一键复制政策解答内容
     const copyBtn = div.querySelector('.btn-copy-mingbai');
     if (copyBtn) {
       copyBtn.addEventListener('click', () => {
@@ -1377,24 +1371,24 @@
         if (c) {
           citeText = `【官方政策依据】\n文件：《${c.title}》（${c.docNumber || '现行有效'}）\n发布机构：${c.dept || '广州市人民政府'}`;
         }
-        const textToCopy = `【广州政策一句话明白纸】\n` +
+        const textToCopy = `【广州市政策法规智能咨询 · 答复明细】\n` +
           `================================\n` +
-          `【政策核心结论】\n${stripHtml(parsed.summary)}\n\n` +
-          (sectionsText ? `【老百姓明白账】\n${sectionsText}\n\n` : '') +
+          `【快速答疑】\n${stripHtml(parsed.summary)}\n\n` +
+          (sectionsText ? `【办事要点】\n${sectionsText}\n\n` : '') +
           (citeText ? `${citeText}\n================================\n` : '') +
           `来源：广州市人民政府门户网站 (www.gz.gov.cn)\n` +
           `咨询时间：${new Date().toLocaleString('zh-CN', { hour12: false })}`;
 
         navigator.clipboard.writeText(textToCopy).then(() => {
-          copyBtn.textContent = '✓ 已复制明白纸';
+          copyBtn.textContent = '已复制';
           copyBtn.classList.add('copied');
           setTimeout(() => {
-            copyBtn.textContent = '复制明白纸发微信';
+            copyBtn.textContent = '复制';
             copyBtn.classList.remove('copied');
-          }, 2500);
+          }, 2000);
         }).catch(() => {
           copyBtn.textContent = '复制失败';
-          setTimeout(() => { copyBtn.textContent = '复制明白纸发微信'; }, 2000);
+          setTimeout(() => { copyBtn.textContent = '复制'; }, 2000);
         });
       });
     }
@@ -1441,7 +1435,7 @@
 
       panel.innerHTML = `
         <div class="feedback-success-note">
-          ✓ 感谢您的反馈！已记录您的建议，政务便民知识库将持续优化白话解读与精准度。
+          已收到您的反馈建议，知识库将持续优化解答准确度与通俗性。
         </div>
       `;
       toggleBtn.innerHTML = '已反馈';
@@ -1497,19 +1491,19 @@
         summary: '能办！在广州稳定工作且在穗没买房的新就业职工，每个月最高可领 1400 元租房补贴，按月打进银行卡，最长可以连续领 5 年。',
         sections: [
           {
-            title: '👤 谁能领？（准入门槛白话讲）',
+            title: '【准入门槛】谁能申领（资格条件）',
             text: '• 大专及以上学历毕业（毕业未满5年）；\n• 在广州连续缴纳社保满6个月；\n• 本人和配偶在广州名下没有任何自有房产；\n• 家庭人均年收入低于保障线（约每人每月低于3800元）。'
           },
           {
-            title: '💰 给多少？（实惠待遇算清楚）',
+            title: '【待遇标准】补贴金额（测算明细）',
             text: '• 按照房子面积每平方米每月最高补贴 35 元；\n• 比如按一般单身补贴面积40㎡算，每个月直接打入 1400 元现金到个人银行账户。'
           },
           {
-            title: '📱 去哪办？（零跑腿指引）',
+            title: '【办理渠道】线上办事指引',
             text: '• 手机微信直接搜“穗好办”小程序，或电脑登录“广东政务服务网·广州专区”；\n• 全程网上办，在家拍身份证、租房合同和社保记录上传即可，不用跑大厅排队。'
           },
           {
-            title: '⚠️ 提个醒！（注意事项避坑点）',
+            title: '【注意事项】关键要点与避坑提醒',
             text: '• 已经租住公租房实物小区的家庭，不能再重复申领租赁补贴现金。',
             isWarn: true
           }
@@ -1535,19 +1529,19 @@
         summary: '能办！长期在广州工作生活的外地朋友，只要符合年龄、居住证、社保满4年这几个硬指标，通过积分排名就可以直接落户广州，全家随迁。',
         sections: [
           {
-            title: '👤 谁能申办？（入户硬指标白话讲）',
+            title: '【准入门槛】谁能申办（硬性指标）',
             text: '• 年龄在 45 周岁以下；\n• 手里持有在广州办理且在有效期的《广东省居住证》；\n• 在广州合法工作并在广州累计交满社保满 4 年（五险齐全）；\n• 在“广州来穗人员积分系统”核定积分达到当年度入户分数线，信用良好无犯罪。'
           },
           {
-            title: '💰 享受什么实惠？（落户红利算清楚）',
+            title: '【落户红利】享受待遇（市民同权）',
             text: '• 享受广州市民同等买房资格、粤A车牌摇号资格及子女公立学校学位待遇；\n• 拿到入户指标后，合法配偶和未成年子女可以同时申请免门槛随迁落户广州。'
           },
           {
-            title: '📱 去哪办？（零跑腿指引）',
+            title: '【办理渠道】申报途径与流程',
             text: '• 电脑登录“广州市来穗人员积分制服务管理信息系统”在线申报；\n• 每年集中审核一次，全流程系统核验，拟入户名单在广州门户网站公示5天。'
           },
           {
-            title: '⚠️ 提个醒！（注意事项避坑点）',
+            title: '【注意事项】关键要点与避坑提醒',
             text: '• 社保累计满4年允许断缴接续，但若两人积分相同，系统会优先按在穗社保连续缴纳月数长短排序。',
             isWarn: true
           }
@@ -1573,19 +1567,19 @@
         summary: '不用花一分钱，半天就能办齐！在广州开公司全面推行“零成本、半天办结”，政府不仅全流程网办，还免费赠送全套 4 枚实体防伪印章。',
         sections: [
           {
-            title: '👤 谁能享受？（适用对象白话讲）',
+            title: '【适用对象】谁能享受（政策范围）',
             text: '• 在广州新设立登记的有限责任公司、股份有限公司及合伙企业；\n• 个体工商户及各类创业者均可享受全流程免费便利政策。'
           },
           {
-            title: '💰 给多少实惠？（政策红利算清楚）',
+            title: '【政策红利】免费清单（省心省钱明细）',
             text: '• 刻章免费：政府财政买单，免费赠送公章、财务章、发票章、法人章共4枚防伪印章（立省数百元）；\n• 税务开户免费、首套发票领用免费、员工社保开户免费。'
           },
           {
-            title: '📱 去哪办？（零跑腿指引）',
+            title: '【办理渠道】一网通办半天办结指引',
             text: '• 登录“广州市开办企业一网通平台”或者在微信小程序填报；\n• 营业执照申请、刻章、领票、员工交社保和公积金“一表搞定”，半天（0.5工作日）全部办完，印章执照可免费邮寄到家。'
           },
           {
-            title: '⚠️ 提个醒！（注意事项避坑点）',
+            title: '【注意事项】关键要点与避坑提醒',
             text: '• 股东和法定代表人需要提前准备好身份证并在手机上完成人脸实名认证。',
             isWarn: true
           }
@@ -1611,19 +1605,19 @@
         summary: '不管是不是广州户口都能办！外卖员、快递小哥、自由职业者在广州凭身份证就能交职工医保，享受和正规大企业职工完全一样的看病报销待遇。',
         sections: [
           {
-            title: '👤 谁能参保？（参保门槛白话讲）',
+            title: '【参保门槛】谁能参保（资格条件）',
             text: '• 只要没到退休年龄，在广州靠自己打零工、做小买卖、搞自媒体或跑外卖的灵活就业人员；\n• 完全打破户籍限制，广州本地人和外省外市朋友政策一视同仁。'
           },
           {
-            title: '💰 报销待遇怎么样？（实惠待遇算清楚）',
+            title: '【待遇标准】报销比例（看病保障）',
             text: '• 享受待遇与企业上班族完全一致：门诊看病按比例报销、大病住院统筹基金支付；\n• 缴费基数可在月工资60%至300%之间自由选档，丰俭由人。'
           },
           {
-            title: '📱 去哪办？（零跑腿指引）',
+            title: '【办理渠道】手机零跑腿指引',
             text: '• 打开微信直接搜“粤税通”小程序，刷脸实名后点击“个人社保缴费”；\n• 动动手指绑定银行卡就能按月自动扣费，不用跑税务局大厅。'
           },
           {
-            title: '⚠️ 提个醒！（注意事项避坑点）',
+            title: '【注意事项】关键要点与避坑提醒',
             text: '• 按月交费次月起即可享受门诊及住院报销；如果断缴超过3个月，补缴后有待遇等待期，尽量别断缴。',
             isWarn: true
           }
@@ -1649,19 +1643,19 @@
         summary: '非广州户口也能摇号！外地户籍只要有有效广州居住证，且近2年内累计在广州交满24个月医保，名下没粤A车牌且有驾照，就可以免费参与摇号。',
         sections: [
           {
-            title: '👤 谁能申请？（硬性门槛白话讲）',
+            title: '【硬性门槛】谁能申请（摇号资格）',
             text: '• 本市户籍人员直接可申领（名下无粤A车且有有效驾照）；\n• 外省外市户籍人员：手里要有广州有效居住证，且近2年内累计交满广州医保24个月。'
           },
           {
-            title: '💰 怎么选更划算？（实惠选法指清楚）',
+            title: '【指标类型】怎么选更划算（燃油车与节能车）',
             text: '• 普通燃油车摇号：免费申请，中签率较低；\n• 节能车（混动车）摇号：同样免费申请，中签率极高（接近百分之百），急用车强烈推荐先摇节能车。'
           },
           {
-            title: '📱 去哪办？（零跑腿指引）',
+            title: '【办理渠道】网上申请与每月摇号指引',
             text: '• 手机搜微信公众号“广州交通”或电脑登录“广州市中小客车指标调控管理信息系统”；\n• 每月8日24点前完成网上申请，当月26日统一自动摇号，结果短信即时通知。'
           },
           {
-            title: '⚠️ 提个醒！（注意事项避坑点）',
+            title: '【注意事项】关键要点与避坑提醒',
             text: '• 近2年内累计交满24个月医保可以累计，允许断缴补缴，但申请当月医保必须处于在保正常状态。',
             isWarn: true
           }
@@ -1687,19 +1681,19 @@
         summary: '不用回老家，带上身份证在广州直接办！全国居民在广州办理港澳通行证及团队旅游签注享受“全国通办”，免户口本、免居住证，一般 7 个工作日办好。',
         sections: [
           {
-            title: '👤 谁能就近办？（全国通办白话讲）',
+            title: '【全国通办】谁能就近办（办理范围）',
             text: '• 只要是中国大陆合法居民，无论你的户籍在哪个省哪个村，都可以在广州公安出入境窗口就近申办；\n• 彻底免去请假坐高铁回老家办证的折腾。'
           },
           {
-            title: '💰 要带什么材料？（省心攻略看仔细）',
+            title: '【材料清单】要带什么材料（精简要件）',
             text: '• 只需要带本人的二代身份证原件即可，其他材料全免；\n• 重新加签：已有港澳通行证的朋友，直接去全市任何一台出入境智能签注机，立等可取，2分钟搞定。'
           },
           {
-            title: '📱 去哪办？（预约指引）',
+            title: '【预约渠道】预约与智能签注机指引',
             text: '• 打开微信搜“广州公安”公众号或“移民局12367”小程序；\n• 选择离你家或公司最近的政务服务中心出入境大厅预约时间，按时到场即可。'
           },
           {
-            title: '⚠️ 提个醒！（注意事项避坑点）',
+            title: '【注意事项】关键要点与避坑提醒',
             text: '• 未满16周岁的小朋友首次办证，需要监护人（爸爸或妈妈）陪同，并带上户口簿和出生证明。',
             isWarn: true
           }
@@ -1723,11 +1717,11 @@
       summary: '市民您好！广州市所有现行有效的政府规章和规范性文件均已在官方门户网站向全社会公开，实行统一公开与便民查询。',
       sections: [
         {
-          title: '🔍 怎么查政策？（官方通道白话讲）',
+          title: '【公开渠道】政策法规检索途径',
           text: '• 登录广州市人民政府门户网站（www.gz.gov.cn），点击顶部“政务公开-政策法规”；\n• 支持输入关键词、年份或部门一键检索红头公文原文与权威解读。'
         },
         {
-          title: '📞 有疑问找谁问？（民生热线指引）',
+          title: '【咨询热线】12345便民服务热线',
           text: '• 如果您对具体政策执行有任何疑问，可随时拨打 12345 政务服务便民热线，一键直通责任委办局为您解答。'
         }
       ],
