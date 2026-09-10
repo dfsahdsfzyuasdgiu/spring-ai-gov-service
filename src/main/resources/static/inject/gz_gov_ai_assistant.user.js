@@ -1,17 +1,15 @@
-// ==UserScript==
-// @name         广州市人民政府门户网站 · 右下角政务问答专窗 (穗政通)
+﻿// ==UserScript==
+// @name         骞垮窞甯備汉姘戞斂搴滈棬鎴风綉绔?路 鏀垮姟鍜ㄨ闂瓟鍔╂墜 (鏍囧噯鍏枃鐩磋鐗?
 // @namespace    https://www.gz.gov.cn/
 // @version      1.1.0
-// @description  为广州市人民政府门户网站（www.gz.gov.cn）注入右下角权威政务问答专窗，支持广州本地政策法规检索、六级十二项标准办事指南导办，深度融入官网视觉规范（直角公文风格、红蓝配色）。
-// @author       穗政通政务研发组
-// @match        *://www.gz.gov.cn/*
-// @match        *://zwfw.gd.gov.cn/*
+// @description  涓哄箍宸炲競浜烘皯鏀垮簻闂ㄦ埛缃戠珯锛坵ww.gz.gov.cn锛夋彁渚涘彸涓嬭鏀垮姟鍜ㄨ涓撶獥锛屼弗鏍奸伒寰畼鏂瑰叕鏂囩洿瑙掕瑙夎鑼冿紙鍘婚櫎鍗￠€氬浘鏍囷紝鏀垮姟钃濈孩涓ヨ皑鎺掔増锛夛紝鏀寔娉曞畾鏀跨瓥渚濇嵁绮惧噯婧簮涓庡姙浜嬫潗鏂欒嚜妫€銆?// @author       骞垮窞鏀垮姟闂瓟涓撶獥鍥㈤槦
+// @match        https://www.gz.gov.cn/*
+// @match        http://www.gz.gov.cn/*
+// @match        https://zwfw.gd.gov.cn/*
 // @match        http://localhost:8080/*
 // @match        http://127.0.0.1:8080/*
-// @include      *://www.gz.gov.cn/*
-// @include      *://zwfw.gd.gov.cn/*
-// @include      http://localhost:8080/*
-// @include      http://127.0.0.1:8080/*
+// @include      /^https?:\/\/localhost(:\d+)?\/.*$/
+// @include      /^https?:\/\/127\.0\.0\.1(:\d+)?\/.*$/
 // @icon         https://www.gz.gov.cn/favicon.ico
 // @grant        none
 // @run-at       document-end
@@ -334,7 +332,19 @@
       color: #003a8c;
       display: flex;
       align-items: center;
-      gap: 6px;
+      gap: 8px;
+      line-height: 1.5;
+    }
+
+    .banner-badge {
+      background: #c20505;
+      color: #ffffff;
+      font-size: 10px;
+      font-weight: 700;
+      padding: 1px 5px;
+      border-radius: 0px !important;
+      flex-shrink: 0;
+      letter-spacing: 0.5px;
     }
 
     /* 热点问答导航栏（直角标签） */
@@ -671,7 +681,7 @@
 
       <!-- 官方公告条 -->
       <div class="gz-gov-banner">
-        <span>📌</span>
+        <span class="banner-badge">通告</span>
         <span>全面落实“高效办成一件事”标准，支持法定政策依据精准溯源与申报材料自检</span>
       </div>
 

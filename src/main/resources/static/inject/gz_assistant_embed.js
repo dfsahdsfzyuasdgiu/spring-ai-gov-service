@@ -315,7 +315,19 @@
       color: #003a8c;
       display: flex;
       align-items: center;
-      gap: 6px;
+      gap: 8px;
+      line-height: 1.5;
+    }
+
+    .banner-badge {
+      background: #c20505;
+      color: #ffffff;
+      font-size: 10px;
+      font-weight: 700;
+      padding: 1px 5px;
+      border-radius: 0px !important;
+      flex-shrink: 0;
+      letter-spacing: 0.5px;
     }
 
     /* 热点问答导航栏（直角标签） */
@@ -652,7 +664,7 @@
 
       <!-- 官方公告条 -->
       <div class="gz-gov-banner">
-        <span>📌</span>
+        <span class="banner-badge">通告</span>
         <span>全面落实“高效办成一件事”标准，支持法定政策依据精准溯源与申报材料自检</span>
       </div>
 
