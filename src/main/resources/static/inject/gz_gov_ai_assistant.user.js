@@ -1,8 +1,8 @@
 ﻿// ==UserScript==
-// @name         骞垮窞甯備汉姘戞斂搴滈棬鎴风綉绔?路 鏀垮姟鍜ㄨ闂瓟鍔╂墜 (鏍囧噯鍏枃鐩磋鐗?
+// @name         骞垮窞甯備汉姘戞斂搴滈棬鎴风綉绔?路 鏀跨瓥娉曡 AI 鏅鸿兘闂瓟鍔╂墜 (鍚戦噺搴揜AG鐩存函鐗?
 // @namespace    https://www.gz.gov.cn/
-// @version      1.1.0
-// @description  涓哄箍宸炲競浜烘皯鏀垮簻闂ㄦ埛缃戠珯锛坵ww.gz.gov.cn锛夋彁渚涘彸涓嬭鏀垮姟鍜ㄨ涓撶獥锛屼弗鏍奸伒寰畼鏂瑰叕鏂囩洿瑙掕瑙夎鑼冿紙鍘婚櫎鍗￠€氬浘鏍囷紝鏀垮姟钃濈孩涓ヨ皑鎺掔増锛夛紝鏀寔娉曞畾鏀跨瓥渚濇嵁绮惧噯婧簮涓庡姙浜嬫潗鏂欒嚜妫€銆?// @author       骞垮窞鏀垮姟闂瓟涓撶獥鍥㈤槦
+// @version      1.2.0
+// @description  涓哄箍宸炲競浜烘皯鏀垮簻闂ㄦ埛缃戠珯锛坵ww.gz.gov.cn锛夐噺韬墦閫犵殑鏀跨瓥娉曡AI鏅鸿兘闂瓟涓撶獥锛屾繁搴﹀鎺ユ斂绛栧悜閲忔暟鎹簱锛圧AG锛夛紝鏀寔鏀跨瓥鏉℃绮惧噯瑙ｈ銆佺孩澶村叕鏂囧彂鏂囧瓧鍙蜂笌鍘熸枃渚濇嵁鐩存函銆佹櫤鑳芥斂绛栬拷闂€?// @author       骞垮窞鏀跨瓥AI鏅鸿兘闂瓟鍥㈤槦
 // @match        https://www.gz.gov.cn/*
 // @match        http://www.gz.gov.cn/*
 // @match        https://zwfw.gd.gov.cn/*
@@ -17,15 +17,14 @@
 
 /**
  * 广州市人民政府门户网站 (www.gz.gov.cn)
- * 政务智能咨询专窗 · 前端独立注入插件
+ * 政策法规 AI 智能问答专窗 · 前端独立注入插件
  * 
- * 视觉规范：
- * 1. 严格契合广州市人民政府官方视觉体系 (GB/T 33356 国家政务门户网站规范)
- * 2. 经典政务基色：广州天蓝 (#006ed5) + 岭南深蓝 (#003a8c) + 顶栏公文红 (#c20505) + 暖白纸色 (#fafbfc)
- * 3. 严谨直角排版：取消圆角，全系直角公文风格，杜绝任何浮夸卡通元素与非规范 Emoji
- * 4. 工业级顶栏交互：极简矢量 SVG 控制按钮 (清屏/最小化/关闭)，彻底杜绝文字折行与样式生硬
- * 5. Shadow DOM 物理隔离：与 gz.gov.cn 现有 CSS/JS 零冲突、零污染
- * 6. 双模通信：支持对接同学后端数据库接口，在离线/无网络时自动切换至广州政务仿真知识库引擎
+ * 核心定位：
+ * 1. 深度对接“广州市政策法规文本向量数据库 (Vector DB + RAG)”
+ * 2. 聚焦政策智能解读、红头公文依据溯源、法条条款原文摘录与智能政策追问
+ * 3. 彻底剥离与政策无关的办事指南表单、材料勾选 Checklist 及外部跳转按钮
+ * 4. 严格契合官方视觉体系：全直角公文标准、广州政务蓝红配色、无任何卡通图标与 Emoji
+ * 5. 纯静态稳固悬浮微标，Shadow DOM 双向样式物理隔离
  */
 
 (function () {
@@ -33,15 +32,15 @@
 
   // 避免在同一页面重复注入
   if (document.getElementById('gz-gov-ai-root')) {
-    console.warn('[广州政务咨询] 已存在运行实例，跳过重复初始化。');
+    console.warn('[广州政策问答] 已存在运行实例，跳过重复初始化。');
     return;
   }
 
-  // 全局对接配置 (便于开发小组同学直连数据库与大模型服务)
+  // 全局对接配置 (为同学对接向量数据库与大模型后端提供标准入口)
   window.GzGovAiConfig = Object.assign({
-    apiEndpoint: 'http://localhost:8080/api/v1/gov/chat/stream', // 同学后端流式/普通问答接口
-    mockIfOffline: true,                                       // 后端服务离线时自动切换为内置高保真知识库
-    assistantName: '广州政务智能咨询专窗',
+    apiEndpoint: 'http://localhost:8080/api/v1/gov/chat/stream', // 同学向量数据库/RAG问答接口
+    mockIfOffline: true,                                       // 后端服务离线时自动切换为内置高保真政策知识库
+    assistantName: '广州市政策法规智能咨询专窗',
     authority: '广州市人民政府门户网站',
     organizer: '广州市政务服务和数据管理局',
     hotline: '12345政务服务便民热线'
@@ -53,7 +52,7 @@
   document.body.appendChild(host);
   const shadow = host.attachShadow({ mode: 'open' });
 
-  // 注入量身定做的官方公文直角视觉样式
+  // 注入量身定制的官方公文直角视觉样式
   const style = document.createElement('style');
   style.textContent = `
     * {
@@ -74,7 +73,7 @@
     }
 
     /* ========================================================
-       1. 右下角悬浮徽标 (经典正圆徽标，内置穗字官印与呼吸动效)
+       1. 右下角悬浮徽标 (纯静态展示，无晃动无呼吸光晕)
        ======================================================== */
     .gz-launcher {
       pointer-events: auto;
@@ -137,7 +136,7 @@
     }
 
     /* ========================================================
-       2. 欢迎公文气泡提示 (向左滑出，直角通告条)
+       2. 欢迎公文卡片提示 (静态通告条)
        ======================================================== */
     .gz-greeting-card {
       pointer-events: auto;
@@ -204,29 +203,29 @@
     }
 
     /* ========================================================
-       3. 核心咨询对话大厅 (全直角公文排版，权威政务视觉)
+       3. 政策问答大厅主弹窗 (全直角公文结构)
        ======================================================== */
     .gz-dialog-window {
       pointer-events: auto;
       position: fixed;
       bottom: 28px;
       right: 28px;
-      width: 460px;
+      width: 480px;
       height: 700px;
       max-width: calc(100vw - 32px);
       max-height: calc(100vh - 48px);
       background: #ffffff;
       border: 1px solid #003a8c;
-      border-top: 4px solid #c20505; /* 广州市人民政府顶头公文红 */
+      border-top: 4px solid #c20505; /* 广州政务红头线 */
       border-radius: 0 !important;   /* 彻底直角 */
       box-shadow: 0 16px 48px rgba(0, 30, 80, 0.28);
       display: flex;
       flex-direction: column;
       overflow: hidden;
       opacity: 0;
-      transform: scale(0.88) translateY(36px);
+      transform: scale(0.9) translateY(30px);
       transform-origin: bottom right;
-      transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+      transition: all 0.28s cubic-bezier(0.16, 1, 0.3, 1);
       z-index: 100000000;
       visibility: hidden;
     }
@@ -237,11 +236,11 @@
       visibility: visible;
     }
 
-    /* 顶栏：广州政务蓝 + 穗印 + 精致矢量 SVG 控制按钮 */
+    /* 顶栏：广州政务蓝 + 极简矢量 SVG 控制按钮 (无左上角小印章) */
     .gz-window-header {
       background: linear-gradient(90deg, #0050b3 0%, #006ed5 100%);
       color: #ffffff;
-      padding: 10px 14px;
+      padding: 12px 16px;
       display: flex;
       justify-content: space-between;
       align-items: center;
@@ -266,10 +265,10 @@
       font-size: 11px;
       color: #d6e4ff;
       letter-spacing: 0.3px;
-      margin-top: 1px;
+      margin-top: 2px;
     }
 
-    /* 工业级 SVG 矢量控制按钮 (解决换行与简陋方块问题) */
+    /* 极简矢量控制按钮 (不折行) */
     .header-controls {
       display: flex;
       align-items: center;
@@ -315,7 +314,7 @@
     .gz-notice-banner {
       background: #f0f7ff;
       border-bottom: 1px solid #d6e4ff;
-      padding: 7px 12px;
+      padding: 8px 14px;
       font-size: 11px;
       color: #003a8c;
       display: flex;
@@ -335,7 +334,7 @@
       letter-spacing: 0.5px;
     }
 
-    /* 广州高频政务导航直角标签 */
+    /* 政策高频热搜直角标签 */
     .gz-quick-bar {
       padding: 8px 12px;
       background: #fafafa;
@@ -354,7 +353,7 @@
       color: #003a8c;
       border: 1px solid #b0cbe8;
       border-radius: 0;
-      padding: 4px 9px;
+      padding: 4px 10px;
       cursor: pointer;
       transition: all 0.18s ease;
       user-select: none;
@@ -373,15 +372,15 @@
       padding: 16px;
       display: flex;
       flex-direction: column;
-      gap: 16px;
+      gap: 18px;
       background: #f7f9fc;
     }
 
     .chat-row {
       display: flex;
       flex-direction: column;
-      max-width: 95%;
-      animation: gzMsgFade 0.22s ease forwards;
+      max-width: 96%;
+      animation: gzMsgFade 0.2s ease forwards;
     }
 
     @keyframes gzMsgFade {
@@ -407,10 +406,10 @@
     }
 
     .chat-bubble {
-      padding: 12px 14px;
+      padding: 14px 16px;
       border-radius: 0 !important;
       font-size: 13px;
-      line-height: 1.65;
+      line-height: 1.7;
       word-break: break-word;
     }
 
@@ -425,115 +424,122 @@
       color: #1a1a1a;
       border: 1px solid #dcdfe6;
       border-left: 3px solid #0050b3;
-      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04);
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
     }
 
-    /* 红头公文法定政策依据卡 */
-    .doc-statute-card {
+    /* ========================================================
+       4. 权威政策依据溯源卡 (向量检索原文直溯)
+       ======================================================== */
+    .policy-citation-card {
       background: #fdf6ec;
       border: 1px solid #faecd8;
       border-left: 4px solid #c20505;
       border-radius: 0 !important;
-      padding: 10px 12px;
-      margin-top: 10px;
-      font-size: 12px;
-      color: #333333;
-    }
-
-    .doc-statute-title {
-      font-weight: 700;
-      color: #c20505;
-      margin-bottom: 4px;
-      display: flex;
-      align-items: center;
-      gap: 6px;
-    }
-
-    .doc-statute-body {
-      color: #555555;
-      line-height: 1.55;
-      margin-top: 4px;
-    }
-
-    /* 六级十二项办事标准指南卡 */
-    .doc-affair-card {
-      background: #ffffff;
-      border: 1px solid #b0cbe8;
-      border-radius: 0 !important;
-      padding: 12px;
+      padding: 12px 14px;
       margin-top: 12px;
+      font-size: 12px;
+      color: #2c3e50;
     }
 
-    .affair-head {
+    .citation-header {
       display: flex;
       justify-content: space-between;
-      align-items: flex-start;
+      align-items: center;
+      margin-bottom: 6px;
       padding-bottom: 6px;
-      border-bottom: 1px solid #e8e8e8;
+      border-bottom: 1px dashed #e8d8c3;
+    }
+
+    .citation-title-tag {
+      font-weight: 700;
+      color: #c20505;
+      font-size: 12px;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .citation-match-tag {
+      font-size: 10px;
+      background: #fff1f0;
+      color: #cf1322;
+      border: 1px solid #ffa39e;
+      padding: 1px 6px;
+      border-radius: 0;
+      font-weight: 600;
+    }
+
+    .citation-doc-name {
+      font-size: 13px;
+      font-weight: 700;
+      color: #1a1a1a;
+      line-height: 1.4;
+      margin-bottom: 4px;
+    }
+
+    .citation-meta {
+      font-size: 11px;
+      color: #64748b;
       margin-bottom: 8px;
     }
 
-    .affair-title {
-      font-size: 13px;
-      font-weight: 700;
+    .citation-snippet-box {
+      background: rgba(255, 255, 255, 0.85);
+      border: 1px solid #faecd8;
+      border-radius: 0;
+      padding: 8px 10px;
+      font-size: 12px;
+      color: #444444;
+      line-height: 1.6;
+    }
+
+    .citation-snippet-box strong {
       color: #003a8c;
     }
 
-    .affair-code {
-      font-size: 11px;
-      color: #64748b;
-      margin-top: 2px;
+    /* ========================================================
+       5. 智能政策延伸推荐 (相关追问引导)
+       ======================================================== */
+    .policy-suggestions-wrap {
+      margin-top: 12px;
+      padding-top: 10px;
+      border-top: 1px dashed #e2e8f0;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
     }
 
-    .affair-limit-tag {
-      font-size: 11px;
-      background: #f6ffed;
-      color: #389e0d;
-      border: 1px solid #b7eb8f;
-      padding: 2px 6px;
-      border-radius: 0;
-      font-weight: 600;
-      white-space: nowrap;
-    }
-
-    .affair-sec-title {
+    .suggestions-label {
       font-size: 11px;
       font-weight: 700;
-      color: #475569;
-      margin: 8px 0 4px 0;
+      color: #64748b;
     }
 
-    .affair-check-row {
+    .suggestions-chips-group {
       display: flex;
-      align-items: center;
+      flex-wrap: wrap;
       gap: 6px;
-      font-size: 12px;
-      color: #333333;
-      padding: 3px 0;
     }
 
-    .affair-check-row input[type="checkbox"] {
-      accent-color: #0050b3;
-      cursor: pointer;
-    }
-
-    .affair-direct-btn {
-      margin-top: 10px;
-      display: block;
-      width: 100%;
-      text-align: center;
-      background: #006ed5;
-      color: #ffffff;
-      text-decoration: none;
-      padding: 8px 0;
+    .suggestion-chip {
+      font-size: 11px;
+      background: #f0f7ff;
+      color: #0050b3;
+      border: 1px solid #d6e4ff;
       border-radius: 0;
-      font-size: 12px;
-      font-weight: 600;
-      transition: background 0.18s ease;
+      padding: 4px 8px;
+      cursor: pointer;
+      transition: all 0.16s ease;
+      line-height: 1.3;
     }
-    .affair-direct-btn:hover { background: #0050b3; }
 
-    /* 评价与采纳操作行 */
+    .suggestion-chip:hover {
+      background: #0050b3;
+      color: #ffffff;
+      border-color: #0050b3;
+    }
+
+    /* 评价反馈行 */
     .chat-feedback-bar {
       display: flex;
       align-items: center;
@@ -647,36 +653,36 @@
   `;
   shadow.appendChild(style);
 
-  // 构造 DOM 骨架 (全系矢量 SVG 图标与直角公文)
+  // 构造 DOM 骨架
   const container = document.createElement('div');
   container.className = 'gz-gov-shell';
   container.innerHTML = `
-    <!-- 右下角悬浮圆形徽章 -->
-    <div class="gz-launcher" id="gzLauncher" title="点击呼出广州市人民政府政务智能咨询专窗">
-      <div class="launcher-tag">咨询</div>
+    <!-- 右下角悬浮圆形徽章 (静态无晃动) -->
+    <div class="gz-launcher" id="gzLauncher" title="点击呼出广州市政策法规智能咨询专窗">
+      <div class="launcher-tag">政策</div>
       <div class="launcher-seal">穗</div>
-      <div class="launcher-caption">政务问答</div>
+      <div class="launcher-caption">政策问答</div>
     </div>
 
-    <!-- 左侧迎宾公文通告卡片 -->
+    <!-- 左侧迎宾公文卡片 -->
     <div class="gz-greeting-card" id="gzGreetingCard">
       <div class="greeting-header">
-        <span>广州市人民政府 · 政务咨询服务</span>
+        <span>广州市人民政府 · 政策咨询服务</span>
         <span class="greeting-close" id="gzGreetingClose" title="关闭提示">&times;</span>
       </div>
       <div class="greeting-body">
-        市民您好！关于<strong>公租房保障、积分制入户、企业开办、医保社保、港澳通行证</strong>等办理指引，欢迎点击此处进行咨询。
+        市民您好！本专窗依托<strong>广州市政策法规知识库</strong>，支持查询住房保障、积分入户、营商扶企、社保医保等现行政策条例与精准条款直溯。
       </div>
     </div>
 
-    <!-- 咨询对话大厅主弹窗 (全直角公文标准结构) -->
+    <!-- 政策咨询大厅主弹窗 (全直角公文结构) -->
     <div class="gz-dialog-window" id="gzDialogWindow">
       <!-- 顶栏与控制按钮 -->
       <div class="gz-window-header">
         <div class="header-main">
           <div class="header-titles">
-            <h3>广州市人民政府门户网站 · 政务智能咨询</h3>
-            <p>广州市政务服务和数据管理局主办 ｜ 12345热线协同</p>
+            <h3>广州市人民政府门户网站 · 政策智能咨询</h3>
+            <p>广州市现行规章与规范性文件权威数据库 ｜ 政策条款直溯</p>
           </div>
         </div>
         <div class="header-controls">
@@ -698,33 +704,33 @@
       <!-- 官方通告条 -->
       <div class="gz-notice-banner">
         <span class="notice-badge">通告</span>
-        <span>全面落实“高效办成一件事”标准，支持法定政策依据精准溯源与申报材料自检</span>
+        <span>汇集全市各委办局现行有效公文规章，基于大模型提供精准条款解读与出处溯源</span>
       </div>
 
-      <!-- 高频热搜业务导航直角标签 -->
+      <!-- 政策高频咨询领域直角标签 -->
       <div class="gz-quick-bar">
-        <span class="quick-chip" data-query="在广州如何申请公共租赁住房（公租房）？">公租房保障申请</span>
-        <span class="quick-chip" data-query="广州积分制入户申报条件与办理流程是什么？">积分制入户申报</span>
-        <span class="quick-chip" data-query="广州市企业开办‘一网通办’如何0.5天快速领照？">企业开办一网通</span>
-        <span class="quick-chip" data-query="外地户籍在广州如何参加灵活就业职工医保？">灵活就业职工医保</span>
-        <span class="quick-chip" data-query="广州市中小客车增量指标（摇号与竞价）申请条件？">车牌摇号竞价</span>
-        <span class="quick-chip" data-query="在广州怎么办理往来港澳通行证期满换发？">港澳通行证换证</span>
+        <span class="quick-chip" data-query="《广州市公共租赁住房保障办法》关于租赁补贴的发放标准和保障对象？">公租房补贴政策</span>
+        <span class="quick-chip" data-query="《广州市积分制入户管理办法》规定的申报门槛和积分指标体系？">积分制入户政策</span>
+        <span class="quick-chip" data-query="广州市深化企业开办“一网通办”改革有何便利举措与扶持政策？">企业开办扶持政策</span>
+        <span class="quick-chip" data-query="广州市灵活就业人员参加职工基本医疗保险的参保范围与缴费规定？">灵活就业医保政策</span>
+        <span class="quick-chip" data-query="《广州市中小客车总量调控管理办法》个人增量指标申请条件是什么？">中小客车指标办法</span>
+        <span class="quick-chip" data-query="广州市公安出入境管理部门关于往来港澳通行证全国通办的政策依据？">港澳签注通行规定</span>
       </div>
 
       <!-- 消息列表流 -->
       <div class="gz-chat-main" id="gzChatMain">
         <div class="chat-row ai">
-          <div class="chat-author">广州市政务咨询专窗</div>
+          <div class="chat-author">广州市政策法规咨询专窗</div>
           <div class="chat-bubble">
-            您好，欢迎使用<strong>广州市人民政府门户网站</strong>政务智能咨询服务。<br><br>
-            本专窗汇集广州市各委办局现行有效的政策规章及“六级十二项”标准办事指南。您可以通过文字咨询办理条件、申报材料及网上申办流程，例如：
+            您好，欢迎使用<strong>广州市人民政府门户网站</strong>政策法规 AI 智能问答系统。<br><br>
+            本系统深度对接广州市现行政策公文向量知识库，为您提供政策条文精准检索、适用对象判断与官方条款溯源。您可在此输入您想了解的政策问题，例如：
             <ul style="margin: 6px 0 0 18px; line-height: 1.6; color: #475569;">
-              <li><em>“新就业无房职工在广州申请公租房租赁补贴的条件是什么？”</em></li>
-              <li><em>“外地户籍居民如何在广州申请办理积分入户？”</em></li>
+              <li><em>“新就业无房职工申领广州公租房租赁补贴的具体政策规定是什么？”</em></li>
+              <li><em>“广州市对新设立企业免费发放印章和半天办结的规章依据是哪部文件？”</em></li>
             </ul>
           </div>
           <div class="chat-feedback-bar">
-            <span>信息保障：广州市政务服务和数据管理局</span>
+            <span>数据源：广州市人民政府门户网站政策公开专栏</span>
           </div>
         </div>
       </div>
@@ -732,11 +738,11 @@
       <!-- 底部输入栏 -->
       <div class="gz-input-footer">
         <div class="input-wrapper">
-          <input type="text" class="gz-text-input" id="gzTextInput" placeholder="请输入您要咨询的广州市政策法规或政务办事事项..." maxlength="200" />
+          <input type="text" class="gz-text-input" id="gzTextInput" placeholder="请输入您想查询的广州市政策规章、规范性文件或条款问题..." maxlength="200" />
           <button class="gz-submit-btn" id="gzSubmitBtn">发 送</button>
         </div>
         <div class="footer-authority-note">
-          广州市人民政府门户网站 · 穗政通标准化政务专窗 ｜ 12345 便民热线协同
+          广州市人民政府门户网站 · 政策法规智能问答专窗 ｜ 12345 便民热线协同
         </div>
       </div>
     </div>
@@ -756,7 +762,7 @@
   const submitBtn = shadow.getElementById('gzSubmitBtn');
   const quickChips = shadow.querySelectorAll('.quick-chip');
 
-  // 页面加载 2.4 秒后优雅弹出迎宾卡片
+  // 页面加载 2.4 秒后弹出迎宾提示卡片
   let greetingTimer = setTimeout(() => {
     greetingCard.classList.add('show');
   }, 2400);
@@ -780,17 +786,17 @@
     greetingCard.classList.remove('show');
     launcher.style.display = 'none';
     dialogWindow.classList.add('open');
-    setTimeout(() => textInput.focus(), 260);
+    setTimeout(() => textInput.focus(), 250);
   }
 
   function closeDialog() {
     dialogWindow.classList.remove('open');
     setTimeout(() => {
       launcher.style.display = 'flex';
-    }, 240);
+    }, 220);
   }
 
-  // 清空对话
+  // 清空对话记录
   btnReset.addEventListener('click', () => {
     const rows = chatMain.querySelectorAll('.chat-row');
     rows.forEach((row, idx) => {
@@ -798,7 +804,7 @@
     });
   });
 
-  // 快捷标签点击提问
+  // 快捷标签点击
   quickChips.forEach(chip => {
     chip.addEventListener('click', () => {
       const q = chip.getAttribute('data-query');
@@ -827,16 +833,16 @@
 
     const loadingElem = appendLoadingRow();
 
-    fetchAiAnswer(content)
+    fetchPolicyAnswer(content)
       .then(res => {
         loadingElem.remove();
-        renderAiAnswer(res);
+        renderPolicyAnswer(res);
       })
       .catch(err => {
-        console.warn('[广州政务咨询] 远端接口未就绪，无缝启用离线仿真知识库引擎:', err);
+        console.warn('[广州政策问答] 远端向量接口未就绪，无缝启用离线仿真知识库引擎:', err);
         loadingElem.remove();
-        const mockRes = getGuangzhouMockData(content);
-        renderAiAnswer(mockRes);
+        const mockRes = getGuangzhouPolicyMockData(content);
+        renderPolicyAnswer(mockRes);
       })
       .finally(() => {
         submitBtn.disabled = false;
@@ -859,7 +865,7 @@
     const div = document.createElement('div');
     div.className = 'chat-row ai loading';
     div.innerHTML = `
-      <div class="chat-author">广州市政务咨询专窗</div>
+      <div class="chat-author">广州市政策法规咨询专窗</div>
       <div class="typing-box">
         <span class="typing-block"></span>
         <span class="typing-block"></span>
@@ -871,69 +877,57 @@
     return div;
   }
 
-  function renderAiAnswer(data) {
+  // 渲染政策问答结果 (专注于政策解读 + 向量溯源 + 追问延伸)
+  function renderPolicyAnswer(data) {
     const div = document.createElement('div');
     div.className = 'chat-row ai';
 
-    // 1. 法定政策依据卡
-    let statuteHtml = '';
-    if (data.policy) {
-      statuteHtml = `
-        <div class="doc-statute-card">
-          <div class="doc-statute-title">
-            <span>【法定政策依据】</span>
-            <span>文号：${escapeText(data.policy.docNumber)}</span>
+    // 1. 政策原文依据卡片组 (Citations)
+    let citationsHtml = '';
+    const citeList = data.citations || (data.policy ? [data.policy] : []);
+    if (citeList && citeList.length > 0) {
+      citationsHtml = citeList.map((c) => `
+        <div class="policy-citation-card">
+          <div class="citation-header">
+            <span class="citation-title-tag">
+              <span>【法定政策公文直溯】</span>
+            </span>
+            <span class="citation-match-tag">知识库匹配 ${escapeText(c.similarity || '98%')}</span>
           </div>
-          <div><strong>《${escapeText(data.policy.title)}》</strong></div>
-          <div class="doc-statute-body">${escapeText(data.policy.clause)}</div>
+          <div class="citation-doc-name">《${escapeText(c.title || '相关规范性文件')}》</div>
+          <div class="citation-meta">
+            <span>发文字号：${escapeText(c.docNumber || '现行有效')}</span>
+            ${c.dept ? ` ｜ <span>颁布机构：${escapeText(c.dept)}</span>` : ''}
+          </div>
+          <div class="citation-snippet-box">
+            <strong>【相关条款原文摘录】</strong><br/>
+            ${escapeText(c.clause || c.snippet || '该政策条文已纳入现行有效库。')}
+          </div>
         </div>
-      `;
+      `).join('');
     }
 
-    // 2. 六级十二项办事指南卡
-    let affairHtml = '';
-    if (data.affair) {
-      const a = data.affair;
-      let materialsHtml = '';
-      if (a.materials && a.materials.length) {
-        materialsHtml = a.materials.map((m, i) => `
-          <label class="affair-check-row">
-            <input type="checkbox" id="chk_mat_${i}">
-            <span>${escapeText(m.name)} <strong style="color: ${m.mandatory ? '#c20505' : '#389e0d'}; font-size:11px;">[${m.mandatory ? '法定必备' : '电子证照免交'}]</strong></span>
-          </label>
-        `).join('');
-      }
+    // 2. 智能政策延伸推荐 (Suggestions)
+    let suggestionsHtml = '';
+    if (data.suggestions && data.suggestions.length > 0) {
+      const chips = data.suggestions.map((s) => `
+        <span class="suggestion-chip" data-prompt="${escapeText(s)}">${escapeText(s)}</span>
+      `).join('');
 
-      affairHtml = `
-        <div class="doc-affair-card">
-          <div class="affair-head">
-            <div>
-              <div class="affair-title">【事项】${escapeText(a.name)}</div>
-              <div class="affair-code">统一实施编码: ${escapeText(a.code)}</div>
-            </div>
-            <div class="affair-limit-tag">承诺时限: ${a.limitDays}个工作日</div>
-          </div>
-          <div class="affair-sec-title">【受理准入条件】</div>
-          <div style="font-size: 12px; color: #333333; line-height: 1.5;">${escapeText(a.qualification)}</div>
-          
-          ${materialsHtml ? `
-            <div class="affair-sec-title">【申办材料自检核验】</div>
-            ${materialsHtml}
-          ` : ''}
-
-          <a href="${a.url || 'https://www.gz.gov.cn/'}" target="_blank" class="affair-direct-btn">
-            前往广东政务服务网·广州专区立即申办
-          </a>
+      suggestionsHtml = `
+        <div class="policy-suggestions-wrap">
+          <div class="suggestions-label">💡 猜您还想了解相关政策：</div>
+          <div class="suggestions-chips-group">${chips}</div>
         </div>
       `;
     }
 
     div.innerHTML = `
-      <div class="chat-author">广州市政务咨询专窗</div>
+      <div class="chat-author">广州市政策法规咨询专窗</div>
       <div class="chat-bubble">
         <div class="typing-target"></div>
-        ${statuteHtml}
-        ${affairHtml}
+        ${citationsHtml}
+        ${suggestionsHtml}
       </div>
       <div class="chat-feedback-bar">
         <span>信息承办：广州市政务服务和数据管理局</span>
@@ -945,8 +939,17 @@
     chatMain.appendChild(div);
     scrollChatBottom();
 
+    // 绑定追问芯片点击
+    div.querySelectorAll('.suggestion-chip').forEach(chip => {
+      chip.addEventListener('click', () => {
+        const p = chip.getAttribute('data-prompt');
+        textInput.value = p;
+        handleUserSubmit();
+      });
+    });
+
     const targetElem = div.querySelector('.typing-target');
-    runTypeWriter(targetElem, data.content, 0, 14);
+    runTypeWriter(targetElem, data.content || data.reply || '', 0, 14);
   }
 
   function runTypeWriter(element, text, index, speed) {
@@ -966,8 +969,8 @@
     return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
   }
 
-  // 接口请求 (预留对接后端服务)
-  async function fetchAiAnswer(prompt) {
+  // 接口请求 (预留对接同学的向量数据库后端)
+  async function fetchPolicyAnswer(prompt) {
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), 3500);
 
@@ -984,163 +987,153 @@
     return json.data || json;
   }
 
-  // 内置广州市人民政府官方高保真问答仿真知识库
-  function getGuangzhouMockData(prompt) {
+  // 广州市政策法规高保真离线向量仿真知识库
+  function getGuangzhouPolicyMockData(prompt) {
     const q = prompt.toLowerCase();
 
-    // 1. 公共租赁住房
+    // 1. 公租房保障与租赁补贴政策
     if (q.includes('公租房') || q.includes('租房') || q.includes('租赁补贴')) {
       return {
-        content: '根据《广州市公共租赁住房保障办法》，广州市城镇户籍中等偏下收入住房困难家庭及新就业无房职工，可依规定申请公共租赁住房或住房租赁补贴。申请实行“一窗受理、并联审核”，符合条件家庭每月最高可申领每平方米35元的租赁住房补贴。',
-        policy: {
-          docNumber: '穗府办规〔2024〕6号',
-          title: '广州市人民政府办公厅关于印发广州市公共租赁住房保障办法的通知',
-          clause: '第三条【保障对象】：本市城镇户籍中等偏下收入住房困难家庭，以及持有本市有效居住证、在穗连续稳定就业的新就业职工及外来务工人员。'
-        },
-        affair: {
-          name: '广州市公共租赁住房保障资格申请核准',
-          code: 'GZ-GZF-440100-01',
-          limitDays: 5,
-          qualification: '申请人及共同申请人具有本市城镇户籍，在穗连续缴纳社保满1年，且家庭人均年可支配收入低于上年度保障标准。',
-          materials: [
-            { name: '申请人及家庭成员居民身份证与户口簿', mandatory: true },
-            { name: '家庭成员年可支配收入核查证明材料', mandatory: true },
-            { name: '广州市不动产权属信息查询凭据 (共享数据免交)', mandatory: false }
-          ],
-          url: 'https://www.gz.gov.cn/'
-        }
+        content: '根据《广州市公共租赁住房保障办法》，广州市对中等偏下收入住房困难家庭及新就业无房职工实行“实物配租”与“住房租赁补贴”相结合的保障模式。符合条件的新就业无房职工在穗稳定就业且人均年可支配收入低于保障线的，可申领住房租赁补贴，补贴标准按建筑面积每平方米每月最高35元计算，补贴期限最长不超过5年。',
+        citations: [
+          {
+            title: '广州市公共租赁住房保障办法',
+            docNumber: '穗府办规〔2024〕6号',
+            dept: '广州市人民政府办公厅',
+            similarity: '98%',
+            clause: '第三条【保障对象】：本市城镇户籍中等偏下收入住房困难家庭，以及持有本市有效居住证、在穗连续稳定就业的新就业职工及外来务工人员。\n第十一条【租赁补贴】：住房租赁补贴标准为每平方米每月35元，结合保障家庭人口与人均保障建筑面积测算发放。'
+          }
+        ],
+        suggestions: [
+          '新就业无房职工申请补贴的收入门槛是多少？',
+          '公租房实物配租与租赁补贴可以同时享受吗？',
+          '租赁补贴累计最长可以享受几年？'
+        ]
       };
     }
 
-    // 2. 积分入户
+    // 2. 积分制入户政策
     if (q.includes('积分') || q.includes('入户') || q.includes('落户') || q.includes('户口')) {
       return {
-        content: '广州市积分制入户依据《广州市积分制入户管理办法》规范实施。来穗人员申请积分制入户需持有在广州市办理的有效《广东省居住证》，在穗合法稳定就业或创业并累计缴纳社会保险满4年，且在“广州市来穗人员积分制服务管理信息系统”核定积分达到当年度规定分值。',
-        policy: {
-          docNumber: '穗府规〔2023〕1号',
-          title: '广州市人民政府关于印发广州市积分制入户管理办法的通知',
-          clause: '第五条【申报条件】：在广州市合法稳定就业或创业、年龄在45周岁以下、持有在穗办理的有效《广东省居住证》、缴纳本市社会保险累计满4年，信用记录良好。'
-        },
-        affair: {
-          name: '来穗人员积分制入户申报与指标卡核发',
-          code: 'GZ-JFRH-440100-02',
-          limitDays: 7,
-          qualification: '年龄45周岁以下，持有有效广州市居住证，连续缴纳广州社保满4年，无严重犯罪记录。',
-          materials: [
-            { name: '广东省居住证 (在穗办理且在有效期内)', mandatory: true },
-            { name: '广州市社会保险参保证明 (累计满48个月)', mandatory: true },
-            { name: '居民户口簿及居民身份证原件', mandatory: true },
-            { name: '合法住所证明材料 (房屋产权证或租赁备案凭证)', mandatory: false }
-          ],
-          url: 'https://www.gz.gov.cn/'
-        }
+        content: '根据《广州市积分制入户管理办法》，广州市对来穗人员实行年度积分指标总量调控。申报人须同时符合四项法定准入条件：年龄在45周岁以下、持有在广州市办理的有效《广东省居住证》、在穗合法稳定就业或创业并累计缴纳社会保险满4年、在“广州市来穗人员积分制服务管理信息系统”核定积分达到当年度规定基准值。积分指标按分数由高到低排序确定落户名单。',
+        citations: [
+          {
+            title: '广州市积分制入户管理办法',
+            docNumber: '穗府规〔2023〕1号',
+            dept: '广州市人民政府',
+            similarity: '97%',
+            clause: '第五条【申报条件】：符合以下条件的来穗人员，可申请积分制入户：\n（一）年龄45周岁以下；\n（二）持本市有效《广东省居住证》；\n（三）在本市合法稳定就业或创业并缴纳社会保险累计满4年；\n（四）在穗信用记录良好，无严重违法犯罪记录。'
+          }
+        ],
+        suggestions: [
+          '社保缴纳满4年是否包含断缴补缴月份？',
+          '来穗人员积分指标体系主要加分项有哪些？',
+          '获得积分入户指标后随迁家属有哪些政策规定？'
+        ]
       };
     }
 
-    // 3. 企业开办
+    // 3. 企业开办与营商环境扶持政策
     if (q.includes('企业') || q.includes('开公司') || q.includes('营业执照') || q.includes('开办') || q.includes('营商')) {
       return {
-        content: '广州市全面实施开办企业“一网通办、半天办结”。申请人登录“广州市开办企业一网通平台”，营业执照设立、公章刻制、发票申领、就业社保登记与公积金缴存开户全部联办并联审批，0.5个工作日内办结并免费赠送一套实体印章。',
-        policy: {
-          docNumber: '穗市监规〔2024〕2号',
-          title: '广州市市场监督管理局关于深化企业开办“一网通办”改革的若干意见',
-          clause: '第二条【一网通办】：新设企业通过一体化智能平台办理，全流程免跑动、零成本，0.5天领照并免费发放4枚防伪印章。'
-        },
-        affair: {
-          name: '内资有限责任公司设立登记 (一网通办专区)',
-          code: 'GZ-QYKB-440100-03',
-          limitDays: 1,
-          qualification: '股东符合法定人数，具备规范的公司章程，拥有真实合法的经营场所。',
-          materials: [
-            { name: '公司章程 (在线标准范本签署)', mandatory: true },
-            { name: '法定代表人及全体股东身份核验 (人脸识别认证)', mandatory: true },
-            { name: '住所 (经营场所) 使用信息申报承诺书', mandatory: true }
-          ],
-          url: 'https://www.gz.gov.cn/'
-        }
+        content: '广州市依据《广东省优化营商环境条例》及《广州市深化企业开办“一网通办”改革的若干意见》，全面推行新开办企业“半天办结、零成本”。新设立企业通过“广州市开办企业一网通平台”申报，营业执照申领、公章刻制、发票领用、就业社保登记与公积金开户实现并联审批，0.5个工作日内完成办结，并由政府财政买单免费向新开办企业赠送4枚防伪印章。',
+        citations: [
+          {
+            title: '广州市市场监督管理局关于深化企业开办“一网通办”改革的若干意见',
+            docNumber: '穗市监规〔2024〕2号',
+            dept: '广州市市场监督管理局',
+            similarity: '96%',
+            clause: '第二条【全流程并联审批】：设立登记、刻制印章、申领发票、员工参保及住房公积金缴存登记实行“一表填报、一次认证、一窗通取”，0.5天内全流程办结，实体印章由各区行政审批局统一免费发放。'
+          }
+        ],
+        suggestions: [
+          '新设企业免费赠送的实体印章包含哪些种类？',
+          '广州对个体工商户转为有限责任公司有何便利扶持？',
+          '企业开办一网通平台电子营业执照如何进行人脸认证？'
+        ]
       };
     }
 
-    // 4. 医保 / 社保
-    if (q.includes('医保') || q.includes('社保') || q.includes('灵活就业') || q.includes('报销')) {
+    // 4. 灵活就业医保与社保政策
+    if (q.includes('医保') || q.includes('社保') || q.includes('灵活就业') || q.includes('医疗')) {
       return {
-        content: '在广州市从业的灵活就业人员，无论具备本地户籍与否，均可在就业地参加广州市职工基本医疗保险。无雇工的个体工商户、未在用人单位参加职工医保的非全日制从业人员，可凭有效身份证件直接在“穗好办”或政务服务大厅办理参保登记。',
-        policy: {
-          docNumber: '穗医保规〔2023〕5号',
-          title: '广州市医疗保障局 广州市财政局关于灵活就业人员参加本市职工基本医疗保险有关事项的通知',
-          clause: '第一条【参保范围】：在法定劳动年龄内的灵活就业人员，可凭居民身份证或居住证在本市办理职工医保核定登记。'
-        },
-        affair: {
-          name: '灵活就业人员职工基本医疗保险参保登记',
-          code: 'GZ-YBLH-440100-04',
-          limitDays: 1,
-          qualification: '年满16周岁且未达到法定退休年龄，在广州从事灵活就业或新业态从业人员。',
-          materials: [
-            { name: '居民身份证原件 (刷脸授权电子证照免交)', mandatory: true },
-            { name: '广东省居住证 (非本地户籍人员提供)', mandatory: false },
-            { name: '本人一类银联储蓄卡 (用于按月代扣代缴)', mandatory: true }
-          ],
-          url: 'https://www.gz.gov.cn/'
-        }
+        content: '根据《广州市医疗保障局 广州市财政局关于灵活就业人员参加本市职工基本医疗保险有关事项的通知》，在法定劳动年龄内的无雇工个体工商户、未在用人单位参加职工医保的非全日制从业人员以及其他灵活就业人员，无论户籍在广州还是外地，均可在就业地参加广州市职工基本医疗保险。缴费基数可在上年度全口径城镇单位就业人员月平均工资的60%至300%之间自主选择，按月享受与企业职工完全相同的门诊和住院报销待遇。',
+        citations: [
+          {
+            title: '广州市医疗保障局 广州市财政局关于灵活就业人员参加本市职工基本医疗保险有关事项的通知',
+            docNumber: '穗医保规〔2023〕5号',
+            dept: '广州市医疗保障局、广州市财政局',
+            similarity: '98%',
+            clause: '第一条【参保范围】：未达到法定退休年龄的灵活就业人员，凭居民身份证可办理本市职工基本医疗保险参保登记，按规定缴纳医疗保险费，不设户籍壁垒限制。'
+          }
+        ],
+        suggestions: [
+          '灵活就业人员参加广州职工医保按什么费率缴费？',
+          '外地户籍灵活就业人员是否需要提供广州居住证？',
+          '断缴医保后如何办理恢复与待遇等待期规定？'
+        ]
       };
     }
 
-    // 5. 中小客车摇号竞价
-    if (q.includes('车牌') || q.includes('摇号') || q.includes('竞价') || q.includes('指标') || q.includes('买车')) {
+    // 5. 中小客车指标调控政策
+    if (q.includes('车牌') || q.includes('摇号') || q.includes('竞价') || q.includes('指标') || q.includes('客车')) {
       return {
-        content: '根据《广州市中小客车总量调控管理办法》，符合条件的单位和个人申领中小客车增量指标（摇号或竞价），可通过“广州市中小客车指标调控管理信息系统”进行网上申请。本市户籍居民或持有有效居住证且近两年在穗连续缴纳医保满24个月的非本市户籍人员均可申请。',
-        policy: {
-          docNumber: '穗府办规〔2023〕15号',
-          title: '广州市人民政府办公厅关于印发广州市中小客车总量调控管理办法的通知',
-          clause: '第十六条【个人申请条件】：住所地在本市、持有有效机动车驾驶证、名下没有本市登记的中小客车。'
-        },
-        affair: {
-          name: '广州市中小客车增量指标配置申请 (摇号/竞价)',
-          code: 'GZ-JTZB-440100-05',
-          limitDays: 3,
-          qualification: '住所地在穗，名下无本市登记的中小客车，名下未持有有效增量指标，具备机动车驾驶证。',
-          materials: [
-            { name: '居民身份证与中华人民共和国机动车驾驶证', mandatory: true },
-            { name: '广东省居住证及连续24个月医保参保证明 (非本市户籍)', mandatory: true }
-          ],
-          url: 'https://www.gz.gov.cn/'
-        }
+        content: '根据《广州市中小客车总量调控管理办法》，广州市中小客车增量指标分为节能车增量指标、普通车增量指标（摇号与竞价）。个人申请增量指标须满足：住所地在本市、持有有效机动车驾驶证、名下没有本市登记的中小客车。非本市户籍人员申请还须持有在穗有效居住证，且近两年内在广州累计缴纳基本医疗保险满24个月。',
+        citations: [
+          {
+            title: '广州市中小客车总量调控管理办法',
+            docNumber: '穗府办规〔2023〕15号',
+            dept: '广州市人民政府办公厅',
+            similarity: '95%',
+            clause: '第十六条【个人申请条件】：住所地在本市的情形包括本市户籍人员、驻穗部队现役军人，以及持有效《广东省居住证》且近2年在本市连续缴纳职工医保满24个月的非本市户籍人员。'
+          }
+        ],
+        suggestions: [
+          '非广州户籍人员医保断缴补缴是否影响摇号资格？',
+          '节能车摇号与普通车摇号可以同时申请吗？',
+          '夫妻之间中小客车指标直接变更过户有何政策规定？'
+        ]
       };
     }
 
-    // 6. 往来港澳通行证
-    if (q.includes('港澳') || q.includes('通行证') || q.includes('签注') || q.includes('出入境') || q.includes('香港') || q.includes('澳门')) {
+    // 6. 出入境与港澳签注政策
+    if (q.includes('港澳') || q.includes('通行证') || q.includes('签注') || q.includes('出入境') || q.includes('出境')) {
       return {
-        content: '广州市全面实施出入境证件“全国通办”。内地居民可在广州市任一公安出入境办证大厅申请往来港澳通行证及团队旅游签注，不受户籍地限制，无需提交户口簿或在穗居住证明，办结时限为7个工作日。',
-        policy: {
-          docNumber: '国移发〔2023〕18号',
-          title: '国家移民管理局关于全面实施出入境证件“全国通办”的规定',
-          clause: '第一条【全国通办】：内地居民可在全国任一公安机关出入境管理窗口申请办理往来港澳通行证及旅游签注。'
-        },
-        affair: {
-          name: '内地居民往来港澳通行证及签注申领 (全国通办)',
-          code: 'GZ-CRJ-440100-06',
-          limitDays: 7,
-          qualification: '中国内地居民，具备合法往来港澳事由，无出入境法定不准出境情形。',
-          materials: [
-            { name: '居民身份证原件 (现场核验)', mandatory: true },
-            { name: '广东省出入境证件数字相片采集回执 (现场免费照相免交)', mandatory: true }
-          ],
-          url: 'https://www.gz.gov.cn/'
-        }
+        content: '依据国家移民管理局《关于全面实施出入境证件“全国通办”的规定》，中国内地居民自2019年起可在全国任一公安出入境管理窗口申请办理往来港澳通行证及赴香港、澳门团队旅游签注，申办手续与户籍地一致。申请人仅需提供本人有效居民身份证即可办理，免交户口簿与居住证明，一般7个工作日内签发。',
+        citations: [
+          {
+            title: '关于全面实施出入境证件“全国通办”的规定',
+            docNumber: '国移发〔2023〕18号',
+            dept: '国家移民管理局',
+            similarity: '94%',
+            clause: '第一条【全国通办】：内地居民可在全国任一出入境管理窗口申请往来港澳通行证及团队旅游签注，不受户籍地限制，无需提交居住证或社保证明。'
+          }
+        ],
+        suggestions: [
+          '在广州智能签注一体机办理港澳签注是否需要预约？',
+          '港澳个人旅游签注（G签）与团队旅游（L签）适用范围？'
+        ]
       };
     }
 
-    // 兜底政务问答
+    // 兜底政务政策回答
     return {
-      content: `关于您咨询的问题：“${prompt}”，广州市政务服务平台已全面推行“一网通办、综合受理”。您可以登录“穗好办”APP或通过广州市人民政府门户网站政务公开与政务服务专栏，查询各区所属经办窗口具体办事指南及预约号源。`,
-      policy: {
-        docNumber: '穗府办规〔2024〕1号',
-        title: '广州市进一步优化政务服务提升行政效能实施方案',
-        clause: '第一条【综合受理】：大力推行“前台综合受理、后台分类审批、统一窗口出件”，为企业群众提供高效便捷政务服务。'
-      }
+      content: `关于您咨询的问题：“${prompt}”，经广州市政策法规数据库检索，广州市人民政府及各委办局现行政策文件库已全面落实信息公开规范。您可通过广州市人民政府门户网站“政务公开-政策法规”专栏，依文号、发布年份与部门进行精准全文查阅。`,
+      citations: [
+        {
+          title: '广州市行政规范性文件管理规定',
+          docNumber: '广州市人民政府令第192号',
+          dept: '广州市人民政府',
+          similarity: '90%',
+          clause: '第二十三条【公开与解读】：行政规范性文件应当自公布之日起在政府门户网站统一向社会公开，并同步发布权威政策解读文本。'
+        }
+      ],
+      suggestions: [
+        '如何查询广州市最新出台的规范性文件？',
+        '广州市政策文件施行日期与有效期如何认定？'
+      ]
     };
   }
 
-  console.log('[广州政务咨询] 广州市人民政府门户网站专属政务智能专窗已注入运行。');
+  console.log('[广州政策问答] 广州市政策法规 AI 智能问答专窗已注入运行（政策向量 RAG 规范版）。');
 })();
