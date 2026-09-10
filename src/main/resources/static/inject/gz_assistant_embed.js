@@ -49,8 +49,8 @@
     /* 悬浮球及弹窗宿主容器 */
     .gz-gov-shell {
       position: fixed;
-      bottom: 28px;
-      right: 28px;
+      bottom: 20px;
+      right: 20px;
       z-index: 99999999;
       pointer-events: none;
     }
@@ -60,11 +60,11 @@
        ======================================================== */
     .gz-launcher {
       pointer-events: auto;
-      width: 66px;
-      height: 66px;
+      width: 56px;
+      height: 56px;
       border-radius: 50%;
       background: linear-gradient(135deg, #006ed5 0%, #003a8c 100%);
-      box-shadow: 0 4px 16px rgba(0, 58, 140, 0.32), 0 2px 6px rgba(0, 0, 0, 0.15);
+      box-shadow: 0 4px 14px rgba(0, 58, 140, 0.32), 0 2px 5px rgba(0, 0, 0, 0.15);
       cursor: pointer;
       display: flex;
       flex-direction: column;
@@ -77,7 +77,7 @@
     }
 
     .gz-launcher:hover {
-      box-shadow: 0 6px 20px rgba(0, 58, 140, 0.45);
+      box-shadow: 0 6px 18px rgba(0, 58, 140, 0.45);
       opacity: 0.95;
     }
 
@@ -86,7 +86,7 @@
     }
 
     .launcher-seal {
-      font-size: 21px;
+      font-size: 18px;
       font-weight: 900;
       color: #ffffff;
       line-height: 1;
@@ -95,12 +95,12 @@
     }
 
     .launcher-caption {
-      font-size: 10px;
+      font-size: 9px;
       font-weight: 700;
       color: #ffd666;
-      margin-top: 3px;
-      letter-spacing: 0.5px;
-      transform: scale(0.9);
+      margin-top: 2px;
+      letter-spacing: 0.3px;
+      transform: scale(0.92);
     }
 
     .launcher-tag {
@@ -109,13 +109,13 @@
       right: -3px;
       background: #c20505;
       color: #ffffff;
-      font-size: 10px;
+      font-size: 9px;
       font-weight: 700;
-      padding: 1px 5px;
+      padding: 0 4px;
       border-radius: 0;
       border: 1px solid #ffffff;
       letter-spacing: 0.5px;
-      box-shadow: 0 2px 5px rgba(194, 5, 5, 0.4);
+      box-shadow: 0 2px 4px rgba(194, 5, 5, 0.35);
     }
 
     /* ========================================================
@@ -124,18 +124,18 @@
     .gz-greeting-card {
       pointer-events: auto;
       position: absolute;
-      right: 78px;
-      bottom: 10px;
-      width: 280px;
+      right: 68px;
+      bottom: 6px;
+      width: 250px;
       background: #ffffff;
       border: 1px solid #b0cbe8;
       border-top: 3px solid #c20505;
       border-radius: 0;
-      padding: 12px 14px;
-      box-shadow: 0 8px 24px rgba(0, 30, 80, 0.16);
+      padding: 10px 12px;
+      box-shadow: 0 6px 20px rgba(0, 30, 80, 0.16);
       display: flex;
       flex-direction: column;
-      gap: 6px;
+      gap: 5px;
       cursor: pointer;
       opacity: 0;
       transform: translateX(16px);
@@ -186,29 +186,29 @@
     }
 
     /* ========================================================
-       3. 政策问答大厅主弹窗 (全直角公文结构)
+       3. 政策问答大厅主弹窗 (全直角公文结构 - 紧凑型优雅比例)
        ======================================================== */
     .gz-dialog-window {
       pointer-events: auto;
       position: fixed;
-      bottom: 28px;
-      right: 28px;
-      width: 480px;
-      height: 700px;
+      bottom: 20px;
+      right: 20px;
+      width: 380px;
+      height: 520px;
       max-width: calc(100vw - 32px);
-      max-height: calc(100vh - 48px);
+      max-height: calc(100vh - 56px);
       background: #ffffff;
       border: 1px solid #003a8c;
-      border-top: 4px solid #c20505; /* 广州政务红头线 */
+      border-top: 3px solid #c20505; /* 广州政务红头线 */
       border-radius: 0 !important;   /* 彻底直角 */
-      box-shadow: 0 16px 48px rgba(0, 30, 80, 0.28);
+      box-shadow: 0 12px 36px rgba(0, 30, 80, 0.22);
       display: flex;
       flex-direction: column;
       overflow: hidden;
       opacity: 0;
-      transform: scale(0.9) translateY(30px);
+      transform: scale(0.92) translateY(20px);
       transform-origin: bottom right;
-      transition: all 0.28s cubic-bezier(0.16, 1, 0.3, 1);
+      transition: all 0.24s cubic-bezier(0.16, 1, 0.3, 1);
       z-index: 100000000;
       visibility: hidden;
     }
@@ -219,11 +219,11 @@
       visibility: visible;
     }
 
-    /* 顶栏：广州政务蓝 + 极简矢量 SVG 控制按钮 (无左上角小印章) */
+    /* 顶栏：广州政务蓝 + 极简矢量 SVG 控制按钮 (紧凑直角) */
     .gz-window-header {
       background: linear-gradient(90deg, #0050b3 0%, #006ed5 100%);
       color: #ffffff;
-      padding: 12px 16px;
+      padding: 9px 12px;
       display: flex;
       justify-content: space-between;
       align-items: center;
@@ -237,30 +237,30 @@
     }
 
     .header-titles h3 {
-      font-size: 14px;
+      font-size: 13px;
       font-weight: 700;
-      letter-spacing: 0.5px;
+      letter-spacing: 0.3px;
       color: #ffffff;
       line-height: 1.3;
     }
 
     .header-titles p {
-      font-size: 11px;
+      font-size: 10.5px;
       color: #d6e4ff;
-      letter-spacing: 0.3px;
-      margin-top: 2px;
+      letter-spacing: 0.2px;
+      margin-top: 1px;
     }
 
     /* 极简矢量控制按钮 (不折行) */
     .header-controls {
       display: flex;
       align-items: center;
-      gap: 4px;
+      gap: 3px;
     }
 
     .win-ctrl-btn {
-      width: 28px;
-      height: 28px;
+      width: 24px;
+      height: 24px;
       background: transparent;
       border: 1px solid transparent;
       border-radius: 0;
@@ -274,8 +274,8 @@
     }
 
     .win-ctrl-btn svg {
-      width: 15px;
-      height: 15px;
+      width: 13px;
+      height: 13px;
       fill: none;
       stroke: #ffffff;
       stroke-width: 2;
@@ -297,21 +297,21 @@
     .gz-notice-banner {
       background: #f0f7ff;
       border-bottom: 1px solid #d6e4ff;
-      padding: 8px 14px;
-      font-size: 11px;
+      padding: 5px 10px;
+      font-size: 10.5px;
       color: #003a8c;
       display: flex;
       align-items: center;
-      gap: 8px;
-      line-height: 1.4;
+      gap: 6px;
+      line-height: 1.35;
     }
 
     .notice-badge {
       background: #c20505;
       color: #ffffff;
-      font-size: 10px;
+      font-size: 9.5px;
       font-weight: 700;
-      padding: 1px 5px;
+      padding: 1px 4px;
       border-radius: 0;
       flex-shrink: 0;
       letter-spacing: 0.5px;
@@ -319,11 +319,11 @@
 
     /* 政策高频热搜直角标签 */
     .gz-quick-bar {
-      padding: 8px 12px;
+      padding: 6px 10px;
       background: #fafafa;
       border-bottom: 1px solid #e8e8e8;
       display: flex;
-      gap: 6px;
+      gap: 5px;
       overflow-x: auto;
       white-space: nowrap;
       scrollbar-width: none;
@@ -331,12 +331,12 @@
     .gz-quick-bar::-webkit-scrollbar { display: none; }
 
     .quick-chip {
-      font-size: 12px;
+      font-size: 11px;
       background: #ffffff;
       color: #003a8c;
       border: 1px solid #b0cbe8;
       border-radius: 0;
-      padding: 4px 10px;
+      padding: 3px 8px;
       cursor: pointer;
       transition: all 0.18s ease;
       user-select: none;
@@ -352,10 +352,10 @@
     .gz-chat-main {
       flex: 1;
       overflow-y: auto;
-      padding: 16px;
+      padding: 12px;
       display: flex;
       flex-direction: column;
-      gap: 18px;
+      gap: 12px;
       background: #f7f9fc;
     }
 
@@ -389,10 +389,10 @@
     }
 
     .chat-bubble {
-      padding: 14px 16px;
+      padding: 10px 12px;
       border-radius: 0 !important;
-      font-size: 13px;
-      line-height: 1.7;
+      font-size: 12.5px;
+      line-height: 1.6;
       word-break: break-word;
     }
 
@@ -407,20 +407,20 @@
       color: #1a1a1a;
       border: 1px solid #dcdfe6;
       border-left: 3px solid #0050b3;
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04);
     }
 
     /* ========================================================
-       4. 权威政策依据溯源卡 (向量检索原文直溯)
+       4. 权威政策依据溯源卡 (向量检索原文直溯 - 紧凑公文卡)
        ======================================================== */
     .policy-citation-card {
       background: #fdf6ec;
       border: 1px solid #faecd8;
-      border-left: 4px solid #c20505;
+      border-left: 3px solid #c20505;
       border-radius: 0 !important;
-      padding: 12px 14px;
-      margin-top: 12px;
-      font-size: 12px;
+      padding: 8px 10px;
+      margin-top: 8px;
+      font-size: 11.5px;
       color: #2c3e50;
     }
 
@@ -428,52 +428,52 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-bottom: 6px;
-      padding-bottom: 6px;
+      margin-bottom: 5px;
+      padding-bottom: 5px;
       border-bottom: 1px dashed #e8d8c3;
     }
 
     .citation-title-tag {
       font-weight: 700;
       color: #c20505;
-      font-size: 12px;
+      font-size: 11.5px;
       display: flex;
       align-items: center;
       gap: 4px;
     }
 
     .citation-match-tag {
-      font-size: 10px;
+      font-size: 9.5px;
       background: #fff1f0;
       color: #cf1322;
       border: 1px solid #ffa39e;
-      padding: 1px 6px;
+      padding: 1px 5px;
       border-radius: 0;
       font-weight: 600;
     }
 
     .citation-doc-name {
-      font-size: 13px;
+      font-size: 12px;
       font-weight: 700;
       color: #1a1a1a;
-      line-height: 1.4;
-      margin-bottom: 4px;
+      line-height: 1.35;
+      margin-bottom: 3px;
     }
 
     .citation-meta {
-      font-size: 11px;
+      font-size: 10.5px;
       color: #64748b;
-      margin-bottom: 8px;
+      margin-bottom: 6px;
     }
 
     .citation-snippet-box {
       background: rgba(255, 255, 255, 0.85);
       border: 1px solid #faecd8;
       border-radius: 0;
-      padding: 8px 10px;
-      font-size: 12px;
+      padding: 6px 8px;
+      font-size: 11.5px;
       color: #444444;
-      line-height: 1.6;
+      line-height: 1.55;
     }
 
     .citation-snippet-box strong {
@@ -481,19 +481,19 @@
     }
 
     /* ========================================================
-       5. 智能政策延伸推荐 (相关追问引导)
+       5. 智能政策延伸推荐 (相关追问引导 - 紧凑标签)
        ======================================================== */
     .policy-suggestions-wrap {
-      margin-top: 12px;
-      padding-top: 10px;
+      margin-top: 8px;
+      padding-top: 6px;
       border-top: 1px dashed #e2e8f0;
       display: flex;
       flex-direction: column;
-      gap: 6px;
+      gap: 5px;
     }
 
     .suggestions-label {
-      font-size: 11px;
+      font-size: 10.5px;
       font-weight: 700;
       color: #64748b;
     }
@@ -501,16 +501,16 @@
     .suggestions-chips-group {
       display: flex;
       flex-wrap: wrap;
-      gap: 6px;
+      gap: 5px;
     }
 
     .suggestion-chip {
-      font-size: 11px;
+      font-size: 10.5px;
       background: #f0f7ff;
       color: #0050b3;
       border: 1px solid #d6e4ff;
       border-radius: 0;
-      padding: 4px 8px;
+      padding: 3px 6px;
       cursor: pointer;
       transition: all 0.16s ease;
       line-height: 1.3;
@@ -526,10 +526,10 @@
     .chat-feedback-bar {
       display: flex;
       align-items: center;
-      gap: 10px;
-      font-size: 11px;
+      gap: 8px;
+      font-size: 10.5px;
       color: #8c8c8c;
-      margin-top: 6px;
+      margin-top: 4px;
     }
 
     .action-sub-btn {
@@ -538,23 +538,23 @@
       border-radius: 0;
       color: #595959;
       cursor: pointer;
-      padding: 2px 8px;
-      font-size: 11px;
+      padding: 1px 6px;
+      font-size: 10.5px;
       transition: all 0.15s ease;
     }
     .action-sub-btn:hover { color: #c20505; border-color: #c20505; background: #ffffff; }
 
-    /* 政策疑问反馈展开框 (全直角公文标准) */
+    /* 政策疑问反馈展开框 (全直角公文标准 - 紧凑型) */
     .msg-feedback-panel {
-      margin-top: 8px;
-      padding: 10px 12px;
+      margin-top: 6px;
+      padding: 8px 10px;
       background: #fafbfc;
       border: 1px solid #dcdfe6;
       border-left: 3px solid #c20505;
       border-radius: 0 !important;
       display: flex;
       flex-direction: column;
-      gap: 8px;
+      gap: 6px;
       animation: gzMsgFade 0.2s ease forwards;
     }
 
@@ -562,14 +562,14 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
-      font-size: 11px;
+      font-size: 10.5px;
       font-weight: 700;
       color: #003a8c;
     }
 
     .feedback-close-btn {
       color: #8c8c8c;
-      font-size: 16px;
+      font-size: 15px;
       cursor: pointer;
       line-height: 1;
       padding: 0 2px;
@@ -579,16 +579,16 @@
     .feedback-tag-list {
       display: flex;
       flex-wrap: wrap;
-      gap: 5px;
+      gap: 4px;
     }
 
     .fb-tag {
-      font-size: 11px;
+      font-size: 10px;
       background: #ffffff;
       color: #475569;
       border: 1px solid #cbd5e1;
       border-radius: 0;
-      padding: 2px 7px;
+      padding: 1px 5px;
       cursor: pointer;
       transition: all 0.15s ease;
       user-select: none;
@@ -607,16 +607,16 @@
 
     .feedback-textarea {
       width: 100%;
-      height: 52px;
+      height: 44px;
       border: 1px solid #cbd5e1;
       border-radius: 0 !important;
-      padding: 6px 8px;
-      font-size: 12px;
+      padding: 4px 6px;
+      font-size: 11px;
       color: #1a1a1a;
       resize: none;
       outline: none;
       background: #ffffff;
-      line-height: 1.45;
+      line-height: 1.4;
     }
 
     .feedback-textarea:focus {
@@ -628,18 +628,18 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
-      font-size: 10px;
+      font-size: 9.5px;
       color: #8c8c8c;
     }
 
     .feedback-btn-group {
       display: flex;
-      gap: 6px;
+      gap: 5px;
     }
 
     .fb-btn-cancel, .fb-btn-submit {
-      padding: 3px 10px;
-      font-size: 11px;
+      padding: 2px 8px;
+      font-size: 10.5px;
       border-radius: 0 !important;
       cursor: pointer;
       border: 1px solid transparent;
@@ -662,9 +662,9 @@
     .fb-btn-submit:hover { background: #a30404; }
 
     .feedback-success-note {
-      font-size: 11px;
+      font-size: 10.5px;
       color: #389e0d;
-      padding: 6px 8px;
+      padding: 4px 6px;
       background: #f6ffed;
       border: 1px solid #b7eb8f;
       border-radius: 0;
@@ -676,15 +676,15 @@
       display: inline-flex;
       align-items: center;
       gap: 4px;
-      padding: 8px 12px;
+      padding: 6px 10px;
       background: #ffffff;
       border: 1px solid #dcdfe6;
       border-radius: 0;
     }
 
     .typing-block {
-      width: 6px;
-      height: 6px;
+      width: 5px;
+      height: 5px;
       background: #006ed5;
       border-radius: 0;
       animation: typePulse 1.2s infinite ease-in-out;
@@ -697,29 +697,29 @@
       40% { transform: scale(1.15); opacity: 1; }
     }
 
-    /* 底部政务输入区 */
+    /* 底部政务输入区 (紧凑比例) */
     .gz-input-footer {
       background: #ffffff;
       border-top: 1px solid #e8e8e8;
-      padding: 12px 14px;
+      padding: 8px 10px;
       display: flex;
       flex-direction: column;
-      gap: 6px;
+      gap: 4px;
     }
 
     .input-wrapper {
       display: flex;
       align-items: center;
-      gap: 8px;
+      gap: 6px;
     }
 
     .gz-text-input {
       flex: 1;
-      height: 38px;
+      height: 34px;
       border: 1px solid #b0cbe8;
       border-radius: 0 !important;
-      padding: 0 12px;
-      font-size: 13px;
+      padding: 0 10px;
+      font-size: 12px;
       color: #1a1a1a;
       outline: none;
       background: #ffffff;
@@ -732,14 +732,14 @@
     }
 
     .gz-submit-btn {
-      height: 38px;
-      padding: 0 18px;
+      height: 34px;
+      padding: 0 14px;
       border-radius: 0 !important;
       border: none;
       background: #006ed5;
       color: #ffffff;
       cursor: pointer;
-      font-size: 13px;
+      font-size: 12px;
       font-weight: 600;
       transition: background 0.18s ease;
       letter-spacing: 0.5px;
@@ -755,10 +755,10 @@
     }
 
     .footer-authority-note {
-      font-size: 10px;
+      font-size: 9.5px;
       color: #8c8c8c;
       text-align: center;
-      letter-spacing: 0.3px;
+      letter-spacing: 0.2px;
     }
   `;
   shadow.appendChild(style);
@@ -814,7 +814,7 @@
       <!-- 官方通告条 -->
       <div class="gz-notice-banner">
         <span class="notice-badge">通告</span>
-        <span>汇集全市各委办局现行有效公文规章，基于大模型提供精准条款解读与出处溯源</span>
+        <span>依托全市政策公文数据库，提供精准条文解读与出处直溯</span>
       </div>
 
       <!-- 政策高频咨询领域直角标签 -->
