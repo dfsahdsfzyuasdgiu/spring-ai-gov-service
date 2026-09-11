@@ -576,59 +576,93 @@
       margin-top: 2px;
     }
     .step-limit-banner {
-      font-size: 13.5px;
-      color: #1e293b;
-      margin-bottom: 6px;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 12.5px;
+      color: #4b5563;
+      margin-bottom: 10px;
       font-weight: 500;
+      background: #f0fdf4;
+      border: 1px solid #bbf7d0;
+      padding: 3px 10px;
     }
     .step-limit-banner strong {
-      color: #389e0d;
+      color: #16a34a;
       font-weight: 700;
+      font-size: 13.5px;
     }
     .step-proc-chain {
-      background: #f8fafc;
+      background: #ffffff;
       border: 1px solid #e2e8f0;
       border-radius: 0 !important;
-      padding: 5px 8px;
-      margin-bottom: 5px;
+      padding: 2px 0;
+      margin-bottom: 10px;
       display: flex;
       flex-direction: column;
-      gap: 3px;
+      gap: 0;
     }
     .step-proc-row {
-      font-size: 13px;
+      font-size: 12.5px;
       color: #334155;
-      line-height: 1.4;
+      line-height: 1.55;
+      padding: 7px 12px;
+      border-bottom: 1px solid #f1f5f9;
+      display: flex;
+      align-items: flex-start;
+      gap: 8px;
+    }
+    .step-proc-row:last-child {
+      border-bottom: none;
     }
     .step-proc-row strong {
-      color: #0f172a;
+      color: #1677ff;
+      flex-shrink: 0;
     }
     .step-route-box {
-      background: #f6ffed;
-      border: 1px solid #d9f7be;
-      border-left: 3px solid #389e0d;
+      background: #ffffff;
+      border: 1px solid #e2e8f0;
       border-radius: 0 !important;
-      padding: 6px 8px;
       font-size: 13px;
       color: #1e293b;
-      line-height: 1.55;
-      margin-bottom: 5px;
+      line-height: 1.6;
+      margin-bottom: 8px;
+      overflow: hidden;
     }
     .route-label {
       font-weight: 700;
-      color: #237804;
-      margin-bottom: 2px;
+      font-size: 12px;
+      color: #ffffff;
+      background: #1677ff;
+      padding: 4px 10px;
+      margin-bottom: 0;
+      letter-spacing: 0.3px;
     }
+    .route-label.offline {
+      background: #64748b;
+    }
+    .route-content {
+      padding: 8px 12px;
+      border-bottom: 1px solid #f1f5f9;
+    }
+    .route-content:last-child { border-bottom: none; }
     .step-warn-box {
-      background: #f6ffed;
-      border: 1px solid #b7eb8f;
-      border-left: 3px solid #52c41a;
+      background: #fffbeb;
+      border: 1px solid #fde68a;
+      border-left: 4px solid #f59e0b;
       border-radius: 0 !important;
-      padding: 5px 8px;
-      color: #135200;
-      font-size: 12.5px;
-      line-height: 1.55;
-      margin-top: 4px;
+      padding: 8px 12px;
+      color: #78350f;
+      font-size: 13px;
+      line-height: 1.65;
+      margin-top: 8px;
+    }
+    .step-warn-box strong {
+      display: block;
+      color: #b45309;
+      font-size: 12px;
+      margin-bottom: 5px;
+      letter-spacing: 0.3px;
     }
 
     /* 【办事要点】条目卡片 (普通纯文本问答兜底) */
@@ -1693,17 +1727,19 @@
             <div class="step-limit-banner">承诺办结时限：<strong>${limitDays} 个工作日</strong></div>
             ${procListHtml ? `<div class="step-proc-chain">${procListHtml}</div>` : ''}
             <div class="step-route-box">
-              <div class="route-label">【线上办理文字路径】</div>
-              <div>${escapeText(onlineRoute)}</div>
-              ${gs.onlineHandleUrl ? `
+              <div class="route-label">线上办理文字路径</div>
+              <div class="route-content">
+                ${escapeText(onlineRoute)}
+                ${gs.onlineHandleUrl ? `
               <div class="step-official-direct-link" style="margin-top:8px; padding:7px 10px; background:#f6ffed; border:1px solid #d9f7be; border-left:3px solid #389e0d;">
                 <div style="font-weight:700; color:#237804; font-size:11px; margin-bottom:3px;">【广东政务服务网 · 官方在线申办直达】</div>
                 <a href="${escapeText((gs.onlineHandleUrl || '').replace(/https?:\/\/zwfw\.gd\.gov\.cn/g, 'https://www.gdzwfw.gov.cn'))}" target="_blank" rel="noopener noreferrer" style="color:#237804; font-weight:700; text-decoration:none; font-size:11px; display:inline-flex; align-items:center; gap:4px;">
                   点击直达官方申报入口 [${escapeText(gs.affairCode || '统一实施编码')}] ↗
                 </a>
-              </div>` : ''}
-              <div class="route-label" style="margin-top:7px;">【线下办事网点】</div>
-              <div>${escapeText(offlineAddress)}</div>
+                </div>` : ''}
+              </div>
+              <div class="route-label offline">线下办事网点</div>
+              <div class="route-content">${escapeText(offlineAddress)}</div>
             </div>
             ${warnHtml}
           </div>
