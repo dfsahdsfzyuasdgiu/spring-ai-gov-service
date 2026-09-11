@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         广州市人民政府门户网站 · 政策法规与办事导办 AI 智能问答专窗
 // @namespace    https://www.gz.gov.cn/
-// @version      1.8.0
+// @version      1.9.0
 // @description  广州市政务政策与办事全生命周期 AI 智能咨询与导办专窗（全直角公文风格、0 Emoji、办事实时申办直达）
 // @author       Guangzhou Smart Gov Project Team
 // @match        https://www.gz.gov.cn/*
@@ -439,13 +439,12 @@
 
     /* 【快速答疑】标志性摘要框 */
     .mingbai-summary-box {
-      background: linear-gradient(135deg, #f0f7ff 0%, #e8f3ff 100%);
-      border: 1px solid #bae0ff;
-      border-left: 4px solid #1677ff;
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-left: 3px solid #0050b3;
       border-radius: 0 !important;
-      padding: 9px 12px;
+      padding: 10px 14px;
       margin-bottom: 10px;
-      box-shadow: 0 2px 6px rgba(22, 119, 255, 0.07);
     }
     .mingbai-summary-title {
       display: flex;
@@ -470,203 +469,131 @@
     }
 
     /* 【办事向导三步法】结构化直角卡片（全流程文字办事指引） */
-    .mingbai-steps-container {
+        /* 銆愬姙浜嬪悜瀵肩粨鏋勫寲娓呭崟銆�(鏋佺畝楂樹繚鐪熷叕鏂囨帓鐗堬紝鏉滅粷鍒虹溂鑹插潡锛屾敞閲嶄笓涓氳緭鍑烘牸寮�) */
+    .guide-doc-sheet {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin-bottom: 8px;
+    }
+    .guide-section {
+      background: #ffffff;
+      border: 1px solid #e2e8f0;
+      border-radius: 0 !important;
+      padding: 10px 14px;
+    }
+    .guide-sec-head {
+      font-size: 13px;
+      font-weight: 700;
+      color: #003a8c;
+      margin-bottom: 8px;
+      padding-bottom: 5px;
+      border-bottom: 1px solid #f1f5f9;
+      letter-spacing: 0.3px;
+    }
+    .guide-sec-body {
+      font-size: 13.5px;
+      color: #334155;
+      line-height: 1.65;
+    }
+    .guide-mat-list {
+      list-style: none;
+      padding: 0;
+      margin: 0;
       display: flex;
       flex-direction: column;
       gap: 6px;
-      margin-bottom: 6px;
     }
-    .guided-step-block {
-      border: 1px solid #e8edf3;
-      border-left: 4px solid #389e0d;
-      border-radius: 0 !important;
-      padding: 9px 12px;
+    .guide-mat-item {
       font-size: 13.5px;
-      line-height: 1.6;
-      box-shadow: 0 1px 4px rgba(0, 0, 0, 0.05);
-    }
-    .guided-step-block.step-1 {
-      border-left-color: #1677ff;
-      background: #f0f7ff;
-    }
-    .guided-step-block.step-2 {
-      border-left-color: #fa8c16;
-      background: #fff8f0;
-    }
-    .guided-step-block.step-3 {
-      border-left-color: #389e0d;
-      background: #f6ffed;
-    }
-    .step-block-header {
-      display: flex;
-      align-items: center;
-      gap: 5px;
-      margin-bottom: 5px;
-    }
-    .step-badge {
-      font-size: 12px;
-      font-weight: 700;
-      padding: 2px 7px;
-      color: #ffffff;
-      background: #389e0d;
-      border-radius: 0 !important;
-      letter-spacing: 0.5px;
-    }
-    .step-1 .step-badge { background: #1677ff; }
-    .step-2 .step-badge { background: #fa8c16; }
-    .step-3 .step-badge { background: #389e0d; }
-    .step-block-title {
-      font-weight: 700;
-      font-size: 14px;
-      color: #0f172a;
-    }
-    .step-qual-box {
-      background: #f6ffed;
-      border: 1px solid #b7eb8f;
-      border-radius: 0 !important;
-      padding: 5px 8px;
       color: #1e293b;
-      font-size: 13.5px;
       line-height: 1.6;
-      margin-bottom: 5px;
-    }
-    .step-sub-note {
-      font-size: 12.5px;
-      color: #52c41a;
-      line-height: 1.4;
-    }
-    .step-mat-list {
-      list-style: none;
-      padding: 0;
-      margin: 0 0 5px 0;
-      display: flex;
-      flex-direction: column;
-      gap: 4px;
-    }
-    .step-mat-item {
-      font-size: 13px;
-      color: #1e293b;
-      line-height: 1.55;
-      padding-left: 10px;
+      padding-left: 14px;
       position: relative;
     }
-    .step-mat-item::before {
+    .guide-mat-item::before {
       content: '▪';
       position: absolute;
       left: 0;
       top: -1px;
-      color: #fa8c16;
+      color: #0050b3;
     }
-    .mat-tag-free {
-      display: inline-block;
-      font-size: 11px;
-      background: #237804;
-      color: #ffffff;
-      border: none;
-      padding: 1px 5px;
-      margin-left: 5px;
-      font-weight: 700;
-      border-radius: 0 !important;
-      cursor: default;
-      letter-spacing: 0.3px;
-    }
-    .mat-tip-sub {
-      color: #8c8c8c;
-      font-size: 12px;
-      margin-top: 2px;
-    }
-    .step-limit-banner {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      font-size: 12.5px;
-      color: #4b5563;
+    .guide-meta-grid {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 14px;
+      font-size: 13px;
+      color: #475569;
       margin-bottom: 10px;
-      font-weight: 500;
-      background: #f0fdf4;
-      border: 1px solid #bbf7d0;
-      padding: 3px 10px;
+      padding-bottom: 8px;
+      border-bottom: 1px dashed #e2e8f0;
     }
-    .step-limit-banner strong {
-      color: #16a34a;
-      font-weight: 700;
-      font-size: 13.5px;
+    .guide-meta-item strong {
+      color: #0f172a;
+      font-weight: 600;
     }
-    .step-proc-chain {
-      background: #ffffff;
-      border: 1px solid #e2e8f0;
-      border-radius: 0 !important;
-      padding: 2px 0;
-      margin-bottom: 10px;
+    .guide-proc-list {
       display: flex;
       flex-direction: column;
-      gap: 0;
+      gap: 8px;
+      margin-bottom: 10px;
     }
-    .step-proc-row {
-      font-size: 12.5px;
+    .guide-proc-item {
+      font-size: 13px;
       color: #334155;
-      line-height: 1.55;
-      padding: 7px 12px;
-      border-bottom: 1px solid #f1f5f9;
+      line-height: 1.6;
       display: flex;
       align-items: flex-start;
-      gap: 8px;
+      gap: 6px;
     }
-    .step-proc-row:last-child {
-      border-bottom: none;
-    }
-    .step-proc-row strong {
-      color: #1677ff;
+    .guide-proc-num {
+      color: #0050b3;
+      font-weight: 700;
       flex-shrink: 0;
     }
-    .step-route-box {
-      background: #ffffff;
-      border: 1px solid #e2e8f0;
-      border-radius: 0 !important;
-      font-size: 13px;
-      color: #1e293b;
-      line-height: 1.6;
-      margin-bottom: 8px;
-      overflow: hidden;
-    }
-    .route-label {
-      font-weight: 700;
-      font-size: 12px;
-      color: #ffffff;
-      background: #1677ff;
-      padding: 4px 10px;
-      margin-bottom: 0;
-      letter-spacing: 0.3px;
-    }
-    .route-label.offline {
-      background: #64748b;
-    }
-    .route-content {
-      padding: 8px 12px;
-      border-bottom: 1px solid #f1f5f9;
-    }
-    .route-content:last-child { border-bottom: none; }
-    .step-warn-box {
-      background: #fffbeb;
-      border: 1px solid #fde68a;
-      border-left: 4px solid #f59e0b;
-      border-radius: 0 !important;
-      padding: 8px 12px;
-      color: #78350f;
-      font-size: 13px;
-      line-height: 1.65;
+    .guide-direct-link-wrap {
       margin-top: 8px;
+      margin-bottom: 4px;
     }
-    .step-warn-box strong {
+    .guide-direct-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      color: #0050b3;
+      font-size: 13px;
+      font-weight: 600;
+      text-decoration: none;
+      padding: 5px 12px;
+      background: #f0f5ff;
+      border: 1px solid #adc6ff;
+      border-radius: 0 !important;
+      transition: all 0.15s ease;
+    }
+    .guide-direct-link:hover {
+      background: #0050b3;
+      color: #ffffff;
+      border-color: #0050b3;
+    }
+    .guide-warn-box {
+      background: #fafafa;
+      border: 1px solid #e2e8f0;
+      border-left: 3px solid #fa8c16;
+      border-radius: 0 !important;
+      padding: 8px 12px;
+      font-size: 12.5px;
+      line-height: 1.65;
+      color: #475569;
+      margin-top: 10px;
+    }
+    .guide-warn-box strong {
       display: block;
-      color: #b45309;
+      color: #c20505;
       font-size: 12px;
-      margin-bottom: 5px;
-      letter-spacing: 0.3px;
+      font-weight: 700;
+      margin-bottom: 4px;
     }
 
-    /* 【办事要点】条目卡片 (普通纯文本问答兜底) */
-    .mingbai-details-card {
+.mingbai-details-card {
       background: #fafbfc;
       border: 1px solid #e2e8f0;
       border-radius: 0 !important;
@@ -1663,90 +1590,62 @@
       let matItemsHtml = '';
       if (gs.materials && gs.materials.length > 0) {
         matItemsHtml = gs.materials.map(m => `
-          <li class="step-mat-item">
-            <strong>${escapeText(m.name)}</strong>
-            
-            
-          </li>
+          <li class="guide-mat-item"><strong>${escapeText(m.name)}</strong></li>
         `).join('');
       } else {
-        matItemsHtml = `
-          <li class="step-mat-item">
-            <strong>居民身份证原件</strong>
-            
-            
-          </li>
-        `;
+        matItemsHtml = `<li class="guide-mat-item"><strong>居民身份证原件</strong></li>`;
       }
 
       const limitDays = gs.promisedLimitDays || 1;
-      let procListHtml = '';
-      if (gs.processSteps && gs.processSteps.length > 0) {
-        procListHtml = gs.processSteps.map(s => `
-          <div class="step-proc-row">
-            <strong>第${s.stepNo}步【${escapeText(s.stepName)}】</strong>：${escapeText(s.description)}
-            
-          </div>
-        `).join('');
-      }
-
-      const onlineRoute = gs.onlineRoute || `打开手机微信搜索“穗好办”小程序或登录广东政务服务网广州站，在顶部搜索栏输入“${escapeText(gs.affairName || '此事项')}”，完成人脸识别实名认证后在线确认申报即可。`;
-      const offlineAddress = gs.handlingAddress || '广州市各区或街道政务服务中心综合窗口';
+      const offlineAddress = gs.handlingAddress || '广州市各区政务服务中心综合窗口';
+      const procItemsHtml = (gs.processSteps && gs.processSteps.length > 0)
+        ? gs.processSteps.map((s, idx) => `
+            <div class="guide-proc-item">
+              <span class="guide-proc-num">${idx + 1}.</span>
+              <div><strong>${escapeText(s.stepName)}</strong>：${escapeText(s.description)}</div>
+            </div>
+          `).join('')
+        : '';
 
       let warnHtml = '';
       if (gs.warnTip) {
-        warnHtml = `<div class="step-warn-box"><strong>【注意事项与避坑提醒】</strong>${escapeText(gs.warnTip)}</div>`;
+        warnHtml = `<div class="guide-warn-box"><strong>【注意事项】</strong>${escapeText(gs.warnTip)}</div>`;
       } else if (parsed.sections && parsed.sections.length > 0) {
         const warnSec = parsed.sections.find(s => s.isWarn || s.title.includes('注意') || s.title.includes('提醒'));
         if (warnSec) {
-          warnHtml = `<div class="step-warn-box"><strong>【${escapeText(warnSec.title)}】</strong>${formatMarkdownLike(warnSec.text)}</div>`;
+          warnHtml = `<div class="guide-warn-box"><strong>【${escapeText(warnSec.title)}】</strong>${formatMarkdownLike(warnSec.text)}</div>`;
         }
       }
 
       stepsGuideHtml = `
-        <div class="mingbai-steps-container">
-          <!-- 步骤1: 准入资格自查 -->
-          <div class="guided-step-block step-1">
-            <div class="step-block-header">
-              <span class="step-badge">步骤1</span>
-              <span class="step-block-title">【准入资格自查】</span>
-            </div>
-            <div class="step-qual-box">${escapeText(qualText)}</div>
-            
+        <div class="guide-doc-sheet">
+          <!-- 1. 准入条件 -->
+          <div class="guide-section">
+            <div class="guide-sec-head">准入条件</div>
+            <div class="guide-sec-body">${escapeText(qualText)}</div>
           </div>
 
-          <!-- 步骤2: 申报材料与免提交核查 -->
-          <div class="guided-step-block step-2">
-            <div class="step-block-header">
-              <span class="step-badge">步骤2</span>
-              <span class="step-block-title">【申报材料与免提交核查】</span>
-            </div>
-            <ul class="step-mat-list">${matItemsHtml}</ul>
-            
+          <!-- 2. 申报材料清单 -->
+          <div class="guide-section">
+            <div class="guide-sec-head">申报材料清单</div>
+            <ul class="guide-mat-list">${matItemsHtml}</ul>
           </div>
 
-          <!-- 步骤3: 全流程文字办事指引 -->
-          <div class="guided-step-block step-3">
-            <div class="step-block-header">
-              <span class="step-badge">步骤3</span>
-              <span class="step-block-title">【全流程文字办事指引】</span>
+          <!-- 3. 办理流程与通道 -->
+          <div class="guide-section">
+            <div class="guide-sec-head">办理流程与渠道</div>
+            <div class="guide-meta-grid">
+              <div class="guide-meta-item"><strong>承诺办结时限：</strong>${limitDays} 个工作日</div>
+              <div class="guide-meta-item"><strong>线下办事网点：</strong>${escapeText(offlineAddress)}</div>
             </div>
-            <div class="step-limit-banner">承诺办结时限：<strong>${limitDays} 个工作日</strong></div>
-            ${procListHtml ? `<div class="step-proc-chain">${procListHtml}</div>` : ''}
-            <div class="step-route-box">
-              <div class="route-label">线上办理通道</div>
-              <div class="route-content">
-                ${(gs.onlineRoute && !gs.onlineRoute.startsWith('打开手机微信搜索')) ? `<div style="margin-bottom:6px;">${escapeText(gs.onlineRoute)}</div>` : ''}
-                ${gs.onlineHandleUrl ? `
-                <div style="padding:6px 10px; background:#f0f7ff; border:1px solid #adc6ff; border-left:3px solid #1677ff;">
-                  <a href="${escapeText((gs.onlineHandleUrl || '').replace(/https?:\/\/zwfw\.gd\.gov\.cn/g, 'https://www.gdzwfw.gov.cn'))}" target="_blank" rel="noopener noreferrer" style="color:#1677ff; font-weight:700; text-decoration:none; font-size:13px; display:inline-flex; align-items:center; gap:4px;">
-                    点击直达广东政务服务网申报入口 [${escapeText(gs.affairCode || '统一实施编码')}] ↗
-                  </a>
-                </div>` : (!gs.onlineRoute || gs.onlineRoute.startsWith('打开手机微信搜索') ? '<div>可通过“穗好办”APP或广东政务服务网在线申报。</div>' : '')}
-              </div>
-              <div class="route-label offline">线下办事网点</div>
-              <div class="route-content">${escapeText(offlineAddress)}</div>
-            </div>
+            ${procItemsHtml ? `<div class="guide-proc-list">${procItemsHtml}</div>` : ''}
+            ${(gs.onlineRoute && !gs.onlineRoute.startsWith('打开手机微信搜索')) ? `<div style="font-size:13px; color:#475569; margin-top:6px;">${escapeText(gs.onlineRoute)}</div>` : ''}
+            ${gs.onlineHandleUrl ? `
+            <div class="guide-direct-link-wrap">
+              <a href="${escapeText((gs.onlineHandleUrl || '').replace(/https?:\/\/zwfw\.gd\.gov\.cn/g, 'https://www.gdzwfw.gov.cn'))}" target="_blank" rel="noopener noreferrer" class="guide-direct-link">
+                点击直达广东政务服务网申报入口 [${escapeText(gs.affairCode || '在线申办')}] ↗
+              </a>
+            </div>` : ''}
             ${warnHtml}
           </div>
         </div>
