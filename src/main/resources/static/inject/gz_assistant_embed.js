@@ -527,7 +527,7 @@
       position: absolute;
       left: 0;
       top: -1px;
-      color: #389e0d;
+      color: #fa8c16;
     }
     .mat-tag-free {
       display: inline-block;
@@ -1637,16 +1637,16 @@
         matItemsHtml = gs.materials.map(m => `
           <li class="step-mat-item">
             <strong>${escapeText(m.name)}</strong>
-            <span class="mat-tag-free">${escapeText(m.format || '免提交')}</span>
-            ${m.sampleTip ? `<div class="mat-tip-sub">${escapeText(m.sampleTip)}</div>` : ''}
+            
+            
           </li>
         `).join('');
       } else {
         matItemsHtml = `
           <li class="step-mat-item">
             <strong>居民身份证原件</strong>
-            <span class="mat-tag-free">电子证照免提交</span>
-            <div class="mat-tip-sub">通过“穗好办”人脸实名认证自动核验，免交纸质证明</div>
+            
+            
           </li>
         `;
       }
@@ -1939,8 +1939,8 @@
       const matList = (stepData.materials || []).map(m => `
         <li style="margin-bottom:4px;">
           <strong>${escapeText(m.name)}</strong>
-          <span style="font-size:9.5px; background:#f6ffed; color:#389e0d; border:1px solid #b7eb8f; padding:0 3px; margin-left:4px;">${escapeText(m.format || '免提交')}</span>
-          <div style="color:#8c8c8c; font-size:10px;">${escapeText(m.sampleTip || '')}</div>
+          
+          
         </li>
       `).join('');
       contentHtml = `
