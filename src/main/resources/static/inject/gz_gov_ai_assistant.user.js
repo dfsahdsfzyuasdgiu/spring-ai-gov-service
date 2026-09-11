@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         广州市人民政府门户网站 · 政策法规与办事导办 AI 智能问答专窗
 // @namespace    https://www.gz.gov.cn/
-// @version      1.9.0
+// @version      1.9.1
 // @description  广州市政务政策与办事全生命周期 AI 智能咨询与导办专窗（全直角公文风格、0 Emoji、办事实时申办直达）
 // @author       Guangzhou Smart Gov Project Team
 // @match        https://www.gz.gov.cn/*
@@ -623,63 +623,74 @@
     }
     .mb-item-content { color: #1e293b; font-size: 11.5px; }
 
-    /* 官方政策依据直溯 (权威红头公文发文标准色) */
+    /* 官方政策依据直溯：左下角极简单行文字小注 (摒弃厚重色块与红框) */
     .mingbai-source-card {
-      background: linear-gradient(135deg, #fdfbf7 0%, #fff9f0 100%);
-      border: 1px solid #faecd8;
-      border-left: 4px solid #c20505;
+      background: transparent !important;
+      border: none !important;
       border-radius: 0 !important;
-      padding: 8px 10px;
-      margin-top: 8px;
-      font-size: 11px;
-      box-shadow: 0 1px 4px rgba(194, 5, 5, 0.06);
+      padding: 6px 0 2px 0 !important;
+      margin-top: 8px !important;
+      box-shadow: none !important;
     }
-    .source-card-top {
+    .source-footnote-line {
       display: flex;
-      justify-content: space-between;
+      flex-wrap: wrap;
       align-items: center;
-      gap: 6px;
-    }
-    .source-doc-info {
-      font-weight: 700;
-      color: #1a1a1a;
-      font-size: 13px;
-      line-height: 1.45;
-    }
-    .source-doc-meta {
+      justify-content: flex-start;
+      gap: 4px 6px;
       font-size: 12px;
       color: #64748b;
-      margin-top: 2px;
+      line-height: 1.5;
+      text-align: left;
+    }
+    .source-footnote-text {
+      color: #64748b;
+    }
+    .source-footnote-sep {
+      color: #94a3b8;
     }
     .source-btn-toggle {
-      color: #c20505;
-      background: #ffffff;
-      border: 1px solid #ffa39e;
-      font-size: 11.5px;
-      padding: 2px 7px;
+      color: #1677ff;
+      background: transparent;
+      border: none;
+      font-size: 12px;
+      padding: 0;
       cursor: pointer;
-      border-radius: 0;
-      transition: all 0.15s ease;
       flex-shrink: 0;
       user-select: none;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      transition: color 0.15s ease;
     }
     .source-btn-toggle:hover {
-      background: #fff1f0;
-      border-color: #c20505;
+      color: #0958d9;
+      text-decoration: underline;
     }
     .source-clause-drawer {
       margin-top: 6px;
-      padding-top: 6px;
-      border-top: 1px dashed #faecd8;
-      font-size: 11px;
-      color: #4b5563;
-      line-height: 1.55;
+      padding: 8px 12px;
+      border: 1px solid #e2e8f0;
+      font-size: 12px;
+      color: #334155;
+      line-height: 1.6;
       display: none;
-      background: rgba(255, 255, 255, 0.7);
-      padding: 6px 8px;
+      background: #f8fafc;
     }
     .source-clause-drawer.open { display: block; }
-    .source-clause-drawer strong { color: #003a8c; }
+    .source-drawer-meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      font-size: 11.5px;
+      color: #64748b;
+      margin-bottom: 6px;
+      padding-bottom: 5px;
+      border-bottom: 1px dashed #cbd5e1;
+    }
+    .source-clause-body {
+      color: #1e293b;
+    }
 
 
 
@@ -1661,22 +1672,31 @@
       stepsGuideHtml = `<div class="mingbai-details-card">${itemsHtml}</div>`;
     }
 
-    // 3. 第三层：官方政策依据
+    // 3. 第三层：官方政策依据（左下角单行轻量小字，点击可按需展开法条）
     let sourceHtml = '';
     const c = parsed.citation;
     if (c) {
+      const docTitle = c.title || c.docTitle || '广州市现行规章与规范性文件';
+      const docNum = c.docNumber || '';
+      const dept = c.dept || c.issuerDept || '';
+      const metaText = docNum ? `${docNum}` : (dept ? `${dept}` : '');
+      const metaDisplay = metaText ? `（${escapeText(metaText)}）` : '';
+
       sourceHtml = `
         <div class="mingbai-source-card">
-          <div class="source-card-top">
-            <div class="source-doc-info">
-              <div>权威政策依据：《${escapeText(c.title || c.docTitle || '广州市现行规章')}》</div>
-              <div class="source-doc-meta">发文字号：${escapeText(c.docNumber || '现行有效')} ｜ 制定机关：${escapeText(c.dept || c.issuerDept || '广州市人民政府')}</div>
-            </div>
-            <button class="source-btn-toggle" title="展开查看严谨的原条款表述">查看条文原文 ▾</button>
+          <div class="source-footnote-line">
+            <span class="source-footnote-text" title="政策依据：《${escapeText(docTitle)}》${metaDisplay}">政策依据：《${escapeText(docTitle)}》${metaDisplay}</span>
+            <span class="source-footnote-sep">·</span>
+            <button class="source-btn-toggle" title="展开查验现行法规条款原文">查看条文原文 ▾</button>
           </div>
           <div class="source-clause-drawer">
-            <strong>【现行法规条款原文】</strong><br/>
-            ${formatMarkdownLike(c.clause || c.clauseText || c.snippet || '该政策条文已纳入广州市现行有效数据库。')}
+            <div class="source-drawer-meta">
+              <span>制定机关：${escapeText(dept || '广州市人民政府')}</span>
+              ${docNum ? `<span>发文字号：${escapeText(docNum)}</span>` : ''}
+            </div>
+            <div class="source-clause-body">
+              ${formatMarkdownLike(c.clause || c.clauseText || c.snippet || '该政策条文已纳入广州市现行有效数据库。')}
+            </div>
           </div>
         </div>
       `;
