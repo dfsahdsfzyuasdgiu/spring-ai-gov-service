@@ -1,4 +1,4 @@
-﻿/**
+/**
  * 广州市人民政府门户网站 (www.gz.gov.cn)
  * 政策法规 AI 智能问答专窗 · 前端独立注入插件 (完备版)
  * 
@@ -14,11 +14,21 @@
 (function () {
   'use strict';
 
-  // 避免在同一页面重复注入
-  if (document.getElementById('gz-gov-ai-root')) {
-    console.warn('[广州政策问答] 已存在运行实例，跳过重复初始化。');
-    return;
-  }
+  function initAssistant() {
+    if (!document.body) {
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initAssistant);
+      } else {
+        setTimeout(initAssistant, 50);
+      }
+      return;
+    }
+
+    // 避免在同一页面重复注入
+    if (document.getElementById('gz-gov-ai-root')) {
+      console.warn('[广州政策问答] 已存在运行实例，跳过重复初始化。');
+      return;
+    }
 
   // 会话标识保持
   let currentSessionId = window.gzGovSessionId || ('gz-session-' + Date.now() + '-' + Math.random().toString(36).substring(2, 7));
@@ -59,7 +69,7 @@
       position: fixed;
       bottom: 20px;
       right: 20px;
-      z-index: 99999999;
+      z-index: 2147483647;
       pointer-events: none;
     }
 
@@ -2060,7 +2070,7 @@
           affairId: 102,
           affairCode: 'GZ-LS-JFRH002',
           affairName: '来穗人员积分制入户申报',
-          onlineHandleUrl: 'https://djjd.gzlsrc.com.cn/',
+          onlineHandleUrl: 'https://www.gdzwfw.gov.cn/portal/v2/search?keyword=%E7%A7%AF%E5%88%86%E5%85%A5%E6%88%B7&region=440100',
           qualifications: '年龄在45周岁以下；持在广州办理且在有效期的《广东省居住证》；在广州合法工作并累计缴纳社保满4年（五险齐全）；信用良好无犯罪记录。',
           promisedLimitDays: 5,
           materials: [
@@ -2100,7 +2110,7 @@
           affairId: 104,
           affairCode: 'GZ-SC-QYKB004',
           affairName: '开办企业一网通办',
-          onlineHandleUrl: 'https://qykb.scsfda.gov.cn/',
+          onlineHandleUrl: 'https://www.gdzwfw.gov.cn/portal/v2/search?keyword=%E4%BC%81%E4%B8%9A%E5%BC%80%E5%8A%9E&region=440100',
           qualifications: '在广州市设立有限责任公司、合伙企业、个人独资企业的全体股东及法定代表人；个体工商户及各类创业者均可享受全流程免费便利。',
           promisedLimitDays: 1,
           materials: [
@@ -2139,7 +2149,7 @@
           affairId: 105,
           affairCode: 'GZ-YB-LHJY005',
           affairName: '灵活就业人员医保参保',
-          onlineHandleUrl: 'https://etax.guangdong.chinatax.gov.cn/',
+          onlineHandleUrl: 'https://www.gdzwfw.gov.cn/portal/v2/search?keyword=%E7%81%B5%E6%B4%BB%E5%B0%B1%E4%B8%9A%E5%8C%BB%E4%BF%9D&region=440100',
           qualifications: '未达到法定退休年龄的灵活就业人员（打零工、小买卖、自媒体、外卖骑手、无雇工个体户等）；完全打破户籍限制，不设户籍壁垒。',
           promisedLimitDays: 1,
           materials: [
@@ -2178,7 +2188,7 @@
           affairId: 103,
           affairCode: 'GZ-JT-CPYH003',
           affairName: '中小客车指标摇号',
-          onlineHandleUrl: 'https://jtzl.jtj.gz.gov.cn/',
+          onlineHandleUrl: 'https://www.gdzwfw.gov.cn/portal/v2/search?keyword=%E4%B8%AD%E5%B0%8F%E5%AE%A2%E8%BD%A6%E6%8C%87%E6%A0%87%E6%91%87%E5%8F%B7&region=440100',
           qualifications: '本市户籍人员直接可申领（名下无粤A车且有驾照）；非本市户籍持有有效广州居住证，且近2年内累计交满广州职工医保24个月。',
           promisedLimitDays: 1,
           materials: [
@@ -2217,7 +2227,7 @@
           affairId: 106,
           affairCode: 'GZ-GA-GAQZ006',
           affairName: '往来港澳通行证申领',
-          onlineHandleUrl: 'https://www.gdzwfw.gov.cn/portal/v2/guide/11440100007483172Q3440106043001',
+          onlineHandleUrl: 'https://www.gdzwfw.gov.cn/portal/v2/search?keyword=%E6%B8%AF%E6%BE%B3%E9%80%9A%E8%A1%8C%E8%AF%81&region=440100',
           qualifications: '中国大陆合法居民，需前往香港或澳门旅游、探亲、商务的公民；无论户籍在哪个省市，均可在广州出入境窗口就近申办。',
           promisedLimitDays: 7,
           materials: [
@@ -2293,7 +2303,7 @@
           affairId: 115,
           affairCode: 'GZ-GA-JSZ015',
           affairName: '机动车驾驶证期满换证“警医邮”',
-          onlineHandleUrl: 'https://gd.122.gov.cn/',
+          onlineHandleUrl: 'https://www.gdzwfw.gov.cn/portal/v2/search?keyword=%E9%A9%BE%E9%A9%B6%E8%AF%81%E6%9C%9F%E6%BB%A1%E6%8D%A2%E8%AF%81&region=440100',
           qualifications: '机动车驾驶证有效期满前90日内，已完成体检且违章违法记分已处理完毕。',
           promisedLimitDays: 1,
           materials: [
@@ -2369,7 +2379,7 @@
           affairId: 129,
           affairCode: 'GZ-KJ-GXJS029',
           affairName: '高新技术企业认定培育入库奖励补贴',
-          onlineHandleUrl: 'https://kjj.gz.gov.cn/',
+          onlineHandleUrl: 'https://www.gdzwfw.gov.cn/portal/v2/search?keyword=%E9%AB%98%E6%96%B0%E6%8A%80%E6%9C%AF%E4%BC%81%E4%B8%9A%E8%AE%A4%E5%AE%9A&region=440100',
           qualifications: '在穗注册申报且首次通过国家高新技术企业认定的科技型中小企业。',
           promisedLimitDays: 5,
           materials: [
@@ -2464,6 +2474,10 @@
     };
   }
 
-  console.log('[广州政策问答] 广州市政策法规 AI 智能问答专窗已注入运行（政策便民翻译官·明白纸完备版）。');
+  if (!document.body && document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initAssistant);
+  } else {
+    initAssistant();
+  }
 })();
 

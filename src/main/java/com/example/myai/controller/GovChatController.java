@@ -53,8 +53,8 @@ public class GovChatController {
      * 流式政务智能咨询接口 (Server-Sent Events)
      */
     @PostMapping(value = "/stream", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
-    public Flux<ChatResponseChunk> chatStream(@RequestBody ChatRequest request) {
-        if (request.getPrompt() == null || request.getPrompt().trim().isEmpty()) {
+    public Flux<ChatResponseChunk> chatStream(@RequestBody(required = false) ChatRequest request) {
+        if (request == null || request.getPrompt() == null || request.getPrompt().trim().isEmpty()) {
             return Flux.just(
                     ChatResponseChunk.chunk("您好！请问有什么广州市政务政策或办事流程我可以为您效劳？"),
                     ChatResponseChunk.done()
@@ -76,13 +76,16 @@ public class GovChatController {
      * 群众好差评评价接口
      */
     @PostMapping("/feedback")
-    public Result<String> submitFeedback(@RequestBody FeedbackDTO dto) {
+    public Result<String> submitFeedback(@RequestBody(required = false) FeedbackDTO dto) {
+        if (dto == null) {
+            return Result.error(400, "评价内容不能为空");
+        }
         if (dto.getRating() > 0) {
             thumbsUpCount.incrementAndGet();
         } else if (dto.getRating() < 0) {
             thumbsDownCount.incrementAndGet();
-            if (dto.getReason() != null) {
-                feedbackReasons.put(dto.getSessionId() != null ? dto.getSessionId() : "anon", dto.getReason());
+            if (dto.getReason() != null && !dto.getReason().trim().isEmpty()) {
+                feedbackReasons.put(dto.getSessionId() != null ? dto.getSessionId() : "anon", dto.getReason().trim());
             }
         }
         return Result.success("感谢您的宝贵评价！我们将持续优化政务咨询精准度。", "OK");
@@ -94,18 +97,22 @@ public class GovChatController {
     @GetMapping("/history")
     public Result<List<GovChatHistory>> getChatHistory(@RequestParam(required = false) String sessionId,
                                                       @RequestParam(defaultValue = "10") int limit) {
+        int safeLimit = (limit <= 0) ? 10 : Math.min(limit, 100);
         if (sessionId != null && !sessionId.trim().isEmpty()) {
-            return Result.success(chatHistoryRepository.findBySessionId(sessionId, limit));
+            return Result.success(chatHistoryRepository.findBySessionId(sessionId.trim(), safeLimit));
         }
-        return Result.success(chatHistoryRepository.findRecent(limit));
+        return Result.success(chatHistoryRepository.findRecent(safeLimit));
     }
 
     /**
      * 清空指定会话的历史记录
      */
     @DeleteMapping("/history")
-    public Result<String> clearChatHistory(@RequestParam String sessionId) {
-        int rows = chatHistoryRepository.clearBySessionId(sessionId);
+    public Result<String> clearChatHistory(@RequestParam(required = false) String sessionId) {
+        if (sessionId == null || sessionId.trim().isEmpty()) {
+            return Result.error(400, "会话标识 sessionId 不能为空");
+        }
+        int rows = chatHistoryRepository.clearBySessionId(sessionId.trim());
         return Result.success("会话历史清理成功，已删除 " + rows + " 条记录", "OK");
     }
 
@@ -116,11 +123,15 @@ public class GovChatController {
     public Result<List<KnowledgeRelation>> getKnowledgeRelations(@RequestParam(required = false) String entityType,
                                                                  @RequestParam(required = false) String entityId,
                                                                  @RequestParam(required = false) String keyword) {
-        if (entityType != null && entityId != null) {
-            return Result.success(knowledgeGraphRepository.findRelated(entityType, entityId));
+        String cleanType = entityType != null ? entityType.trim() : null;
+        String cleanId = entityId != null ? entityId.trim() : null;
+        String cleanKw = keyword != null ? keyword.trim() : null;
+
+        if (cleanType != null && !cleanType.isEmpty() && cleanId != null && !cleanId.isEmpty()) {
+            return Result.success(knowledgeGraphRepository.findRelated(cleanType, cleanId));
         }
-        if (keyword != null && !keyword.trim().isEmpty()) {
-            return Result.success(knowledgeGraphRepository.findByNameLike(keyword));
+        if (cleanKw != null && !cleanKw.isEmpty()) {
+            return Result.success(knowledgeGraphRepository.findByNameLike(cleanKw));
         }
         return Result.success(knowledgeGraphRepository.findAll());
     }
@@ -129,9 +140,23 @@ public class GovChatController {
      * 扩展功能二：办事流程引导式对话向导交互接口
      */
     @PostMapping("/guide-step")
-    public Result<Map<String, Object>> handleGuideStep(@RequestBody Map<String, Object> body) {
-        Long affairId = body.get("affairId") != null ? Long.parseLong(body.get("affairId").toString()) : 101L;
-        int stepNo = body.get("stepNo") != null ? Integer.parseInt(body.get("stepNo").toString()) : 1;
+    public Result<Map<String, Object>> handleGuideStep(@RequestBody(required = false) Map<String, Object> body) {
+        Long affairId = 101L;
+        int stepNo = 1;
+        if (body != null) {
+            Object aObj = body.get("affairId");
+            if (aObj != null) {
+                try {
+                    affairId = Long.parseLong(aObj.toString().trim());
+                } catch (Exception ignored) {}
+            }
+            Object sObj = body.get("stepNo");
+            if (sObj != null) {
+                try {
+                    stepNo = Integer.parseInt(sObj.toString().trim());
+                } catch (Exception ignored) {}
+            }
+        }
 
         AffairGuide affair = affairRepository.findById(affairId).orElse(null);
         if (affair == null) {
@@ -174,11 +199,14 @@ public class GovChatController {
      * 广州政务政策与办事公文爬虫采集触发接口
      */
     @PostMapping("/crawl")
-    public Result<Object> triggerCrawler(@RequestBody Map<String, String> body) {
-        String url = body.get("url");
-        String category = body.get("category");
-        String html = body.get("html");
-        if ((url == null || url.trim().isEmpty()) && (html == null || html.trim().isEmpty())) {
+    public Result<Object> triggerCrawler(@RequestBody(required = false) Map<String, String> body) {
+        if (body == null) {
+            return Result.error(400, "请求体不能为空");
+        }
+        String url = body.get("url") != null ? body.get("url").trim() : null;
+        String category = body.get("category") != null ? body.get("category").trim() : null;
+        String html = body.get("html") != null ? body.get("html").trim() : null;
+        if ((url == null || url.isEmpty()) && (html == null || html.isEmpty())) {
             return Result.error(400, "URL 或 HTML 不能为空");
         }
         GovCrawlerService.CrawlResult res = govCrawlerService.crawlPolicyByUrl(url != null ? url : "https://www.gz.gov.cn/zwgk/fggw/sample", category, html);

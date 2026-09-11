@@ -3,6 +3,7 @@
 -- =========================================================================
 -- 1. 政策法规公文表 gov_policy_doc (27部广州现行有效红头文件)
 -- =========================================================================
+DELETE FROM gov_policy_clause;
 DELETE FROM gov_policy_doc;
 INSERT INTO gov_policy_doc (id, doc_number, title, category, issuer_dept, publish_date, effective_date, status, summary) VALUES
 (1, '穗府办规〔2024〕6号', '广州市公共租赁住房保障办法', '住房保障', '广州市人民政府办公厅', '2024-03-01', '2024-04-01', 1, '明确本市户籍家庭、持居住证新就业无房职工申领公共租赁住房实物配租与租赁补贴（最高35元/㎡/月）的准入标准。'),
@@ -80,6 +81,8 @@ INSERT INTO gov_policy_clause (policy_id, clause_no, clause_text) VALUES
 -- =========================================================================
 -- 3. 政务办事指南事项表 gov_affair_guide (全生命周期32大高频政务办事事项)
 -- =========================================================================
+DELETE FROM gov_affair_material;
+DELETE FROM gov_affair_process;
 DELETE FROM gov_affair_guide;
 INSERT INTO gov_affair_guide (id, affair_code, affair_name, category, service_object, legal_limit_days, promised_limit_days, qualifications, handling_address, online_handle_url) VALUES
 (101, 'GZ-ZJ-GZH001', '新就业无房职工公共租赁住房租赁补贴申领', '住房保障', '自然人', 15, 3, '具有大专及以上学历（毕业未满5年），在穗连续缴纳社保满6个月，本人及配偶名下在穗无自有产权住房。', '广州市各区住房保障办公室或街道政务服务中心综合窗口', 'https://www.gdzwfw.gov.cn/portal/v2/search?keyword=%E5%85%AC%E7%A7%9F%E6%88%BF&region=440100'),
@@ -91,11 +94,11 @@ INSERT INTO gov_affair_guide (id, affair_code, affair_name, category, service_ob
 (111, 'GZ-RS-RCBT011', '广州市新引进人才住房补贴与安家费申领', '人才服务', '自然人', 15, 3, '重点产业新引进博士、硕士及本科生，连续在穗缴纳社保满1年且未享受其他安家保障。', '广州市各区人力资源和社会保障局人才服务专窗', 'https://www.gdzwfw.gov.cn/portal/v2/search?keyword=%E4%BA%BA%E6%89%8D%E8%A1%A5%E8%B4%B4&region=440100'),
 (112, 'GZ-GA-JZZ012', '广东省居住证首次申领与电子居住证签注', '户籍管理', '自然人', 10, 1, '在穗办理居住登记满半年且具有合法稳定住所或合法稳定就业或连续就读。', '广州市各区公安分局户政大厅及街镇出租屋服务站', 'https://www.gdzwfw.gov.cn/portal/v2/search?keyword=%E5%B1%85%E4%BD%8F%E8%AF%81&region=440100'),
 (113, 'GZ-GA-XSE013', '新生儿出生登记与随父/随母落户申报', '户籍管理', '自然人', 5, 1, '父母一方为本市户口，具有出生医学证明且父母双方依法登记结婚。', '广州市各区公安分局办证中心及户籍派出所', 'https://www.gdzwfw.gov.cn/portal/v2/search?keyword=%E6%96%B0%E7%94%9F%E5%84%BF%E5%87%BA%E7%94%9F%E7%99%BB%E8%AE%B0&region=440100'),
-(103, 'GZ-JT-CPYH003', '广州市中小客车个人增量指标摇号申请', '交通出行', '自然人', 10, 1, '本市户籍人员，或持有效广州居住证且近2年内累计缴纳广州职工社保医保满24个月人员，名下无粤A车牌且持有有效机动车驾驶证。', '广州市中小客车指标调控管理办公室窗口', 'https://jtzl.jtj.gz.gov.cn/'),
-(114, 'GZ-JT-JNC014', '节能车增量指标直接摇号申领', '交通出行', '自然人', 10, 1, '符合中小客车摇号基本申请资格，且选报节能车节能增量指标类型。', '广州市中小客车指标调控管理办公室窗口', 'https://jtzl.jtj.gz.gov.cn/'),
+(103, 'GZ-JT-CPYH003', '广州市中小客车个人增量指标摇号申请', '交通出行', '自然人', 10, 1, '本市户籍人员，或持有效广州居住证且近2年内累计缴纳广州职工社保医保满24个月人员，名下无粤A车牌且持有有效机动车驾驶证。', '广州市中小客车指标调控管理办公室窗口', 'https://www.gdzwfw.gov.cn/portal/v2/search?keyword=%E4%B8%AD%E5%B0%8F%E5%AE%A2%E8%BD%A6%E6%8C%87%E6%A0%87&region=440100'),
+(114, 'GZ-JT-JNC014', '节能车增量指标直接摇号申领', '交通出行', '自然人', 10, 1, '符合中小客车摇号基本申请资格，且选报节能车节能增量指标类型。', '广州市中小客车指标调控管理办公室窗口', 'https://www.gdzwfw.gov.cn/portal/v2/search?keyword=%E8%8A%82%E8%83%BD%E8%BD%A6%E6%8C%87%E6%A0%87&region=440100'),
 (115, 'GZ-GA-JSZ015', '机动车驾驶证期满换证“警医邮”网办到家', '交通出行', '自然人', 5, 1, '机动车驾驶证有效期满前90日内，已完成体检且违章违法记分已处理完毕。', '广州市公安局交警支队车管所及市内联网“警医邮”服务点', 'https://www.gdzwfw.gov.cn/portal/v2/search?keyword=%E9%A9%BE%E9%A9%B6%E8%AF%81%E6%9C%9F%E6%BB%A1%E6%8D%A2%E8%AF%81&region=440100'),
 (116, 'GZ-GA-CLNJ016', '机动车免检车辆电子检验合格标志申领', '交通出行', '自然人', 3, 1, '属于6年免检范围内的非营运小型微型客车，交通事故已处理且交强险在保。', '广州市各交警大队违法处理及车管窗口', 'https://www.gdzwfw.gov.cn/portal/v2/search?keyword=%E5%85%8D%E6%A3%80%E6%A0%87%E5%BF%97&region=440100'),
-(106, 'GZ-GA-GAQZ006', '往来港澳通行证及团队旅游签注申领（全国通办）', '出入境服务', '自然人', 15, 7, '中国大陆居民，需前往香港或澳门旅游、探亲、商务的公民，免户籍地限制。', '广州市公安局出入境大厦及各区分局出入境接待大厅', 'https://www.gdzwfw.gov.cn/portal/v2/guide/11440100007483172Q3440106043001'),
+(106, 'GZ-GA-GAQZ006', '往来港澳通行证及团队旅游签注申领（全国通办）', '出入境服务', '自然人', 15, 7, '中国大陆居民，需前往香港或澳门旅游、探亲、商务的公民，免户籍地限制。', '广州市公安局出入境大厦及各区分局出入境接待大厅', 'https://www.gdzwfw.gov.cn/portal/v2/search?keyword=%E6%B8%AF%E6%BE%B3%E9%80%9A%E8%A1%8C%E8%AF%81&region=440100'),
 (117, 'GZ-GA-ZNJ017', '赴港澳旅游再次签注（智能签注机立等可取）', '出入境服务', '自然人', 1, 1, '持有有效往来港澳通行证且距卡面有效期超过3个月以上中国大陆居民。', '广州市各区出入境智能签注一体机24小时自助服务厅', 'https://www.gdzwfw.gov.cn/portal/v2/search?keyword=%E6%B8%AF%E6%BE%B3%E7%AD%BE%E6%B3%A8&region=440100'),
 (118, 'GZ-GA-HZ018', '中华人民共和国普通护照首次申领与加急', '出入境服务', '自然人', 15, 7, '中国公民因非公务原因出国旅游、探亲、留学、就业或从事商务活动。', '广州市公安局出入境大厦及各区分局出入境办证大厅', 'https://www.gdzwfw.gov.cn/portal/v2/search?keyword=%E6%8A%A4%E7%85%A7&region=440100'),
 (119, 'GZ-GA-TW019', '大陆居民往来台湾通行证及赴台签注申领', '出入境服务', '自然人', 15, 7, '大陆居民因探亲、商务、团队旅游或赴台应邀学术交流等事由。', '广州市公安局出入境接待大厅及各区公安办证中心', 'https://www.gdzwfw.gov.cn/portal/v2/search?keyword=%E5%8F%B0%E6%B9%BE%E9%80%9A%E8%A1%8C%E8%AF%81&region=440100'),
@@ -110,7 +113,7 @@ INSERT INTO gov_affair_guide (id, affair_code, affair_name, category, service_ob
 (104, 'GZ-SC-QYKB004', '开办企业一网通办设立登记与免费发章', '营商环境', '企业法人', 3, 1, '在广州市设立有限责任公司、合伙企业、个人独资企业的全体股东及法定代表人。', '广州市各区政务服务中心企业开办专窗', 'https://www.gdzwfw.gov.cn/portal/v2/search?keyword=%E4%BC%81%E4%B8%9A%E5%BC%80%E5%8A%9E&region=440100'),
 (127, 'GZ-SC-GZQ027', '个体工商户转型升级为企业（个转企）直接登记', '营商环境', '企业法人', 3, 1, '在广州合法登记的个体工商户拟转型为有限责任公司或独资企业，且无违法欠税。', '广州市各区市场监督管理局登记注册大厅', 'https://www.gdzwfw.gov.cn/portal/v2/search?keyword=%E4%B8%AA%E8%BD%AC%E4%BC%81&region=440100'),
 (128, 'GZ-SC-SPXK028', '食品经营许可告知承诺制“证照联办”', '营商环境', '企业法人', 1, 1, '从事普通热食、预包装食品销售等餐饮单位书面承诺符合经营条件。', '广州市各区市场监督管理局窗口及政务服务中心市监专窗', 'https://www.gdzwfw.gov.cn/portal/v2/search?keyword=%E9%A3%9F%E5%93%81%E7%BB%8F%E8%90%A5%E8%AE%B8%E5%8F%AF&region=440100'),
-(129, 'GZ-KJ-GXJS029', '高新技术企业认定培育入库奖励补贴', '科技创新', '企业法人', 15, 5, '在穗注册申报且首次通过国家高新技术企业认定的科技型中小企业。', '广州市科学技术局高新技术处窗口', 'https://kjj.gz.gov.cn/'),
+(129, 'GZ-KJ-GXJS029', '高新技术企业认定培育入库奖励补贴', '科技创新', '企业法人', 15, 5, '在穗注册申报且首次通过国家高新技术企业认定的科技型中小企业。', '广州市科学技术局高新技术处窗口', 'https://www.gdzwfw.gov.cn/portal/v2/search?keyword=%E9%AB%98%E6%96%B0%E6%8A%80%E6%9C%AF%E4%BC%81%E4%B8%9A&region=440100'),
 (130, 'GZ-SC-JYZX030', '企业简易注销登记一网公告办结', '营商环境', '企业法人', 25, 1, '未发生债权债务或已清偿债权债务的未开业企业，且公告期满20天无异议。', '广州市各区市场监督管理局综合业务窗口', 'https://www.gdzwfw.gov.cn/portal/v2/search?keyword=%E7%AE%80%E6%98%93%E6%B3%A8%E9%94%80&region=440100'),
 (131, 'GZ-MZ-LNYD031', '广州市老年人优待卡申领与长寿保健金发放', '老龄福利', '自然人', 10, 1, '广州市户籍或持本市居住证年满60周岁长者（70周岁以上享受长寿保健金）。', '广州市各街镇综合养老服务中心及社区居委会专窗', 'https://www.gdzwfw.gov.cn/portal/v2/search?keyword=%E8%80%81%E5%B9%B4%E4%BA%BA%E4%BC%98%E5%BE%85%E5%8D%A1&region=440100'),
 (132, 'GZ-TW-QNYZ032', '广州各区青年人才驿站免租住宿与人才公寓申请', '青年关怀', '自然人', 3, 1, '毕业前一年至毕业后两年的大专及以上学历毕业生来穗求职面试且在穗无房。', '共青团广州市委青年发展驿站各区分站', 'https://www.gdzwfw.gov.cn/portal/v2/search?keyword=%E9%9D%92%E5%B9%B4%E9%A9%BF%E7%AB%99&region=440100');

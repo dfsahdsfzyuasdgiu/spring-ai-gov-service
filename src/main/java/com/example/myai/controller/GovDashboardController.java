@@ -25,7 +25,8 @@ public class GovDashboardController {
 
         int thumbsUp = GovChatController.thumbsUpCount.get();
         int thumbsDown = GovChatController.thumbsDownCount.get();
-        double satRate = (double) thumbsUp / (thumbsUp + thumbsDown) * 100.0;
+        int totalFeedback = thumbsUp + thumbsDown;
+        double satRate = totalFeedback > 0 ? (double) thumbsUp / totalFeedback * 100.0 : 100.0;
 
         data.put("totalConsultations", GovChatController.totalConsultationCount.get());
         data.put("totalWorkOrders", workOrderRepository.findAll().size());

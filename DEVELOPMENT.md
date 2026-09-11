@@ -1,4 +1,4 @@
-﻿# 《基于 SpringBoot + SpringAI 的智能政务政策咨询与导办系统》开发与技术实现文档
+# 《基于 SpringBoot + SpringAI 的智能政务政策咨询与导办系统》开发与技术实现文档
 ### 广州市人民政府门户网站（www.gz.gov.cn）专版
 
 > **项目名称**：智能政务政策法规咨询与导办系统（Guangzhou Smart Government Policy AI Consultation & Guiding System）  
@@ -413,7 +413,7 @@ CREATE TABLE IF NOT EXISTS gov_knowledge_relation (
 ### 5.4 Shadow DOM 样式物理隔离与真实网站多途径接入
 * 前端助手采用 Shadow DOM 封装挂载，在宿主网站上实现 CSS 样式的物理隔离，完全不会干扰真实官方政务网站的原生页面排版与全局样式；
 * **真实网站测试与接入途径**：
-  * **途径一（油猴脚本持久伴随）**：在 Tampermonkey 中安装 `http://localhost:8080/gz_gov_ai_assistant.user.js`，访问真实广州市人民政府门户（`https://www.gz.gov.cn`）或广东政务服务网广州分厅（`https://wsbs.gz.gov.cn`）自动挂载；
+  * **途径一（油猴脚本持久伴随）**：在 Tampermonkey 中安装 `http://localhost:8080/gz_gov_ai_assistant.user.js`，访问真实广州市人民政府门户（`https://www.gz.gov.cn`）或广东政务服务网广州专区（`https://www.gdzwfw.gov.cn/?region=440100`）自动挂载；
   * **途径二（控制台快速注入）**：打开真实官方政务网站，在浏览器开发者工具 Console 中粘贴运行一行指令：
     `const s = document.createElement('script'); s.src = 'http://localhost:8080/gz_assistant_embed.js'; document.body.appendChild(s);`
     即可免装插件直接在真实页面右下角唤起助手进行功能测试；
@@ -523,34 +523,34 @@ CREATE TABLE IF NOT EXISTS gov_knowledge_relation (
 | | 2 | GZ-ZJ-SWPZ007 | 本市户籍中等偏下收入家庭公租房实物配租轮候 | 5天 | [广东政务服务网直通](https://www.gdzwfw.gov.cn/portal/v2/search?keyword=%E5%85%AC%E7%A7%9F%E6%88%BF%E9%85%8D%E7%A7%9F&region=440100) |
 | | 3 | GZ-GJJ-ZFTQ008 | 个人住房公积金无房租赁按月提取 | 1天 | [广东政务服务网直通](https://www.gdzwfw.gov.cn/portal/v2/search?keyword=%E7%A7%9F%E6%88%BF%E6%8F%90%E5%8F%96&region=440100) |
 | | 4 | GZ-GJJ-HFTQ009 | 个人住房公积金按月冲还房贷本息提取 | 1天 | [广东政务服务网直通](https://www.gdzwfw.gov.cn/portal/v2/search?keyword=%E8%BF%98%E8%B4%B7%E6%8F%90%E5%8F%96&region=440100) |
-| **户籍与人才** | 5 | GZ-LS-JFRH002 | 广州市来穗人员积分制入户申报 | 5天 | [广州市来穗人员积分系统直通](https://djjd.gzlsrc.com.cn/) |
+| **户籍与人才** | 5 | GZ-LS-JFRH002 | 广州市来穗人员积分制入户申报 | 5天 | [广东政务服务网直通](https://www.gdzwfw.gov.cn/portal/v2/search?keyword=%E7%A7%AF%E5%88%86%E5%85%A5%E6%88%B7&region=440100) |
 | | 6 | GZ-RS-XLRH010 | 全日制青年高校毕业生在穗落户（学历入户） | 2天 | [广东政务服务网直通](https://www.gdzwfw.gov.cn/portal/v2/search?keyword=%E5%AD%A6%E5%8E%86%E5%85%A5%E6%88%B7&region=440100) |
 | | 7 | GZ-RS-RCBT011 | 广州市新引进人才住房补贴与安家费申领 | 3天 | [广东政务服务网直通](https://www.gdzwfw.gov.cn/portal/v2/search?keyword=%E4%BA%BA%E6%89%8D%E8%A1%A5%E8%B4%B4&region=440100) |
 | | 8 | GZ-GA-JZZ012 | 广东省居住证首次申领与电子居住证签注 | 1天 | [广东政务服务网直通](https://www.gdzwfw.gov.cn/portal/v2/search?keyword=%E5%B1%85%E4%BD%8F%E8%AF%81&region=440100) |
 | | 9 | GZ-GA-XSE013 | 新生儿出生登记与随父/随母落户申报 | 1天 | [广东政务服务网直通](https://www.gdzwfw.gov.cn/portal/v2/search?keyword=%E6%96%B0%E7%94%9F%E5%84%BF%E5%87%BA%E7%94%9F%E7%99%BB%E8%AE%B0&region=440100) |
-| **交通与车管** | 10 | GZ-JT-CPYH003 | 广州市中小客车个人增量指标摇号申请 | 1天 | [广州中小客车调控系统直通](https://jtzl.jtj.gz.gov.cn/) |
-| | 11 | GZ-JT-JNC014 | 节能车增量指标直接摇号申领 | 1天 | [广州中小客车调控系统直通](https://jtzl.jtj.gz.gov.cn/) |
-| | 12 | GZ-GA-JSZ015 | 机动车驾驶证期满换证“警医邮”网办到家 | 1天 | [互联网交通安全综合服务平台直通](https://gd.122.gov.cn/) |
-| | 13 | GZ-GA-CLNJ016 | 机动车免检车辆电子检验合格标志申领 | 1天 | [互联网交通安全综合服务平台直通](https://gd.122.gov.cn/) |
-| **出入境便民** | 14 | GZ-GA-GAQZ006 | 往来港澳通行证及团队旅游签注申领（全国通办） | 7天 | [广东政务服务网直通](https://www.gdzwfw.gov.cn/portal/v2/guide/11440100007483172Q3440106043001) |
+| **交通与车管** | 10 | GZ-JT-CPYH003 | 广州市中小客车个人增量指标摇号申请 | 1天 | [广东政务服务网直通](https://www.gdzwfw.gov.cn/portal/v2/search?keyword=%E4%B8%AD%E5%B0%8F%E5%AE%A2%E8%BD%A6%E6%8C%87%E6%A0%87&region=440100) |
+| | 11 | GZ-JT-JNC014 | 节能车增量指标直接摇号申领 | 1天 | [广东政务服务网直通](https://www.gdzwfw.gov.cn/portal/v2/search?keyword=%E8%8A%82%E8%83%BD%E8%BD%A6%E6%8C%87%E6%A0%87&region=440100) |
+| | 12 | GZ-GA-JSZ015 | 机动车驾驶证期满换证“警医邮”网办到家 | 1天 | [广东政务服务网直通](https://www.gdzwfw.gov.cn/portal/v2/search?keyword=%E9%A9%BE%E9%A9%B6%E8%AF%81%E6%9C%9F%E6%BB%A1%E6%8D%A2%E8%AF%81&region=440100) |
+| | 13 | GZ-GA-CLNJ016 | 机动车免检车辆电子检验合格标志申领 | 1天 | [广东政务服务网直通](https://www.gdzwfw.gov.cn/portal/v2/search?keyword=%E5%85%8D%E6%A3%80%E6%A0%87%E5%BF%97&region=440100) |
+| **出入境便民** | 14 | GZ-GA-GAQZ006 | 往来港澳通行证及团队旅游签注申领（全国通办） | 7天 | [广东政务服务网直通](https://www.gdzwfw.gov.cn/portal/v2/search?keyword=%E6%B8%AF%E6%BE%B3%E9%80%9A%E8%A1%8C%E8%AF%81&region=440100) |
 | | 15 | GZ-GA-ZNJ017 | 赴港澳旅游再次签注（智能签注机立等可取） | 1天 | [广东政务服务网直通](https://www.gdzwfw.gov.cn/portal/v2/search?keyword=%E6%B8%AF%E6%BE%B3%E7%AD%BE%E6%B3%A8&region=440100) |
 | | 16 | GZ-GA-HZ018 | 中华人民共和国普通护照首次申领与加急 | 7天 | [广东政务服务网直通](https://www.gdzwfw.gov.cn/portal/v2/search?keyword=%E6%8A%A4%E7%85%A7&region=440100) |
 | | 17 | GZ-GA-TW019 | 大陆居民往来台湾通行证及赴台签注申领 | 7天 | [广东政务服务网直通](https://www.gdzwfw.gov.cn/portal/v2/search?keyword=%E5%8F%B0%E6%B9%BE%E9%80%9A%E8%A1%8C%E8%AF%81&region=440100) |
-| **医疗保障** | 18 | GZ-YB-LHJY005 | 灵活就业人员职工基本医疗保险参保登记 | 1天 | [广东省电子税务局直通](https://etax.guangdong.chinatax.gov.cn/) |
+| **医疗保障** | 18 | GZ-YB-LHJY005 | 灵活就业人员职工基本医疗保险参保登记 | 1天 | [广东政务服务网直通](https://www.gdzwfw.gov.cn/portal/v2/search?keyword=%E7%81%B5%E6%B4%BB%E5%B0%B1%E4%B8%9A%E5%8C%BB%E4%BF%9D&region=440100) |
 | | 19 | GZ-YB-CXJM020 | 城乡居民基本医疗保险年度参保登记 | 1天 | [广东政务服务网直通](https://www.gdzwfw.gov.cn/portal/v2/search?keyword=%E5%9F%8E%E4%B9%A1%E5%B1%85%E6%B0%91%E5%8C%BB%E4%BF%9D&region=440100) |
 | | 20 | GZ-YB-JTGJ021 | 职工医保个人账户家庭成员共济绑定 | 1天 | [广东政务服务网直通](https://www.gdzwfw.gov.cn/portal/v2/search?keyword=%E5%AE%B6%E5%BA%AD%E5%85%B1%E6%B5%8E&region=440100) |
-| | 21 | GZ-YB-YDJY022 | 跨省异地就医直接结算联网备案 | 1天 | [国家医保服务平台直通](https://fuwu.nhsa.gov.cn/) |
+| | 21 | GZ-YB-YDJY022 | 跨省异地就医直接结算联网备案 | 1天 | [广东政务服务网直通](https://www.gdzwfw.gov.cn/portal/v2/search?keyword=%E5%BC%82%E5%9C%B0%E5%B0%B1%E5%8C%BB%E5%A4%87%E6%A1%88&region=440100) |
 | | 22 | GZ-YB-SYJT023 | 职工生育保险待遇申领与生育津贴核发 | 3天 | [广东政务服务网直通](https://www.gdzwfw.gov.cn/portal/v2/search?keyword=%E7%94%9F%E8%82%B2%E6%B4%A5%E8%B4%B4&region=440100) |
 | **就业与社保** | 23 | GZ-RS-SYBX024 | 失业保险金与失业补助金按月申领 | 1天 | [广东政务服务网直通](https://www.gdzwfw.gov.cn/portal/v2/search?keyword=%E5%A4%B1%E4%B8%9A%E4%BF%9D%E9%99%A9%E9%87%91&region=440100) |
-| | 24 | GZ-RS-JNBT025 | 职业技能提升补贴与职业技能等级证书奖补 | 3天 | [广东省统一人社公共服务平台直通](https://ggfw.hrss.gd.gov.cn/) |
+| | 24 | GZ-RS-JNBT025 | 职业技能提升补贴与职业技能等级证书奖补 | 3天 | [广东政务服务网直通](https://www.gdzwfw.gov.cn/portal/v2/search?keyword=%E6%8A%80%E8%83%BD%E6%8F%90%E5%8D%87%E8%A1%A5%E8%B4%B4&region=440100) |
 | | 25 | GZ-RS-LHBT026 | 高校毕业生灵活就业社会保险补贴 | 2天 | [广东政务服务网直通](https://www.gdzwfw.gov.cn/portal/v2/search?keyword=%E7%81%B5%E6%B4%BB%E5%B0%B1%E4%B8%9A%E7%A4%BE%E4%BF%9D%E8%A1%A5%E8%B4%B4&region=440100) |
-| **营商环境与创新** | 26 | GZ-SC-QYKB004 | 开办企业一网通办设立登记与免费发章 | 1天 | [广州开办企业一网通平台直通](https://qykb.scsfda.gov.cn/) |
+| **营商环境与创新** | 26 | GZ-SC-QYKB004 | 开办企业一网通办设立登记与免费发章 | 1天 | [广东政务服务网直通](https://www.gdzwfw.gov.cn/portal/v2/search?keyword=%E4%BC%81%E4%B8%9A%E5%BC%80%E5%8A%9E&region=440100) |
 | | 27 | GZ-SC-GZQ027 | 个体工商户转型升级为企业（个转企）直接登记 | 1天 | [广东政务服务网直通](https://www.gdzwfw.gov.cn/portal/v2/search?keyword=%E4%B8%AA%E8%BD%AC%E4%BC%81&region=440100) |
 | | 28 | GZ-SC-SPXK028 | 食品经营许可告知承诺制“证照联办” | 1天 | [广东政务服务网直通](https://www.gdzwfw.gov.cn/portal/v2/search?keyword=%E9%A3%9F%E5%93%81%E7%BB%8F%E8%90%A5%E8%AE%B8%E5%8F%AF&region=440100) |
-| | 29 | GZ-KJ-GXJS029 | 高新技术企业认定培育入库奖励补贴 | 5天 | [广州市科学技术局官网直通](https://kjj.gz.gov.cn/) |
+| | 29 | GZ-KJ-GXJS029 | 高新技术企业认定培育入库奖励补贴 | 5天 | [广东政务服务网直通](https://www.gdzwfw.gov.cn/portal/v2/search?keyword=%E9%AB%98%E6%96%B0%E6%8A%80%E6%9C%AF%E4%BC%81%E4%B8%9A&region=440100) |
 | | 30 | GZ-SC-JYZX030 | 企业简易注销登记一网公告办结 | 1天 | [广东政务服务网直通](https://www.gdzwfw.gov.cn/portal/v2/search?keyword=%E7%AE%80%E6%98%93%E6%B3%A8%E9%94%80&region=440100) |
 | **老龄与青年** | 31 | GZ-MZ-LNYD031 | 广州市老年人优待卡申领与长寿保健金发放 | 1天 | [广东政务服务网直通](https://www.gdzwfw.gov.cn/portal/v2/search?keyword=%E8%80%81%E5%B9%B4%E4%BA%BA%E4%BC%98%E5%BE%85%E5%8D%A1&region=440100) |
-| | 32 | GZ-TW-QNYZ032 | 广州各区青年人才驿站免租住宿与人才公寓申请 | 1天 | [广州青年人才驿站平台直通](https://www.12355.net/gz/youth-station) |
+| | 32 | GZ-TW-QNYZ032 | 广州各区青年人才驿站免租住宿与人才公寓申请 | 1天 | [广东政务服务网直通](https://www.gdzwfw.gov.cn/portal/v2/search?keyword=%E9%9D%92%E5%B9%B4%E9%A9%BF%E7%AB%99&region=440100) |
 
 ### 7.2 27 部广州市现行法定红头公文数据库
 
@@ -574,8 +574,8 @@ cd c:\Users\Lenovo\Desktop\实验项目\spring-ai-alibaba\spring-ai-alibaba
 # 2. 执行 Maven 一键打包 (自动跳过单元测试)
 .\mvnw.cmd clean package -DskipTests
 
-# 3. 强制以 UTF-8 编码启动服务 (根除 Windows 下数据库中文字符集错乱)
-java -Dfile.encoding=UTF-8 -jar target\spring-ai-alibaba-0.0.1-SNAPSHOT.jar
+# 3. 强制以 UTF-8 编码启动服务 (根除 Windows 下数据库中文字符集错乱，PowerShell 中需加引号)
+java "-Dfile.encoding=UTF-8" -jar target\spring-ai-alibaba-0.0.1-SNAPSHOT.jar
 ```
 
 ### 8.3 控制台与端点核验

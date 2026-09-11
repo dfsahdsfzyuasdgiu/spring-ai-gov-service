@@ -19,7 +19,8 @@ CREATE TABLE IF NOT EXISTS gov_policy_clause (
     id BIGINT AUTO_INCREMENT PRIMARY KEY,
     policy_id BIGINT NOT NULL,
     clause_no VARCHAR(100) NOT NULL,
-    clause_text TEXT NOT NULL
+    clause_text TEXT NOT NULL,
+    CONSTRAINT fk_clause_policy FOREIGN KEY (policy_id) REFERENCES gov_policy_doc(id) ON DELETE CASCADE
 );
 
 -- 3. 政务办事指南事项表
@@ -43,7 +44,8 @@ CREATE TABLE IF NOT EXISTS gov_affair_material (
     name VARCHAR(300) NOT NULL,
     mandatory BOOLEAN DEFAULT TRUE,
     format VARCHAR(100),
-    sample_tip VARCHAR(500)
+    sample_tip VARCHAR(500),
+    CONSTRAINT fk_material_affair FOREIGN KEY (affair_id) REFERENCES gov_affair_guide(id) ON DELETE CASCADE
 );
 
 -- 5. 办事指南流程步骤表
@@ -53,7 +55,8 @@ CREATE TABLE IF NOT EXISTS gov_affair_process (
     step_no INT NOT NULL,
     step_name VARCHAR(100) NOT NULL,
     description VARCHAR(500),
-    time_cost VARCHAR(100)
+    time_cost VARCHAR(100),
+    CONSTRAINT fk_process_affair FOREIGN KEY (affair_id) REFERENCES gov_affair_guide(id) ON DELETE CASCADE
 );
 
 -- 6. 对话历史持久化表 (支持 Spring AI 上下文管理与回溯)
@@ -80,3 +83,9 @@ CREATE TABLE IF NOT EXISTS gov_knowledge_relation (
     target_name VARCHAR(300) NOT NULL,
     relation_desc VARCHAR(500)
 );
+
+-- 8. 幂等添加外键约束（针对既有表环境）
+ALTER TABLE gov_policy_clause ADD CONSTRAINT IF NOT EXISTS fk_clause_policy FOREIGN KEY (policy_id) REFERENCES gov_policy_doc(id) ON DELETE CASCADE;
+ALTER TABLE gov_affair_material ADD CONSTRAINT IF NOT EXISTS fk_material_affair FOREIGN KEY (affair_id) REFERENCES gov_affair_guide(id) ON DELETE CASCADE;
+ALTER TABLE gov_affair_process ADD CONSTRAINT IF NOT EXISTS fk_process_affair FOREIGN KEY (affair_id) REFERENCES gov_affair_guide(id) ON DELETE CASCADE;
+

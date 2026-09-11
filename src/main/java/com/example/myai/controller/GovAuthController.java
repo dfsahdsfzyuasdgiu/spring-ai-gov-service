@@ -92,7 +92,10 @@ public class GovAuthController {
      * 合并统一登录入口（无论管理员还是普通市民均在此统一鉴权）
      */
     @PostMapping("/login")
-    public Result<UserVO> login(@RequestBody LoginDTO dto) {
+    public Result<UserVO> login(@RequestBody(required = false) LoginDTO dto) {
+        if (dto == null) {
+            return Result.error(400, "请求体不能为空");
+        }
         // 模式 1: 手机短信快捷验证码登录
         if ("SMS".equalsIgnoreCase(dto.getLoginType())) {
             String phone = dto.getPhone();
@@ -146,7 +149,10 @@ public class GovAuthController {
      * 普通市民实名注册接口
      */
     @PostMapping("/register")
-    public Result<UserVO> register(@RequestBody RegisterDTO dto) {
+    public Result<UserVO> register(@RequestBody(required = false) RegisterDTO dto) {
+        if (dto == null) {
+            return Result.error(400, "请求体不能为空");
+        }
         if (dto.getUsername() == null || dto.getUsername().trim().isEmpty()) {
             return Result.error(400, "请设置用户名");
         }

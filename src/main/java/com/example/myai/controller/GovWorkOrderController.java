@@ -28,11 +28,11 @@ public class GovWorkOrderController {
      * 12345 诉求 AI 智能归口研判与摘要提炼
      */
     @PostMapping("/ai-triage")
-    public Result<Map<String, Object>> aiTriage(@RequestBody Map<String, String> body) {
-        String content = body.get("appealContent");
-        if (content == null || content.trim().isEmpty()) {
-            return Result.error("诉求事实不能为空");
+    public Result<Map<String, Object>> aiTriage(@RequestBody(required = false) Map<String, String> body) {
+        if (body == null || body.get("appealContent") == null || body.get("appealContent").trim().isEmpty()) {
+            return Result.error(400, "诉求事实不能为空");
         }
+        String content = body.get("appealContent");
 
         Map<String, Object> res = new HashMap<>();
         String suggestedCategory = "12345民情";
@@ -94,9 +94,9 @@ public class GovWorkOrderController {
      * 群众在线提报 12345 模拟工单
      */
     @PostMapping("/submit")
-    public Result<WorkOrder12345> submitOrder(@RequestBody WorkOrderSubmitDTO dto) {
-        if (dto.getAppealContent() == null || dto.getAppealContent().trim().isEmpty()) {
-            return Result.error("诉求内容不能为空");
+    public Result<WorkOrder12345> submitOrder(@RequestBody(required = false) WorkOrderSubmitDTO dto) {
+        if (dto == null || dto.getAppealContent() == null || dto.getAppealContent().trim().isEmpty()) {
+            return Result.error(400, "诉求内容不能为空");
         }
         WorkOrder12345 created = workOrderService.submit(dto);
         return Result.success("12345诉求登记成功，承办部门将加急核实！", created);
@@ -114,11 +114,14 @@ public class GovWorkOrderController {
      * 管理端官方答复工单
      */
     @PostMapping("/{id}/reply")
-    public Result<String> replyOrder(@PathVariable Long id, @RequestBody Map<String, String> body) {
-        String content = body.get("replyContent");
-        if (content == null || content.trim().isEmpty()) {
-            return Result.error("答复内容不能为空");
+    public Result<String> replyOrder(@PathVariable Long id, @RequestBody(required = false) Map<String, String> body) {
+        if (id == null || id <= 0) {
+            return Result.error(400, "工单ID无效");
         }
+        if (body == null || body.get("replyContent") == null || body.get("replyContent").trim().isEmpty()) {
+            return Result.error(400, "答复内容不能为空");
+        }
+        String content = body.get("replyContent");
         boolean ok = workOrderService.reply(id, content);
         if (ok) {
             return Result.success("工单已答复并办结！", "OK");

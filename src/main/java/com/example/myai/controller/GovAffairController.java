@@ -36,6 +36,9 @@ public class GovAffairController {
      */
     @GetMapping("/policies/{id}")
     public Result<PolicyDoc> getPolicy(@PathVariable Long id) {
+        if (id == null || id <= 0) {
+            return Result.error(400, "政策ID无效");
+        }
         return policyRepository.findById(id)
                 .map(Result::success)
                 .orElseGet(() -> Result.error(404, "政策不存在"));
@@ -54,6 +57,9 @@ public class GovAffairController {
      */
     @GetMapping("/affairs/{id}")
     public Result<AffairGuide> getAffair(@PathVariable Long id) {
+        if (id == null || id <= 0) {
+            return Result.error(400, "政务事项ID无效");
+        }
         return affairService.getById(id)
                 .map(Result::success)
                 .orElseGet(() -> Result.error(404, "政务事项不存在"));
