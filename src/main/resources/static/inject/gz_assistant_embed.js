@@ -2473,6 +2473,7 @@
       ]
     };
   }
+  }
 
   if (!document.body && document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', initAssistant);

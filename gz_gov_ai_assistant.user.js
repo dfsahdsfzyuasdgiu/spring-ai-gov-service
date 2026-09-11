@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         广州市人民政府门户网站 · 政策法规与办事导办 AI 智能问答专窗
 // @namespace    https://www.gz.gov.cn/
-// @version      1.6.0
+// @version      1.6.1
 // @description  广州市政务政策与办事全生命周期 AI 智能咨询与导办专窗（全直角公文风格、0 Emoji、办事实时申办直达）
 // @author       Guangzhou Smart Gov Project Team
 // @match        https://www.gz.gov.cn/*
@@ -2487,6 +2487,7 @@
         '打12345热线咨询政策大概多长时间能得到官方答复？'
       ]
     };
+  }
   }
 
   if (!document.body && document.readyState === 'loading') {
