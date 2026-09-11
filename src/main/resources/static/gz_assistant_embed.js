@@ -619,11 +619,11 @@
     }
     .mb-item-content { color: #1e293b; font-size: 11.5px; }
 
-    /* 官方政策依据直溯 */
+    /* 官方政策依据直溯 (权威红头公文发文标准色) */
     .mingbai-source-card {
-      background: #fcfffa;
-      border: 1px solid #d9f7be;
-      border-left: 3px solid #389e0d;
+      background: #fdfbf7;
+      border: 1px solid #faecd8;
+      border-left: 3px solid #c20505;
       border-radius: 0 !important;
       padding: 6px 8px;
       margin-top: 6px;
@@ -647,9 +647,9 @@
       margin-top: 2px;
     }
     .source-btn-toggle {
-      color: #237804;
+      color: #c20505;
       background: #ffffff;
-      border: 1px solid #b7eb8f;
+      border: 1px solid #ffa39e;
       font-size: 9.5px;
       padding: 1px 6px;
       cursor: pointer;
@@ -659,8 +659,8 @@
       user-select: none;
     }
     .source-btn-toggle:hover {
-      background: #f6ffed;
-      border-color: #389e0d;
+      background: #fff1f0;
+      border-color: #c20505;
     }
     .source-clause-drawer {
       margin-top: 6px;
