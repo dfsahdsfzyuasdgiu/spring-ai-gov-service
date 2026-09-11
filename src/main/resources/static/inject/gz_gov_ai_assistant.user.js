@@ -1,12 +1,13 @@
 ﻿// ==UserScript==
-// @name         广州市人民政府门户网站 · 政策法规 AI 智能问答助手 (向量库RAG直溯完备版)
+// @name         广州市人民政府门户网站 · 政策法规 AI 智能咨询助手
 // @namespace    https://www.gz.gov.cn/
-// @version      1.3.0
-// @description  为广州市人民政府门户网站（www.gz.gov.cn）量身打造的政策法规AI智能问答专窗，深度对接广州真实政策公文、关系数据库持久化、政务知识图谱关联与办事流程分步引导。
-// @author       广州政策AI智能问答团队
+// @version      1.4.0
+// @description  为广州市人民政府门户网站（www.gz.gov.cn）提供政策法规 AI 智能问答专窗，深度对接官方现行规章与公文数据库，具备多轮记忆、知识图谱关联、向导式办事导办、直角缩放与 12345 诉求闭环流转能力。
+// @author       广州政务 AI 研发团队
 // @match        https://www.gz.gov.cn/*
 // @match        http://www.gz.gov.cn/*
 // @match        https://zwfw.gd.gov.cn/*
+// @match        https://wsbs.gz.gov.cn/*
 // @match        http://localhost:8080/*
 // @match        http://127.0.0.1:8080/*
 // @include      /^https?:\/\/localhost(:\d+)?\/.*$/
@@ -172,7 +173,7 @@
       line-height: 1.5;
     }
 
-    /* 政策问答大厅主窗口 (全直角公文标准 420x570) */
+    /* 政策问答大厅主窗口 (以 420x570 为最小窗口，支持直角无极缩放) */
     .gz-dialog-window {
       pointer-events: auto;
       position: absolute;
@@ -180,6 +181,8 @@
       right: 0;
       width: 420px;
       height: 570px;
+      min-width: 420px !important;
+      min-height: 570px !important;
       max-width: calc(100vw - 24px);
       max-height: calc(100vh - 24px);
       background: #ffffff;
@@ -190,8 +193,65 @@
       flex-direction: column;
       overflow: hidden;
       animation: gzWinOpen 0.22s ease-out forwards;
+      transition: width 0.16s cubic-bezier(0.2, 0, 0, 1), height 0.16s cubic-bezier(0.2, 0, 0, 1);
+    }
+    .gz-dialog-window.resizing {
+      transition: none !important;
+      user-select: none !important;
     }
     .gz-dialog-window.open { display: flex; }
+
+    /* 左上角政务直角缩放标尺手柄 (全直角标尺视觉) */
+    .gz-resize-grip-nw {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 22px;
+      height: 22px;
+      cursor: nwse-resize;
+      z-index: 100;
+      display: flex;
+      align-items: flex-start;
+      justify-content: flex-start;
+      padding: 3px;
+      user-select: none;
+    }
+    .gz-resize-corner-mark {
+      width: 10px;
+      height: 10px;
+      border-top: 2.5px solid #ffd666;
+      border-left: 2.5px solid #ffd666;
+      border-radius: 0 !important;
+      opacity: 0.9;
+      transition: opacity 0.15s ease, border-color 0.15s ease, transform 0.15s ease;
+    }
+    .gz-resize-grip-nw:hover .gz-resize-corner-mark {
+      opacity: 1;
+      border-color: #ffffff;
+      transform: scale(1.15);
+    }
+
+    /* 窗口左侧边缘拖拽手柄 */
+    .gz-resize-edge-w {
+      position: absolute;
+      top: 22px;
+      bottom: 0;
+      left: 0;
+      width: 6px;
+      cursor: ew-resize;
+      z-index: 99;
+    }
+
+    /* 窗口顶部边缘拖拽手柄 */
+    .gz-resize-edge-n {
+      position: absolute;
+      top: 0;
+      left: 22px;
+      right: 0;
+      height: 6px;
+      cursor: ns-resize;
+      z-index: 99;
+    }
 
     @keyframes gzWinOpen {
       from { transform: translateY(16px); opacity: 0; }
@@ -904,15 +964,26 @@
 
     <!-- 政策咨询大厅主弹窗 -->
     <div class="gz-dialog-window" id="gzDialogWindow">
+      <!-- 直角缩放手柄与边缘热区 (最小 420x570) -->
+      <div class="gz-resize-grip-nw" id="gzResizeGripNw" title="拖拽进行直角缩放（最小 420×570）">
+        <div class="gz-resize-corner-mark"></div>
+      </div>
+      <div class="gz-resize-edge-w" id="gzResizeEdgeW" title="拖拽调整窗口宽度"></div>
+      <div class="gz-resize-edge-n" id="gzResizeEdgeN" title="拖拽调整窗口高度"></div>
+
       <!-- 顶栏与控制按钮 -->
-      <div class="gz-window-header">
-        <div class="header-main">
+      <div class="gz-window-header" id="gzWindowHeader">
+        <div class="header-main" style="padding-left: 12px;">
           <div class="header-titles">
             <h3>广州市人民政府门户网站 · 政策智能咨询</h3>
             <p>广州市现行规章与规范性文件权威数据库 ｜ 政策条款直溯</p>
           </div>
         </div>
         <div class="header-controls">
+          <!-- 直角缩放/大屏切换按钮 -->
+          <button class="win-ctrl-btn" id="gzBtnScale" title="直角缩放：切换大屏导办 / 最小窗口" aria-label="直角缩放窗口">
+            <svg id="gzScaleIcon" viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" stroke-width="2.2" stroke-linecap="square"/></svg>
+          </button>
           <!-- 查看历史按钮 -->
           <button class="win-ctrl-btn" id="gzBtnHistory" title="查看会话历史记录" aria-label="查看会话历史记录">
             <svg viewBox="0 0 24 24"><path d="M12 8v4l3 3"/><circle cx="12" cy="12" r="9"/></svg>
@@ -1013,6 +1084,12 @@
   const btnHistory = shadow.getElementById('gzBtnHistory');
   const btnMin = shadow.getElementById('gzBtnMin');
   const btnDismiss = shadow.getElementById('gzBtnDismiss');
+  const btnScale = shadow.getElementById('gzBtnScale');
+  const scaleIcon = shadow.getElementById('gzScaleIcon');
+  const resizeGripNw = shadow.getElementById('gzResizeGripNw');
+  const resizeEdgeW = shadow.getElementById('gzResizeEdgeW');
+  const resizeEdgeN = shadow.getElementById('gzResizeEdgeN');
+  const windowHeader = shadow.getElementById('gzWindowHeader');
   const chatMain = shadow.getElementById('gzChatMain');
   const textInput = shadow.getElementById('gzTextInput');
   const submitBtn = shadow.getElementById('gzSubmitBtn');
@@ -1021,6 +1098,154 @@
   const historyList = shadow.getElementById('gzHistoryList');
   const btnClearHistory = shadow.getElementById('gzBtnClearHistory');
   const btnCloseHistory = shadow.getElementById('gzBtnCloseHistory');
+
+  // 直角缩放与最小窗口控制体系 (以 420px × 570px 为绝对最小窗口)
+  const MIN_WIDTH = 420;
+  const MIN_HEIGHT = 570;
+  let isMaximized = false;
+  let customW = MIN_WIDTH;
+  let customH = MIN_HEIGHT;
+
+  // 恢复保存的窗口尺寸偏好
+  try {
+    const savedW = parseInt(localStorage.getItem('gz_gov_win_w'), 10);
+    const savedH = parseInt(localStorage.getItem('gz_gov_win_h'), 10);
+    if (savedW && savedW >= MIN_WIDTH) customW = savedW;
+    if (savedH && savedH >= MIN_HEIGHT) customH = savedH;
+    if (customW > MIN_WIDTH || customH > MIN_HEIGHT) {
+      applyWindowSize(customW, customH, false);
+    }
+  } catch (e) {}
+
+  function applyWindowSize(w, h, save = true) {
+    const maxW = Math.max(MIN_WIDTH, window.innerWidth - 24);
+    const maxH = Math.max(MIN_HEIGHT, window.innerHeight - 24);
+    const finalW = Math.max(MIN_WIDTH, Math.min(maxW, w));
+    const finalH = Math.max(MIN_HEIGHT, Math.min(maxH, h));
+    dialogWindow.style.width = finalW + 'px';
+    dialogWindow.style.height = finalH + 'px';
+    const isExpanded = (finalW > MIN_WIDTH + 40 || finalH > MIN_HEIGHT + 40);
+    updateScaleIcon(isExpanded);
+    if (save) {
+      try {
+        localStorage.setItem('gz_gov_win_w', finalW);
+        localStorage.setItem('gz_gov_win_h', finalH);
+      } catch (e) {}
+    }
+    return { w: finalW, h: finalH };
+  }
+
+  function updateScaleIcon(expanded) {
+    isMaximized = expanded;
+    if (expanded) {
+      btnScale.title = "直角缩放：还原为最小窗口 (420×570)";
+      scaleIcon.innerHTML = '<rect x="7" y="7" width="13" height="13" stroke-width="2" stroke-linecap="square"/><polyline points="4 17 4 4 17 4" stroke-width="2" stroke-linecap="square"/>';
+    } else {
+      btnScale.title = "直角缩放：切换大屏导办全景模式";
+      scaleIcon.innerHTML = '<rect x="4" y="4" width="16" height="16" stroke-width="2.2" stroke-linecap="square"/>';
+    }
+  }
+
+  // 点击顶部直角缩放按钮：在最小窗口与全景大屏之间切换
+  btnScale.addEventListener('click', () => {
+    if (isMaximized) {
+      applyWindowSize(MIN_WIDTH, MIN_HEIGHT, true);
+    } else {
+      const targetW = Math.min(880, window.innerWidth - 32);
+      const targetH = Math.min(760, window.innerHeight - 32);
+      applyWindowSize(targetW, targetH, true);
+    }
+  });
+
+  // 双击顶部标头还原为最小窗口或展开大屏
+  if (windowHeader) {
+    windowHeader.addEventListener('dblclick', (e) => {
+      if (e.target.closest('.win-ctrl-btn')) return;
+      if (dialogWindow.offsetWidth > MIN_WIDTH + 20 || dialogWindow.offsetHeight > MIN_HEIGHT + 20) {
+        applyWindowSize(MIN_WIDTH, MIN_HEIGHT, true);
+      } else {
+        const targetW = Math.min(880, window.innerWidth - 32);
+        const targetH = Math.min(760, window.innerHeight - 32);
+        applyWindowSize(targetW, targetH, true);
+      }
+    });
+  }
+
+  // 拖拽无极缩放交互逻辑
+  function initDragResize(handleEl, type) {
+    if (!handleEl) return;
+    handleEl.addEventListener('mousedown', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      dialogWindow.classList.add('resizing');
+      const startX = e.clientX;
+      const startY = e.clientY;
+      const startW = dialogWindow.offsetWidth;
+      const startH = dialogWindow.offsetHeight;
+
+      function onMouseMove(moveEvent) {
+        let newW = startW;
+        let newH = startH;
+        if (type === 'nw' || type === 'w') {
+          newW = startW + (startX - moveEvent.clientX);
+        }
+        if (type === 'nw' || type === 'n') {
+          newH = startH + (startY - moveEvent.clientY);
+        }
+        applyWindowSize(newW, newH, false);
+      }
+
+      function onMouseUp() {
+        dialogWindow.classList.remove('resizing');
+        document.removeEventListener('mousemove', onMouseMove);
+        document.removeEventListener('mouseup', onMouseUp);
+        try {
+          localStorage.setItem('gz_gov_win_w', dialogWindow.offsetWidth);
+          localStorage.setItem('gz_gov_win_h', dialogWindow.offsetHeight);
+        } catch (e) {}
+      }
+
+      document.addEventListener('mousemove', onMouseMove);
+      document.addEventListener('mouseup', onMouseUp);
+    });
+
+    handleEl.addEventListener('touchstart', (e) => {
+      if (e.touches.length !== 1) return;
+      dialogWindow.classList.add('resizing');
+      const touch = e.touches[0];
+      const startX = touch.clientX;
+      const startY = touch.clientY;
+      const startW = dialogWindow.offsetWidth;
+      const startH = dialogWindow.offsetHeight;
+
+      function onTouchMove(moveEvent) {
+        if (moveEvent.touches.length !== 1) return;
+        const curTouch = moveEvent.touches[0];
+        let newW = startW;
+        let newH = startH;
+        if (type === 'nw' || type === 'w') newW = startW + (startX - curTouch.clientX);
+        if (type === 'nw' || type === 'n') newH = startH + (startY - curTouch.clientY);
+        applyWindowSize(newW, newH, false);
+      }
+
+      function onTouchEnd() {
+        dialogWindow.classList.remove('resizing');
+        document.removeEventListener('touchmove', onTouchMove);
+        document.removeEventListener('touchend', onTouchEnd);
+        try {
+          localStorage.setItem('gz_gov_win_w', dialogWindow.offsetWidth);
+          localStorage.setItem('gz_gov_win_h', dialogWindow.offsetHeight);
+        } catch (e) {}
+      }
+
+      document.addEventListener('touchmove', onTouchMove, { passive: false });
+      document.addEventListener('touchend', onTouchEnd);
+    }, { passive: false });
+  }
+
+  initDragResize(resizeGripNw, 'nw');
+  initDragResize(resizeEdgeW, 'w');
+  initDragResize(resizeEdgeN, 'n');
 
   // 迎宾卡片定时器
   let greetingTimer = setTimeout(() => {
