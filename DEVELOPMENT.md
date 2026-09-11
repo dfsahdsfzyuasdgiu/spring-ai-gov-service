@@ -151,8 +151,15 @@ spring-ai-alibaba/
 │   ├── common/
 │   │   ├── Result.java                         # 统一 API 响应包装类
 │   │   └── DataMaskUtils.java                  # 敏感身份信息脱敏工具
+│   ├── config/
+│   │   └── GovWebMvcConfig.java                # Web MVC 配置 (多媒体类型回退与 UTF-8 保障)
 │   ├── controller/
 │   │   ├── GovChatController.java             # 智能咨询 SSE 流式接口、流程向导、知识图谱、爬虫 API
+│   │   ├── GovAffairController.java           # 32 项事项与 27 部公文 REST 查询、条款模糊检索 API
+│   │   ├── GovGlobalExceptionHandler.java     # 全局异常捕获与友好 JSON 响应 (杜绝白页与堆栈泄露)
+│   │   ├── GovErrorController.java            # /error 路径兜底控制器
+│   │   ├── GovAuthController.java             # 实名认证与模拟登录接口
+│   │   ├── GovWorkOrderController.java        # 12345 工单提交与 AI 研判分流接口
 │   │   ├── GovPortalController.java           # 门户根路径重定向与油猴脚本分发控制器
 │   │   └── GovDashboardController.java         # 统计大屏与指标控制器
 │   ├── model/
@@ -166,7 +173,7 @@ spring-ai-alibaba/
 │   │       ├── ChatResponseChunk.java          # SSE 流式分块 DTO
 │   │       └── FeedbackDTO.java                # 群众反馈 DTO
 │   ├── repository/
-│   │   ├── PolicyRepository.java               # 政策公文库 (JdbcTemplate 查询 H2)
+│   │   ├── PolicyRepository.java               # 政策公文库 (含全文条款与口语别名模糊检索)
 │   │   ├── AffairRepository.java               # 办事指南库 (JdbcTemplate 查询 H2)
 │   │   ├── ChatHistoryRepository.java          # 对话历史仓储库 (持久化落库与上下文查询)
 │   │   └── KnowledgeGraphRepository.java       # 知识图谱三元组仓储库
@@ -174,9 +181,11 @@ spring-ai-alibaba/
 │       ├── GovAiService.java                  # 核心服务: 上下文拼接、Prompt 编排、图谱与向导组装
 │       ├── GovRagService.java                  # 本地政策规章精准 RAG 检索召回服务
 │       └── GovCrawlerService.java             # 广州政务公文爬虫采集服务
+├── src/test/java/com/example/myai/
+│   └── GovEndpointSecurityAuditTests.java      # 全量 REST 接口、边界参数、外键级联与安全测试套件
 ├── src/main/resources/
 │   ├── application.properties                  # 核心配置 (H2 连接池、UTF-8 脚本编码、DashScope API Key)
-│   ├── schema.sql                              # 7 张核心业务表 DDL (UTF-8)
+│   ├── schema.sql                              # 7 张核心业务表 DDL (含外键级联约束 ON DELETE CASCADE)
 │   ├── data.sql                                # 真实广州公文、办事指南与知识图谱初始数据 (UTF-8)
 │   └── static/
 │       ├── index.html                          # 真实网站测试与服务中枢管理页面

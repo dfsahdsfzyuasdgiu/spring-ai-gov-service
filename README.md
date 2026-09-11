@@ -1,4 +1,4 @@
-﻿# 广州市政务政策法规与办事导办 AI 智能系统
+# 广州市政务政策法规与办事导办 AI 智能系统
 ### 基于 SpringBoot + SpringAI 的全生命周期政务知识库与便民服务平台
 
 <p align="center">
@@ -54,7 +54,13 @@
 | **民政老龄与拥军优属** | 4 项 | 29. 广州市老年人优待卡申领（敬老卡）<br>30. 广州市户籍80周岁以上长寿保健金<br>31. 婚姻登记预约（跨省通办）<br>32. 退役军人优待证申领 | GZ-MZ-LNYD031<br>GZ-MZ-CSJ036<br>GZ-MZ-HYDJ037<br>GZ-TY-YDZ038 | [老年人优待卡直通](https://www.gdzwfw.gov.cn/portal/v2/search?keyword=%E8%80%81%E5%B9%B4%E4%BA%BA%E4%BC%98%E5%BE%85%E5%8D%A1&region=440100)<br>[长寿保健金直通](https://www.gdzwfw.gov.cn/portal/v2/search?keyword=%E9%95%BF%E5%AF%BF%E4%BF%9D%E5%81%A5%E9%87%91&region=440100)<br>[婚姻登记预约直通](https://www.gdzwfw.gov.cn/portal/v2/search?keyword=%E5%A9%9A%E5%A7%BB%E7%99%BB%E8%AE%B0&region=440100)<br>[退役军人优待证直通](https://www.gdzwfw.gov.cn/portal/v2/search?keyword=%E9%80%80%E5%BD%B9%E5%86%9B%E4%BA%BA%E4%BC%98%E5%BE%85%E8%AF%81&region=440100) |
 
 ### 2.2 27 部广州市政府现行红头政策公文库
-数据库预置了 27 部真实有效的红头公文规章（包含 `穗府办规〔2020〕17号`、`穗公积金规字〔2023〕1号`、`穗府规〔2023〕1号`、`穗府办规〔2022〕17号`、`公安部令第162号` 等），覆盖发文字号、制定机构、成文日期及 38+ 核心条文切片，为 RAG 问答提供坚实的法定依据支撑。
+数据库预置了 27 部真实有效的红头公文规章（包含 `穗府办规〔2024〕6号`、`穗公积金规字〔2023〕1号`、`穗府规〔2023〕1号`、`穗府办规〔2022〕17号`、`公安部令第162号` 等），覆盖发文字号、制定机构、成文日期及核心条文切片，为 RAG 问答提供坚实的法定依据支撑。
+
+### 2.3 广州市法定公文发文字号“穗”字官方规范依据
+根据中共中央办公厅、国务院办公厅印发的《党政机关公文处理工作条例》（中办发〔2012〕14号）第九条第四款规定：“发文字号由发文机关代字、年份、发文顺序号组成。”
+* **广东省级机关**：统一代字为 **“粤”**（如 `粤府令`、`粤人社规`）；
+* **广州市级机关**：统一依法使用官方简称 **“穗”**（源于羊城“五羊衔谷”历史典故，车牌为粤A）；
+* **官方公文代字规范**：市政府发文为 `穗府`、市政府办公厅为 `穗府办/穗府办规`、市公积金中心为 `穗公积金/穗公积金规字`、市医保局为 `穗医保`、市人社局为 `穗人社`。若写作“广府”或“州府”，在行政法与公文审核中属于**违规公文**。
 
 ---
 
@@ -64,15 +70,16 @@
 | :--- | :--- | :--- |
 | **开发框架** | Spring Boot 3.3.4 (Java 17 LTS) | 企业级后端基础架构 |
 | **大模型框架** | Spring AI Alibaba 1.0.0-M2.1 | 通义千问 `qwen-plus` 流式 SSE 调用与 Prompt 工程编排 |
-| **持久化数据库** | H2 Database (文件模式 `./data/gz_gov_ai.mv.db`) | MySQL 兼容模式，重启不丢数据，严格 UTF-8 编码 |
+| **持久化数据库** | H2 Database (文件模式 `./data/gz_gov_ai.mv.db`) | MySQL 兼容模式，增加外键级联约束，重启不丢数据 |
+| **全局异常与安全** | `GovGlobalExceptionHandler` + `GovWebMvcConfig` | 拦截 400/404/405/500，统一结构化响应，彻底杜绝 Whitelabel 白页与堆栈泄露 |
 | **数据爬虫采集** | Jsoup + Regex Engine | 广州市政务公文发文字号、正文条款及办事要素自动化抓取解析 |
-| **前端交互规范** | 原生 JavaScript + Shadow DOM | 物理样式隔离，支持直接挂载在任意真实官方网站运行 |
+| **前端交互规范** | 原生 JavaScript + Shadow DOM | 物理样式隔离，全直角公文视觉，字体字号舒适放大，自适应高清大屏 |
 
 ### 核心数据表设计
 ```text
 gov_policy_doc            ── 广州市现行政策法规公文表 (发文字号、发布机关、成文日期、摘要)
-gov_policy_clause         ── 政策法规条款切片表 (条款编号、法定原文内容)
-gov_affair_guide          ── 政务办事指南事项表 (实施编码、事项全称、法定/承诺时限、准入条件、官方直达链接 online_handle_url)
+gov_policy_clause         ── 政策法规条款切片表 (条款编号、法定原文内容，支持外键级联删除)
+gov_affair_guide          ── 政务办事指南事项表 (实施编码、事项全称、法定/承诺时限、准入条件、官方直达链接)
 gov_affair_material       ── 办事指南申报材料清单表 (材料名称、是否必备、免交方式、样本提示)
 gov_affair_process        ── 办事流程步骤表 (环节序号、环节名称、办理内容、耗时估算)
 gov_chat_history          ── 多轮会话持久化表 (sessionId、用户提问、AI回复、公文溯源、时间)
@@ -81,19 +88,31 @@ gov_knowledge_relation    ── 政务知识图谱三元组表 (事项 ➔ 政�
 
 ---
 
-## 四、 快速构建与运行
+## 四、 快速构建与启动服务
 
+### 方式一：一键双击批处理脚本（最推荐，零配置秒开）
+* 在主工作区直接双击：👉 **`快速启动服务.bat`**
+* 或进入项目根目录双击：👉 **`start.bat`**
+> 脚本内置 JDK 17 环境自动检测、编译包自动检查（无包自动构建）、8080 端口占用防冲突及 UTF-8 编码强制保障。
+
+### 方式二：命令行启动已打包 JAR（生产模式，2秒拉起）
 ```powershell
-# 1. 进入工程目录
+# 进入代码根目录
 cd c:\Users\Lenovo\Desktop\实验项目\spring-ai-alibaba\spring-ai-alibaba
 
-# 2. 执行 Maven 一键打包
-.\mvnw.cmd clean package -DskipTests
-
-# 3. 强制以 UTF-8 编码启动服务
+# 启动可执行程序包
 java -Dfile.encoding=UTF-8 -jar target/spring-ai-alibaba-0.0.1-SNAPSHOT.jar
 ```
-服务启动后，Tomcat 监听在 `8080` 端口。
+
+### 方式三：Maven 构建与运行
+```powershell
+# 一键编译并跳过测试打包
+.\mvnw.cmd clean package -DskipTests
+
+# 运行自动化安全与端点审计测试套件
+.\mvnw.cmd test -Dtest=GovEndpointSecurityAuditTests
+```
+服务启动后，默认监听在 `http://localhost:8080/`。
 
 ---
 

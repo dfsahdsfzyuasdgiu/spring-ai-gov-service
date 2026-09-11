@@ -170,10 +170,10 @@
       position: absolute;
       bottom: 0;
       right: 0;
-      width: 420px;
-      height: 570px;
-      min-width: 420px !important;
-      min-height: 570px !important;
+      width: 480px;
+      height: 640px;
+      min-width: 440px !important;
+      min-height: 580px !important;
       max-width: calc(100vw - 24px);
       max-height: calc(100vh - 24px);
       background: #ffffff;
@@ -270,12 +270,12 @@
       flex-shrink: 0;
     }
     .header-titles h3 {
-      font-size: 13.5px;
+      font-size: 15px;
       font-weight: 700;
       letter-spacing: 0.6px;
     }
     .header-titles p {
-      font-size: 9.5px;
+      font-size: 11.5px;
       color: #e6f0ff;
       margin-top: 1px;
     }
@@ -307,8 +307,8 @@
       background: #fdfbf7;
       border-bottom: 1px solid #faecd8;
       color: #8c5d1e;
-      font-size: 10px;
-      padding: 4px 10px;
+      font-size: 12px;
+      padding: 5px 12px;
       display: flex;
       align-items: center;
       gap: 6px;
@@ -317,9 +317,9 @@
     .notice-badge {
       background: #fa8c16;
       color: #ffffff;
-      font-size: 9px;
+      font-size: 11px;
       font-weight: 700;
-      padding: 0 3px;
+      padding: 1px 5px;
       border-radius: 0;
       line-height: 1.2;
     }
@@ -339,8 +339,8 @@
       border: 1px solid #b0cbe8;
       border-radius: 0 !important;
       color: #003a8c;
-      font-size: 11px;
-      padding: 4px 4px;
+      font-size: 12.5px;
+      padding: 5px 6px;
       cursor: pointer;
       transition: all 0.15s ease;
       line-height: 1.3;
@@ -380,7 +380,7 @@
     .chat-row.user { align-items: flex-end; }
     .chat-row.ai { align-items: flex-start; }
     .chat-author {
-      font-size: 10px;
+      font-size: 12px;
       color: #64748b;
       margin-bottom: 3px;
       font-weight: 600;
@@ -390,10 +390,10 @@
     .chat-bubble {
       max-width: 95%;
       border-radius: 0 !important;
-      font-size: 12px;
-      line-height: 1.6;
+      font-size: 14px;
+      line-height: 1.65;
       word-break: break-word;
-      padding: 8px 10px;
+      padding: 10px 14px;
     }
     .chat-row.user .chat-bubble {
       background: #006ed5;
@@ -427,17 +427,17 @@
     .mingbai-tag {
       background: #006ed5;
       color: #ffffff;
-      font-size: 9.5px;
+      font-size: 11.5px;
       font-weight: 700;
-      padding: 1px 4px;
+      padding: 2px 6px;
       border-radius: 0;
       letter-spacing: 0.5px;
     }
     .mingbai-summary-body {
-      font-size: 12px;
+      font-size: 14.5px;
       font-weight: 600;
       color: #003a8c;
-      line-height: 1.55;
+      line-height: 1.65;
     }
 
     /* 【办事向导三步法】结构化直角卡片（全流程文字办事指引） */
@@ -453,8 +453,8 @@
       border-left: 3px solid #389e0d;
       border-radius: 0 !important;
       padding: 7px 9px;
-      font-size: 11.5px;
-      line-height: 1.5;
+      font-size: 13.5px;
+      line-height: 1.6;
     }
     .guided-step-block.step-1 {
       border-left-color: #389e0d;
@@ -475,9 +475,9 @@
       margin-bottom: 5px;
     }
     .step-badge {
-      font-size: 9.5px;
+      font-size: 12px;
       font-weight: 700;
-      padding: 1px 5px;
+      padding: 2px 7px;
       color: #ffffff;
       background: #389e0d;
       border-radius: 0 !important;
@@ -488,7 +488,7 @@
     .step-3 .step-badge { background: #389e0d; }
     .step-block-title {
       font-weight: 700;
-      font-size: 11.5px;
+      font-size: 14px;
       color: #0f172a;
     }
     .step-qual-box {
@@ -497,12 +497,12 @@
       border-radius: 0 !important;
       padding: 5px 8px;
       color: #1e293b;
-      font-size: 11px;
-      line-height: 1.55;
-      margin-bottom: 4px;
+      font-size: 13.5px;
+      line-height: 1.6;
+      margin-bottom: 5px;
     }
     .step-sub-note {
-      font-size: 10px;
+      font-size: 12.5px;
       color: #52c41a;
       line-height: 1.4;
     }
@@ -515,9 +515,9 @@
       gap: 4px;
     }
     .step-mat-item {
-      font-size: 11px;
+      font-size: 13px;
       color: #1e293b;
-      line-height: 1.45;
+      line-height: 1.55;
       padding-left: 10px;
       position: relative;
     }
@@ -529,7 +529,7 @@
       color: #389e0d;
     }
     .mat-tag-free {
-      font-size: 9px;
+      font-size: 11.5px;
       background: #f6ffed;
       color: #389e0d;
       border: 1px solid #b7eb8f;
@@ -540,13 +540,13 @@
     }
     .mat-tip-sub {
       color: #8c8c8c;
-      font-size: 10px;
-      margin-top: 1px;
+      font-size: 12px;
+      margin-top: 2px;
     }
     .step-limit-banner {
-      font-size: 11px;
+      font-size: 13.5px;
       color: #1e293b;
-      margin-bottom: 5px;
+      margin-bottom: 6px;
       font-weight: 500;
     }
     .step-limit-banner strong {
@@ -564,7 +564,7 @@
       gap: 3px;
     }
     .step-proc-row {
-      font-size: 10.5px;
+      font-size: 13px;
       color: #334155;
       line-height: 1.4;
     }
@@ -577,10 +577,10 @@
       border-left: 3px solid #389e0d;
       border-radius: 0 !important;
       padding: 6px 8px;
-      font-size: 11px;
+      font-size: 13px;
       color: #1e293b;
-      line-height: 1.5;
-      margin-bottom: 4px;
+      line-height: 1.55;
+      margin-bottom: 5px;
     }
     .route-label {
       font-weight: 700;
@@ -594,8 +594,8 @@
       border-radius: 0 !important;
       padding: 5px 8px;
       color: #135200;
-      font-size: 10.5px;
-      line-height: 1.45;
+      font-size: 12.5px;
+      line-height: 1.55;
       margin-top: 4px;
     }
 
@@ -611,8 +611,8 @@
       gap: 6px;
     }
     .mb-item {
-      font-size: 11.5px;
-      line-height: 1.5;
+      font-size: 13.5px;
+      line-height: 1.6;
       color: #334155;
     }
     .mb-item-title {
@@ -648,11 +648,11 @@
     .source-doc-info {
       font-weight: 700;
       color: #1a1a1a;
-      font-size: 11px;
-      line-height: 1.35;
+      font-size: 13px;
+      line-height: 1.45;
     }
     .source-doc-meta {
-      font-size: 10px;
+      font-size: 12px;
       color: #64748b;
       margin-top: 2px;
     }
@@ -660,8 +660,8 @@
       color: #c20505;
       background: #ffffff;
       border: 1px solid #ffa39e;
-      font-size: 9.5px;
-      padding: 1px 6px;
+      font-size: 11.5px;
+      padding: 2px 7px;
       cursor: pointer;
       border-radius: 0;
       transition: all 0.15s ease;
@@ -932,31 +932,31 @@
     .input-wrapper { display: flex; align-items: center; gap: 6px; }
     .gz-text-input {
       flex: 1;
-      height: 32px;
+      height: 40px;
       border: 1px solid #b0cbe8;
       border-radius: 0 !important;
-      padding: 0 8px;
-      font-size: 11.5px;
+      padding: 0 12px;
+      font-size: 13.5px;
       color: #1a1a1a;
       outline: none;
       background: #ffffff;
     }
     .gz-text-input:focus { border-color: #0050b3; }
     .gz-submit-btn {
-      height: 32px;
-      padding: 0 12px;
+      height: 40px;
+      padding: 0 16px;
       border-radius: 0 !important;
       border: none;
       background: #006ed5;
       color: #ffffff;
       cursor: pointer;
-      font-size: 11.5px;
+      font-size: 14px;
       font-weight: 600;
     }
     .gz-submit-btn:hover { background: #0050b3; }
     .gz-submit-btn:disabled { background: #bfbfbf; cursor: not-allowed; }
     .footer-authority-note {
-      font-size: 9px;
+      font-size: 11px;
       color: #8c8c8c;
       text-align: center;
     }
