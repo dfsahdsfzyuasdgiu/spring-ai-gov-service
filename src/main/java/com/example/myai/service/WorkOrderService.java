@@ -43,13 +43,13 @@ public class WorkOrderService {
     }
 
     private String getRecommendedDept(String category) {
-        if (category == null) return "海口市12345政务热线服务中心";
+        if (category == null) return "广州市12345政务服务便民热线中心";
         switch (category) {
-            case "户籍管理": return "海口市公安局户政处";
-            case "住房保障": return "海南省住房公积金管理局海口分局";
-            case "医疗保险": return "海口市医疗保障局";
-            case "企业开办": return "海口市市场监督管理局";
-            default: return "海口市综合行政审批服务局";
+            case "户籍管理": return "广州市公安局户政管理支队";
+            case "住房保障": return "广州住房公积金管理中心";
+            case "医疗保险": return "广州市医疗保障局";
+            case "企业开办": return "广州市市场监督管理局";
+            default: return "广州市政务服务和数据管理局";
         }
     }
 }

@@ -12,7 +12,7 @@ public class WorkOrder12345 implements Serializable {
     private String userPhone;       // 联系电话 (已脱敏)
     private String category;        // 诉求类别 (户籍/社保/医保/交通/综合等)
     private String appealContent;   // 群众反映的具体诉求或疑难问题
-    private String assignedDept;    // 拟派驻承办单位 (如: 海口市人力资源和社会保障局)
+    private String assignedDept;    // 拟派驻承办单位 (如: 广州市人力资源和社会保障局)
     private int status;             // 状态: 0-待受理, 1-已分派处理中, 2-已答复办结
     private String replyContent;    // 官方承办答复内容
     private String createTime;      // 提交时间
