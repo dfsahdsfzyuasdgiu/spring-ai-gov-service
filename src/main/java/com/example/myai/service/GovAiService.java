@@ -135,20 +135,14 @@ public class GovAiService {
             prefixChunks.add(ChatResponseChunk.citation(citationMap));
         }
 
-        // 6. 组装收尾卡片块 (办事指南卡片 + 知识图谱三元组 + 分步导办向导 + 联办推荐)
+        // 6. 组装收尾卡片块 (办事指南卡片 + 分步导办向导 + 联办推荐)
         List<ChatResponseChunk> suffixChunks = new ArrayList<>();
         if (matchedAffair != null) {
             suffixChunks.add(ChatResponseChunk.guideCard(matchedAffair));
 
-            // 扩展功能二：办事流程引导式对话卡片 (分步引导: 资格自查 -> 材料准备 -> 网办直达)
+            // 扩展功能二：办事流程引导式卡片 (完整向导三步法: 资格自查 -> 材料准备 -> 网办指引)
             Map<String, Object> guidedSteps = buildGuidedStepsCard(matchedAffair);
             suffixChunks.add(ChatResponseChunk.guidedStepsCard(guidedSteps));
-        }
-
-        // 扩展功能一：政务知识图谱关联检索 (三元组：法定依据、承办部门、适用主体、业务联办)
-        List<KnowledgeRelation> relations = retrieveKnowledgeRelations(matchedAffair, ragResult);
-        if (!relations.isEmpty()) {
-            suffixChunks.add(ChatResponseChunk.graphCard(relations));
         }
 
         // 链式关联事项推荐卡片
@@ -248,7 +242,11 @@ public class GovAiService {
         card.put("affairCode", affair.getAffairCode());
         card.put("affairName", affair.getAffairName());
         card.put("qualifications", affair.getQualifications());
+        card.put("promisedLimitDays", affair.getPromisedLimitDays());
+        card.put("handlingAddress", affair.getHandlingAddress());
         card.put("onlineHandleUrl", affair.getOnlineHandleUrl());
+        card.put("materials", affair.getMaterials());
+        card.put("processSteps", affair.getProcessSteps());
 
         List<Map<String, String>> steps = new ArrayList<>();
 
@@ -368,17 +366,15 @@ public class GovAiService {
         sb.append("你是广州市人民政府门户网站（www.gz.gov.cn）“政策法规 AI 智能问答专窗·政策便民翻译官”。\n");
         sb.append("你由广州市政务服务和数据管理局指导建设，依托广州市现行规章与规范性文件权威数据库（Vector DB + RAG）为市民提供政策咨询解答。\n");
         sb.append("【核心宗旨】：项目的本质是便利人民的生活，通过 AI 把复杂的法款条例智能翻译成老百姓需要的、能听懂的语言，解决老百姓办事“看不懂政策、找不到门路、不知晓实惠”的痛点。\n");
-        sb.append("请严格按照以下【快速答疑 · 办事要点】规范输出答复，绝不讲空话套话，绝不在正文无意义堆砌法条原文：\n\n");
+        sb.append("请严格按照以下规范输出答复，绝不讲空话套话，绝不在正文无意义堆砌法条原文：\n\n");
         sb.append("答复结构模板：\n");
         sb.append("【快速答疑】\n");
         sb.append("（开门见山用 1-2 句话直接说清楚核心结论，市民最关心的结果：到底能不能办、能领多少钱/补贴额度、最长有效期或最快多久办好）\n\n");
-        sb.append("【办事要点】\n");
-        sb.append("• 准入门槛：谁能办（讲清户籍、社保缴费月数、年龄等硬性准入条件）\n");
-        sb.append("• 待遇标准/携带材料：给多少/带什么（实惠待遇算清楚，或明确办事办证需要携带的核心材料，能免则免）\n");
-        sb.append("• 办理渠道：去哪办（零跑腿指引，直接列出微信小程序“穗好办”、广东政务服务网或就近网点）\n");
-        sb.append("• 注意事项：提个醒（提醒社保断缴、申请时间截点等市民最容易踩坑的细节）\n\n");
+        sb.append("【注意事项与关键提醒】\n");
+        sb.append("（精炼列出社保断缴、申请时间截点等市民最容易踩坑的细节）\n\n");
         sb.append("【官方政策依据】\n");
         sb.append("（注明依据的官方红头文件名称与文号，例如《广州市xxx规定》（穗府办规〔202x〕x号）。注意：正文切勿大篇幅摘抄法条原文，法定条款原文明细已由系统自动挂载至底部的“查看条文原文”抽屉供市民按需查验）\n\n");
+        sb.append("（重要说明：准入门槛、申报材料与线上线下办理路径已由系统自动挂载为结构化【办事向导三步法】卡片，正文无需重复堆砌门槛和材料列表，请专注回答【快速答疑】的核心定性结论与【注意事项与关键提醒】）\n\n");
 
         if (historyList != null && !historyList.isEmpty()) {
             sb.append("【此前多轮对话历史上下文（会话记忆）】\n");
