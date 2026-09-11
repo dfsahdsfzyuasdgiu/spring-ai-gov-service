@@ -1507,9 +1507,16 @@
     return div;
   }
 
+  function stripEmoji(s) {
+    if (!s) return '';
+    return s.replace(/[\u{1F000}-\u{1FFFF}\u{2600}-\u{27BF}\u{2B00}-\u{2BFF}\u{FE00}-\u{FEFF}\u{1F300}-\u{1F9FF}]/gu, '')
+             .replace(/[\u2702\u2705\u2708-\u270D\u270F\u2712\u2714\u2716\u271D\u2721\u2728\u2733\u2734\u2744\u2747\u274C\u274E\u2753-\u2755\u2757\u2763\u2764\u2795-\u2797\u27A1\u27B0\u27BF]/g, '')
+             .replace(/\s{2,}/g, ' ')
+             .trim();
+  }
   function formatMarkdownLike(str) {
     if (!str) return '';
-    let html = escapeText(str)
+    let html = escapeText(stripEmoji(str))
       .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
       .replace(/\*(.*?)\*/g, '<em>$1</em>');
 
