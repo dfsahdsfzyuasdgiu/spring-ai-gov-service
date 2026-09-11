@@ -403,42 +403,42 @@
 
     </div>
 
-    <!-- 下方快速导航与演示 -->
+    <!-- 32项高频事项与政策法规数据库检查中心 -->
     <div class="card">
       <div class="card-header">
-        <div class="card-title">数字化协同管理与汇报演示中心</div>
+        <div class="card-title">广州政务 32 项全生命周期事项与政策数据库检查中心</div>
       </div>
       <div class="nav-grid">
-        <a href="/admin.html" class="nav-tile">
+        <a href="/api/v1/gov/affairs" target="_blank" class="nav-tile">
           <div>
-            <div class="nav-tile-title">数字化协同管理大屏</div>
-            <div class="nav-tile-desc">12345 工单研判分流、诉求办理答复、热点民情研判与知识库审计大屏。</div>
+            <div class="nav-tile-title">32项政务服务事项全览</div>
+            <div class="nav-tile-desc">查看 10 大委办局 32 项高频事项数据，包含实施编码、准入条件及广东政务服务网直达 URL。</div>
           </div>
-          <div style="font-size: 12px; color: var(--gov-blue); font-weight: 600; margin-top: 10px;">进入管理后台 ➔</div>
+          <div style="font-size: 12px; color: var(--gov-blue); font-weight: 600; margin-top: 10px;">查看 32 项事项 ➔</div>
         </a>
 
-        <a href="/presentation.html" class="nav-tile">
+        <a href="/api/v1/gov/policies" target="_blank" class="nav-tile">
           <div>
-            <div class="nav-tile-title">实训答辩汇报 PPT</div>
-            <div class="nav-tile-desc">8 页全屏交互式答辩演示胶片，涵盖项目背景、技术架构、核心攻关与未来愿景。</div>
+            <div class="nav-tile-title">27部红头政策法规公文库</div>
+            <div class="nav-tile-desc">查看广州市现行有效的 27 部法定红头政策公文、发文字号、制定机关与法规条款切片。</div>
           </div>
-          <div style="font-size: 12px; color: var(--gov-blue); font-weight: 600; margin-top: 10px;">全屏演示汇报 ➔</div>
+          <div style="font-size: 12px; color: var(--gov-blue); font-weight: 600; margin-top: 10px;">查看 27 部公文 ➔</div>
         </a>
 
         <a href="/api/v1/gov/policy/search?keyword=%E5%85%AC%E7%A7%9F%E6%88%BF" target="_blank" class="nav-tile">
           <div>
-            <div class="nav-tile-title">政策法规检索接口</div>
-            <div class="nav-tile-desc">直接调用后端 REST API 探测真实公租房政策公文条款及法条出处结构化 JSON。</div>
+            <div class="nav-tile-title">政策条款模糊检索接口</div>
+            <div class="nav-tile-desc">直接调用后端 REST API 探测公租房/公积金/医保等政策条款与法条出处结构化数据。</div>
           </div>
-          <div style="font-size: 12px; color: var(--gov-blue); font-weight: 600; margin-top: 10px;">调用政策 API ➔</div>
+          <div style="font-size: 12px; color: var(--gov-blue); font-weight: 600; margin-top: 10px;">检索政策条款 ➔</div>
         </a>
 
-        <a href="/api/v1/gov/work-order/list" target="_blank" class="nav-tile">
+        <a href="/api/v1/gov/chat/history" target="_blank" class="nav-tile">
           <div>
-            <div class="nav-tile-title">12345 工单数据接口</div>
-            <div class="nav-tile-desc">查看接诉即办闭环工单列表，验证多部门智能流转、字段脱敏与官方答复数据。</div>
+            <div class="nav-tile-title">多轮问答持久化历史接口</div>
+            <div class="nav-tile-desc">查看 Spring AI 对话历史持久化记录，验证 Session 上下文与政策溯源关联数据。</div>
           </div>
-          <div style="font-size: 12px; color: var(--gov-blue); font-weight: 600; margin-top: 10px;">调用工单 API ➔</div>
+          <div style="font-size: 12px; color: var(--gov-blue); font-weight: 600; margin-top: 10px;">查看会话历史 ➔</div>
         </a>
       </div>
     </div>
@@ -460,5 +460,7 @@
       });
     }
   </script>
+  <!-- 直接在首页加载政务助手，方便本地一键直接体验 -->
+  <script src="/gz_assistant_embed.js"></script>
 </body>
 </html>
