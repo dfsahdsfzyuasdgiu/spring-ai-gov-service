@@ -1069,7 +1069,7 @@
         <div class="header-main" style="padding-left: 12px;">
           <div class="header-titles">
             <h3>广州市人民政府门户网站 · 政策智能咨询</h3>
-            <p>广州市现行规章与规范性文件权威数据库 ｜ 政策条款直溯</p>
+            
           </div>
         </div>
         <div class="header-controls">
@@ -1685,7 +1685,7 @@
         procListHtml = gs.processSteps.map(s => `
           <div class="step-proc-row">
             <strong>第${s.stepNo}步【${escapeText(s.stepName)}】</strong>：${escapeText(s.description)}
-            <span style="color:#8c8c8c; font-size:10px;">（预计耗时：${escapeText(s.timeCost || '即时')}）</span>
+            
           </div>
         `).join('');
       }
@@ -1712,7 +1712,7 @@
               <span class="step-block-title">【准入资格自查】</span>
             </div>
             <div class="step-qual-box">${escapeText(qualText)}</div>
-            <div class="step-sub-note">请对照上述准入条件确认是否符合申报资质；符合条件即可备齐材料直接申报。</div>
+            
           </div>
 
           <!-- 步骤2: 申报材料与免提交核查 -->
@@ -1722,7 +1722,7 @@
               <span class="step-block-title">【申报材料与免提交核查】</span>
             </div>
             <ul class="step-mat-list">${matItemsHtml}</ul>
-            <div class="step-sub-note">核心材料已接入广州政务大数据联网核验，支持电子证照自动免提交。</div>
+            
           </div>
 
           <!-- 步骤3: 全流程文字办事指引 -->
@@ -1734,16 +1734,15 @@
             <div class="step-limit-banner">承诺办结时限：<strong>${limitDays} 个工作日</strong></div>
             ${procListHtml ? `<div class="step-proc-chain">${procListHtml}</div>` : ''}
             <div class="step-route-box">
-              <div class="route-label">线上办理文字路径</div>
+              <div class="route-label">线上办理通道</div>
               <div class="route-content">
-                ${escapeText(onlineRoute)}
+                ${(gs.onlineRoute && !gs.onlineRoute.startsWith('打开手机微信搜索')) ? `<div style="margin-bottom:6px;">${escapeText(gs.onlineRoute)}</div>` : ''}
                 ${gs.onlineHandleUrl ? `
-                <div style="margin-top:8px; padding:6px 10px; background:#f0f7ff; border:1px solid #adc6ff; border-left:3px solid #1677ff;">
-                  <div style="font-weight:700; color:#1677ff; font-size:11.5px; margin-bottom:3px;">广东政务服务网 · 官方在线申办直达</div>
-                  <a href="${escapeText((gs.onlineHandleUrl || '').replace(/https?:\/\/zwfw\.gd\.gov\.cn/g, 'https://www.gdzwfw.gov.cn'))}" target="_blank" rel="noopener noreferrer" style="color:#1677ff; font-weight:700; text-decoration:none; font-size:12px; display:inline-flex; align-items:center; gap:4px;">
-                    点击直达官方申报入口 [${escapeText(gs.affairCode || '统一实施编码')}] ↗
+                <div style="padding:6px 10px; background:#f0f7ff; border:1px solid #adc6ff; border-left:3px solid #1677ff;">
+                  <a href="${escapeText((gs.onlineHandleUrl || '').replace(/https?:\/\/zwfw\.gd\.gov\.cn/g, 'https://www.gdzwfw.gov.cn'))}" target="_blank" rel="noopener noreferrer" style="color:#1677ff; font-weight:700; text-decoration:none; font-size:13px; display:inline-flex; align-items:center; gap:4px;">
+                    点击直达广东政务服务网申报入口 [${escapeText(gs.affairCode || '统一实施编码')}] ↗
                   </a>
-                </div>` : ''}
+                </div>` : (!gs.onlineRoute || gs.onlineRoute.startsWith('打开手机微信搜索') ? '<div>可通过“穗好办”APP或广东政务服务网在线申报。</div>' : '')}
               </div>
               <div class="route-label offline">线下办事网点</div>
               <div class="route-content">${escapeText(offlineAddress)}</div>
@@ -1808,7 +1807,7 @@
         ${suggestionsHtml}
       </div>
       <div class="chat-feedback-bar">
-        <span>信息承办：广州市政务服务和数据管理局</span>
+        <span></span>
         <div class="action-btn-group">
           <button class="action-sub-btn btn-copy-mingbai" title="点击复制政策解答内容">复制</button>
           <button class="action-sub-btn fb-toggle-btn" title="点击展开政策解答疑问与建议反馈">有疑问？</button>
@@ -1981,7 +1980,7 @@
       const stepsList = (stepData.processSteps || []).map(s => `
         <div style="margin-bottom:4px; font-size:11px; color:#1e293b;">
           <strong>第${s.stepNo}步【${escapeText(s.stepName)}】</strong>：${escapeText(s.description)}
-          <span style="color:#8c8c8c; font-size:10px;">（预计耗时：${escapeText(s.timeCost)}）</span>
+          
         </div>
       `).join('');
 
