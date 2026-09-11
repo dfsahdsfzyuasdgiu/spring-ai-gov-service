@@ -1,820 +1,526 @@
-# 《基于 Spring Boot + Spring AI 的智能政务咨询与导办系统》开发文档
+# 《基于 SpringBoot + SpringAI 的智能政务政策咨询与导办系统》开发与技术实现文档
+### 广州市人民政府门户网站（www.gz.gov.cn）专版
 
-> **项目名称**：智能政务咨询与导办系统（Efficient Government AI Consultation & Guiding System）  
-> **设计基准**：严格遵循国务院《关于进一步优化政务服务提升行政效能推动“高效办成一件事”的指导意见》（国发〔2024〕3号）、国家一体化政务服务平台、上海“随申办”、浙江“浙里办”及“12345”接诉即办工作规范。  
-> **运行环境**：JDK 17 + Spring Boot 3.3.4 + Spring AI Alibaba 1.0.0-M2.1 + Vue 3  
-> **默认访问地址**：`http://localhost:8080/index.html`（群众端咨询门户） / `http://localhost:8080/admin.html`（政务民情大屏）
+> **项目名称**：智能政务政策法规咨询与导办系统（Guangzhou Smart Government Policy AI Consultation & Guiding System）  
+> **核心宗旨**：**“通过 AI 把复杂的法款条例智能翻译成老百姓能听懂的语言，项目的本质是便利人民的生活。”**  
+> **建设标准**：对齐全国一体化在线政务服务平台标准规范、广东省“粤省事/粤商通”、广州市“穗好办”移动政务服务规范，以及党政机关严肃公文规范（全直角、无卡通、严格 0 Emoji）。  
+> **运行环境**：JDK 17 LTS + Spring Boot 3.3.4 + Spring AI Alibaba 1.0.0-M2.1 + H2 Database (MySQL Mode) + 原生 JavaScript (Shadow DOM 物理隔离) + Tampermonkey 油猴插件。  
+> **本地访问地址**：`http://localhost:8080/`（仿真政务门户） / `http://localhost:8080/gz_gov_ai_assistant.user.js`（油猴插件分发）
 
 ---
 
 ## 目录 (Table of Contents)
 - [1. 建设背景与系统定位](#1-建设背景与系统定位)
-  - [1.1 政策背景与痛点分析](#11-政策背景与痛点分析)
-  - [1.2 核心建设目标与特色](#12-核心建设目标与特色)
+  - [1.1 核心建设宗旨与业务痛点](#11-核心建设宗旨与业务痛点)
+  - [1.2 关键指标与功能特性](#12-关键指标与功能特性)
 - [2. 系统整体技术架构](#2-系统整体技术架构)
-  - [2.1 整体分层架构设计](#21-整体分层架构设计)
-  - [2.2 核心技术栈选型表](#22-核心技术栈选型表)
+  - [2.1 整体分层技术架构](#21-整体分层技术架构)
+  - [2.2 核心技术选型表](#22-核心技术选型表)
   - [2.3 工程代码目录组织结构](#23-工程代码目录组织结构)
-- [3. 数据库与数据模型设计](#3-数据库与数据模型设计)
-  - [3.1 实体关系结构 (ER)](#31-实体关系结构-er)
-  - [3.2 核心实体模型详解](#32-核心实体模型详解)
-  - [3.3 数据隐私保护与脱敏设计](#33-数据隐私保护与脱敏设计)
+- [3. 数据库与持久化数据模型设计](#3-数据库与持久化数据模型设计)
+  - [3.1 实体关系结构 (ER) 与 7 张核心表](#31-实体关系结构-er-与-7-张核心表)
+  - [3.2 数据库 DDL 结构详解](#32-数据库-ddl-结构详解)
+  - [3.3 编码规范与防乱码机制 (UTF-8 强制对齐)](#33-编码规范与防乱码机制-utf-8-强制对齐)
 - [4. 核心业务逻辑与技术实现](#4-核心业务逻辑与技术实现)
-  - [4.1 RAG 政策检索增强与精准溯源（防幻觉引擎）](#41-rag-政策检索增强与精准溯源防幻觉引擎)
-  - [4.2 意图识别与“边聊边办”智能导办卡片](#42-意图识别与边聊边办智能导办卡片)
-    - [4.2.1 多轮交互式条件追问与精准澄清 (Slot-filling & Clarification)](#421-多轮交互式条件追问与精准澄清-slot-filling--clarification)
-    - [4.2.2 “高效办成一件事”——链式关联事项推荐 (One-Thing Chain)](#422-高效办成一件事链式关联事项推荐-one-thing-chain)
-  - [4.3 统一身份认证与 RBAC 权限控制](#43-统一身份认证与-rbac-权限控制)
-  - [4.4 12345 民情工单闭环接诉即办与 AI 智能归口研判](#44-12345-民情工单闭环接诉即办与-ai-智能归口研判)
-  - [4.5 典型民情案例公示回音壁](#45-典型民情案例公示回音壁)
-  - [4.6 政务态势感知与研判大屏](#46-政务态势感知与研判大屏)
-- [5. 接口规范与 API 参考](#5-接口规范与-api-参考)
-  - [5.1 智能问答与导办接口](#51-智能问答与导办接口)
-  - [5.2 统一身份认证接口](#52-统一身份认证接口)
-  - [5.3 事项办理与材料自检接口](#53-事项办理与材料自检接口)
-  - [5.4 12345 工单流转与 AI 研判接口](#54-12345-工单流转与-ai-研判接口)
-  - [5.5 管理端民情研判看板接口](#55-管理端民情研判看板接口)
-- [6. 前端 UI/UX 设计与排版规范](#6-前端-uiux-设计与排版规范)
-  - [6.1 权威党政红蓝金视觉体系](#61-权威党政红蓝金视觉体系)
-  - [6.2 专注式双栏排版与侧边栏双 Tab 联动](#62-专注式双栏排版与侧边栏双-tab-联动)
-  - [6.3 交互式多功能模态弹窗](#63-交互式多功能模态弹窗)
-  - [6.4 拟人化流式打字与单气泡状态机](#64-拟人化流式打字与单气泡状态机)
-- [7. 环境部署与运行调试指南](#7-环境部署与运行调试指南)
-  - [7.1 环境依赖要求](#71-环境依赖要求)
-  - [7.2 配置文件说明](#72-配置文件说明)
-  - [7.3 构建打包与启动命令](#73-构建打包与启动命令)
-  - [7.4 预设演示账号体系](#74-预设演示账号体系)
-- [8. 安全合规与仿真沙箱机制说明](#8-安全合规与仿真沙箱机制说明)
-- [9. 海口市高频政务咨询场景与测试基准库 (35项)](#9-海口市高频政务咨询场景与测试基准库-35项)
-- [10. 海口全域政务知识库扩充规划与标准化架构](#10-海口全域政务知识库扩充规划与标准化架构)
-- [11. 广州市人民政府门户网站 (gz.gov.cn) 右下角圆形 AI 问答小助手前端脚本](#11-广州市人民政府门户网站-gzgovcn-右下角圆形-ai-问答小助手前端脚本)
+  - [4.1 权威公文检索增强与法定依据直溯 (RAG 防幻觉引擎)](#41-权威公文检索增强与法定依据直溯-rag-防幻觉引擎)
+  - [4.2 政策条款“老百姓大白话”智能翻译引擎](#42-政策条款老百姓大白话智能翻译引擎)
+  - [4.3 Spring AI 多轮会话上下文管理与持久化 (Session Memory)](#43-spring-ai-多轮会话上下文管理与持久化-session-memory)
+  - [4.4 扩展功能一：政务知识图谱三元组关联检索](#44-扩展功能一政务知识图谱三元组关联检索)
+  - [4.5 扩展功能二：办事流程引导式对话向导 (沉浸式纯文字指引)](#45-扩展功能二办事流程引导式对话向导-沉浸式纯文字指引)
+  - [4.6 广州市政务公文爬虫采集服务 (Crawler Engine)](#46-广州市政务公文爬虫采集服务-crawler-engine)
+- [5. 前端 UI/UX 设计与严肃公文规范](#5-前端-uiux-设计与严肃公文规范)
+  - [5.1 严肃党政全直角公文视觉体系 (Sharp Corner Aesthetic)](#51-严肃党政全直角公文视觉体系-sharp-corner-aesthetic)
+  - [5.2 严格零表情零卡通规范 (Zero Emoji & Zero Cartoon)](#52-严格零表情零卡通规范-zero-emoji--zero-cartoon)
+  - [5.3 标志性“快速答疑”与最简“复制”功能设计](#53-标志性快速答疑与最简复制功能设计)
+  - [5.4 Shadow DOM 样式物理隔离与双模无缝切换](#54-shadow-dom-样式物理隔离与双模无缝切换)
+- [6. 接口规范与 API 参考](#6-接口规范与-api-参考)
+  - [6.1 流式政务智能咨询接口 (`POST /stream`)](#61-流式政务智能咨询接口-post-stream)
+  - [6.2 流程向导交互接口 (`POST /guide-step`)](#62-流程向导交互接口-post-guide-step)
+  - [6.3 会话历史持久化接口 (`GET /history`, `DELETE /history`)](#63-会话历史持久化接口-get-history-delete-history)
+  - [6.4 政务知识图谱检索接口 (`GET /graph`)](#64-政务知识图谱检索接口-get-graph)
+  - [6.5 公文爬虫采集入库接口 (`POST /crawl`)](#65-公文爬虫采集入库接口-post-crawl)
+- [7. 广州现行法定政策法规与真实测试基准库](#7-广州现行法定政策法规与真实测试基准库)
+- [8. 环境部署与运行调试指南](#8-环境部署与运行调试指南)
 
 ---
 
 ## 1. 建设背景与系统定位
 
-### 1.1 政策背景与痛点分析
-政务信息化已步入“高效办成一件事”的新阶段，但传统的政务咨询仍然面临四大行业痛点：
-1. **专业壁垒与信息孤岛**：法定公文语言严谨晦涩，不同委办局（公安、人社、医保、公积金、市监等）政策分散，群众“找不到、看不懂、来回跑”。
-2. **传统规则客服机械生硬**：传统政务机器人仅支持死板的关键词匹配，面对口语化、长句或多意图诉求时频现“答非所问”。
-3. **商业大模型“事实性幻觉”**：通用大模型容易无中生有编造法规或已废止政策，在严肃政务领域带来不可控的行政与公信力风险。
-4. **“只问不办”无业务闭环**：传统咨询窗口无法直接办理业务，缺乏办事准入核验、材料准备自查与一键申报直达。
+### 1.1 核心建设宗旨与业务痛点
+传统的政务公开与政策问答平台普遍面临如下深层痛点：
+1. **公文语言严谨但晦涩难懂**：红头公文法规条文繁复，大量专业术语与交叉条款让普通老百姓“读不懂、看不透、算不清”，难以直接知晓自己到底享有什么待遇、符合什么准入条件；
+2. **商业大模型的“政策事实性幻觉”**：直接使用市面商用大模型容易虚构已废止的文件编号、甚至凭空捏造办事政策，在严肃政务领域带来不可容忍的行政风险；
+3. **外部跳转打断办事连贯性**：传统机器人动辄丢出一长串外部网页超链接让群众自行点击跳转，由于移动端适配差异或鉴权断层，极易导致办事进程中断；
+4. **缺乏多轮指代理解与上下文持久化**：用户往往在追问时省略前提（如前句问公租房，后句追问“外地人可以吗”），传统系统无法记忆会话上下文。
 
-### 1.2 核心建设目标与特色
-本项目采用 **Spring Boot 3 + Spring AI Alibaba**，依托通义千问等先进大模型能力，融合 RAG（检索增强生成）与 Function Calling 风格的结构化导办机制，实现：
-- **政策严格溯源（防幻觉）**：回答基于本地法定红头文件切片，前置标注法定依据，点击可调出真实红头文件原文；
-- **智能导办“边聊边办”**：咨询过程中动态唤起业务导办卡片，包含承诺办结时限、准入条件、申报材料 Checklist（用户可交互核验勾选备齐）；
-- **12345 接诉即办兜底**：超出知识库范围或复杂疑难诉求，提供 12345 模拟直通车，生成工单号并闭环流转；
-- **真实民情案例回音壁**：汇聚各委办局典型办结案例，展示官方答复并支持一键发起专项导办；
-- **政务研判大屏**：为政府管理者提供态势感知指标、民情分类占比、热点趋势图与工单批复工作台。
+**本系统的核心宗旨**：
+> **“把复杂的法款条例智能翻译成老百姓能听懂的语言，项目的本质是便利人民的生活。”**
+通过 Spring AI + 真实公文 RAG 检索增强 + 关系数据库持久化 + 知识图谱三元组 + 纯文字流程向导，构筑权威、通俗、连贯且有依有据的智能政务便民中枢。
+
+### 1.2 关键指标与功能特性
+* **真实广州政策全域支撑**：入库《广州市公共租赁住房保障办法》（穗府办规〔2024〕6号）、《广州市积分制入户管理办法》（穗府规〔2023〕1号）等真实公文；
+* **法定依据 100% 直溯**：每条答复附带法定公文出处，支持查验条款原文；
+* **Spring AI 上下文持久化**：基于 H2 数据库实现多轮问答连续追问与指代理解；
+* **知识图谱四维三元组**：`LEGAL_BASIS`、`GOVERNING_DEPT`、`JOINT_BUSINESS`、`APPLIES_TO`；
+* **纯文字办事流程向导**：资格自查 ➔ 材料清单 ➔ 办事指引，彻底剔除外部跳转外链；
+* **党政严肃视觉体系**：全局 `border-radius: 0` 直角规范，**Emoji = 0**，无卡通图案。
 
 ---
 
 ## 2. 系统整体技术架构
 
-### 2.1 整体分层架构设计
+### 2.1 整体分层技术架构
 
-```mermaid
-flowchart TD
-    subgraph UI ["用户交互层 (Web 前端)"]
-        U1["群众咨询门户 (index.html)<br/>Vue3 + SSE流式消息流 + 边聊边办卡片"]
-        U2["政务研判大屏 (admin.html)<br/>ECharts 5 统计大图 + 工单批复台"]
-    end
-
-    subgraph API ["控制器层 (RESTful / SSE)"]
-        C1["GovChatController: 流式问答 / 点赞评价"]
-        C2["GovAuthController: 统一身份鉴权 (市民/管理员)"]
-        C3["GovAffairController: 事项查询 / 在线申报受理"]
-        C4["GovWorkOrderController: 12345诉求流转与办结"]
-        C5["GovDashboardController: 态势感知与研判大屏"]
-    end
-
-    subgraph SERVICE ["核心业务引擎层 (Service)"]
-        S1["GovAiService: Spring AI 提示词与意图识别"]
-        S2["GovRagService: 本地红头文件向量与文本双路检索"]
-        S3["AffairService: 标准事项六级十二项与材料规则引擎"]
-        S4["WorkOrderService: 12345 接诉即办协同流转"]
-    end
-
-    subgraph DATA ["数据存储与模型层 (In-Memory / Repository)"]
-        D1[("UserRepository: 用户与账号库 (RBAC)")]
-        D2[("PolicyRepository: 权威政务法规红头公文库")]
-        D3[("AffairRepository: 六级十二项标准办事指南库")]
-        D4[("WorkOrderRepository: 12345 民情工单流转库")]
-    end
-
-    subgraph SEC ["安全合规与基础设施"]
-        M1["DataMaskUtils: 敏感信息脱敏 (等保三级规范)"]
-        M2["Spring AI DashScope: 阿里云百炼通义千问模型服务"]
-    end
-
-    UI -->|HTTP / SSE / JSON| API
-    API --> SERVICE
-    SERVICE --> DATA
-    SERVICE --> SEC
+```text
+┌────────────────────────────────────────────────────────────────────────┐
+│                        前端交互层 (Dual-Mode UI)                        │
+│  ┌───────────────────────────────┐   ┌──────────────────────────────┐  │
+│  │ 真实政务网油猴插件             │   │ 广州政务门户本地仿真底座      │  │
+│  │ (gz_gov_ai_assistant.user.js) │   │ (test_gz_assistant.html)     │  │
+│  └───────────────┬───────────────┘   └──────────────┬───────────────┘  │
+│                  └─────────────────┬────────────────┘                  │
+│                                    ▼                                   │
+│                        Shadow DOM 样式物理隔离容器                      │
+│            [快速答疑徽标] [全直角咨询窗口] [复制按钮] [历史抽屉]           │
+└────────────────────────────────────┬───────────────────────────────────┘
+                                     │ HTTP / SSE (text/event-stream)
+┌────────────────────────────────────▼───────────────────────────────────┐
+│                        网关与控制层 (Spring MVC)                        │
+│  ┌───────────────────────┐  ┌───────────────────────┐  ┌────────────┐  │
+│  │ GovChatController     │  │ GovPortalController   │  │ WebMvcConf │  │
+│  │ (流式问答/向导/图谱)   │  │ (页面转发与脚本分发)   │  │ (跨域/静态)│  │
+│  └───────────────────────┘  └───────────────────────┘  └────────────┘  │
+└────────────────────────────────────┬───────────────────────────────────┘
+                                     │
+┌────────────────────────────────────▼───────────────────────────────────┐
+│                       核心业务服务层 (Business Services)                │
+│  ┌──────────────────────────────────────────────────────────────────┐  │
+│  │ GovAiService:                                                    │  │
+│  │ • 会话上下文组装 (Session Context Injector)                       │  │
+│  │ • RAG 公文检索增强与出处锚定                                      │  │
+│  │ • 大白话通俗化 Prompt 工程与流式解析                              │  │
+│  │ • 知识图谱三元组关联召回                                          │  │
+│  │ • 办事向导步骤卡片组装                                            │  │
+│  │ • 会话落库持久化切面                                              │  │
+│  ├────────────────────────────────┬─────────────────────────────────┤  │
+│  │ GovCrawlerService              │ Spring AI Client                │  │
+│  │ (政务公文/条款结构化抓取抽取)   │ (DashScope 通义千问 qwen-plus)  │  │
+│  └────────────────────────────────┴─────────────────────────────────┘  │
+└────────────────────────────────────┬───────────────────────────────────┘
+                                     │ JdbcTemplate
+┌────────────────────────────────────▼───────────────────────────────────┐
+│                     持久化数据层 (H2 File Database)                     │
+│  存储路径: ./data/gz_gov_ai.mv.db (MySQL 兼容模式, UTF-8 编码初始化)   │
+│  ┌──────────────────┐  ┌──────────────────┐  ┌──────────────────┐      │
+│  │ gov_policy_doc   │  │ gov_affair_guide │  │ gov_chat_history │      │
+│  │ (政策公文主表)   │  │ (办事指南主表)   │  │ (多轮问答历史表) │      │
+│  ├──────────────────┤  ├──────────────────┤  ├──────────────────┤      │
+│  │gov_policy_clause │  │gov_affair_material│ │gov_knowledge_rela│      │
+│  │ (公文详细条款表) │  │ (申报材料清单表) │  │ (知识图谱三元组) │      │
+│  └──────────────────┘  ├──────────────────┤  └──────────────────┘      │
+│                        │gov_affair_process│                            │
+│                        │ (办理流程环节表) │                            │
+│                        └──────────────────┘                            │
+└────────────────────────────────────────────────────────────────────────┘
 ```
 
-### 2.2 核心技术栈选型表
+### 2.2 核心技术选型表
 
-| 层次 | 技术组件 | 版本 / 规格 | 说明与选型理由 |
-| :--- | :--- | :--- | :--- |
-| **基础框架** | Spring Boot | 3.3.4 | 现代化微服务框架，原生兼容 Java 17，极简配置 |
-| **AI 框架** | Spring AI Alibaba | 1.0.0-M2.1 | 阿里云百炼官方推荐框架，无缝整合 DashScope 通义大模型 |
-| **大模型底座** | Qwen-Plus / Turbo | 云端最新 | 具备优秀的中文政务理解与结构化 JSON 生成能力 |
-| **网络通信** | Server-Sent Events (SSE) | HTTP/1.1 | 逐字流式返回打字机效果，首字响应小于 1 秒 |
-| **前端架构** | Vue.js 3 | 3.3.4 (Production) | 渐进式响应式单页，免 Node 构建即可开箱即用 |
-| **可视化图表** | ECharts | 5.4.3 | 提供政务大屏饼图、折线图等高质量交互看板 |
-| **持久层方案** | ConcurrentHashMap + Repository | Thread-Safe 内存存储 | 开箱即用无需外部安装 MySQL，保证快速部署与数据隔离 |
-| **数据安全** | DataMaskUtils | 自研实现 | 针对公民姓名、身份证、手机号实施国标 GB 35273 脱敏 |
+| 组件名称 | 选型版本 | 作用与选型理由 |
+| :--- | :--- | :--- |
+| **基础开发框架** | Spring Boot 3.3.4 | 现代化 Java 17 LTS 企业级底座，稳定高效 |
+| **AI 大模型框架** | Spring AI Alibaba 1.0.0-M2.1 | 阿里云百炼通义千问官方接入标准，支持流式 SSE 打字机输出 |
+| **大模型型号** | `qwen-plus` | 具备出色的中文政策语义理解、复杂长文抽取与通俗表达能力 |
+| **持久化关系数据库** | H2 Database 2.2.224 | 嵌入式文件模式持久化，轻量免运维，完美支持标准 SQL 与外键关联 |
+| **数据初始化框架** | Spring SQL Initialization | 启动时自动执行 DDL 与预置公文，严格对齐 `UTF-8` 编码 |
+| **HTML 爬虫引擎** | Jsoup 1.17.2 | 爬取广州政务网网页并正则提取公文发文字号、条款及正文 |
+| **前端样式隔离** | Web Components (Shadow DOM) | 确保插件在真实政府官网中运行时，CSS 样式 100% 物理隔离 |
+| **浏览器自动化挂载** | Tampermonkey (油猴) 5.x | 支持在真实政府网（`gz.gov.cn`、`zwfw.gd.gov.cn`）一键挂载专窗 |
 
 ### 2.3 工程代码目录组织结构
 
 ```text
 spring-ai-alibaba/
-├── pom.xml                               # Maven 构建配置文件
-├── DEVELOPMENT.md                        # 系统开发设计与规范文档
-├── src/main/
-│   ├── java/com/example/myai/
-│   │   ├── SpringAiAlibabaApplication.java # Spring Boot 启动引导类
-│   │   ├── common/                       # 通用工具与公共返回对象
-│   │   │   ├── DataMaskUtils.java        # 个人信息等保脱敏工具类
-│   │   │   └── Result.java               # 统一 API 响应格式 (code, message, data)
-│   │   ├── controller/                   # REST 控制器层
-│   │   │   ├── GovChatController.java    # 智能咨询 SSE 流式对话与评价
-│   │   │   ├── GovAuthController.java    # 统一实名认证与登录接口
-│   │   │   ├── GovAffairController.java  # 政务办事指南与申报受理
-│   │   │   ├── GovWorkOrderController.java # 12345 诉求工单流转与处置
-│   │   │   └── GovDashboardController.java # 管理端大屏数据聚合
-│   │   ├── model/                        # 业务实体对象
-│   │   │   ├── SysUser.java              # 用户账号与权限实体
-│   │   │   ├── PolicyDoc.java            # 法定红头文件与条款切片
-│   │   │   ├── AffairGuide.java          # 办事指南与申报材料实体
-│   │   │   ├── WorkOrder12345.java       # 12345 工单数据模型
-│   │   │   └── dto/                      # 传输对象 (ChatRequest, LoginDTO 等)
-│   │   ├── repository/                   # 数据仓储层 (线程安全存储)
-│   │   │   ├── UserRepository.java       # 用户仓储
-│   │   │   ├── PolicyRepository.java     # 政策法规知识仓储
-│   │   │   ├── AffairRepository.java     # 办事指南知识仓储
-│   │   │   └── WorkOrderRepository.java  # 工单仓储
-│   │   └── service/                      # 核心服务层
-│   │       ├── GovAiService.java         # AI 对话中枢与导办意图触发
-│   │       ├── GovRagService.java        # RAG 检索增强与溯源比对
-│   │       ├── AffairService.java        # 事项指南逻辑与材料自检
-│   │       └── WorkOrderService.java     # 12345 工单提报与状态流转
-│   └── resources/
-│       ├── application.properties        # 核心配置文件 (API Key、端口)
-│       └── static/                       # 前端静态门户资源
-│           ├── index.html                # 群众端政务咨询与导办主页
-│           ├── admin.html                # 管理端民情研判与大数据看板
-│           ├── css/
-│           │   └── gov-style.css         # 规范化党政红蓝金样式库
-│           ├── js/
-│           │   ├── app.js                # 群众端 Vue3 交互应用
-│           │   └── admin.js              # 管理端 Vue3 与 Echarts 脚本
-│           └── img/                      # 官方视觉素材 (华表长城Banner、党政水印)
+├── pom.xml                                     # Maven 核心依赖与编译配置 (强制 UTF-8)
+├── README.md                                   # 项目权威说明与快速入门文档
+├── DEVELOPMENT.md                              # 详细技术实现、架构与设计开发规范文档
+├── gz_gov_ai_assistant.user.js                # 广州政务 AI 智能问答油猴前端脚本
+├── src/main/java/com/example/myai/
+│   ├── SpringAiAlibabaApplication.java        # Spring Boot 主启动类
+│   ├── common/
+│   │   ├── Result.java                         # 统一 API 响应包装类
+│   │   └── DataMaskUtils.java                  # 敏感身份信息脱敏工具
+│   ├── controller/
+│   │   ├── GovChatController.java             # 智能咨询 SSE 流式接口、流程向导、知识图谱、爬虫 API
+│   │   ├── GovPortalController.java           # 门户根路径重定向与油猴脚本分发控制器
+│   │   └── GovDashboardController.java         # 统计大屏与指标控制器
+│   ├── model/
+│   │   ├── PolicyDoc.java                      # 政策公文实体
+│   │   ├── PolicyClause.java                   # 政策条款实体
+│   │   ├── AffairGuide.java                    # 办事指南实体 (含材料与环节内部类)
+│   │   ├── GovChatHistory.java                 # 对话历史实体
+│   │   ├── KnowledgeRelation.java              # 知识图谱三元组实体
+│   │   └── dto/
+│   │       ├── ChatRequest.java                # 问答请求 DTO
+│   │       ├── ChatResponseChunk.java          # SSE 流式分块 DTO
+│   │       └── FeedbackDTO.java                # 群众反馈 DTO
+│   ├── repository/
+│   │   ├── PolicyRepository.java               # 政策公文库 (JdbcTemplate 查询 H2)
+│   │   ├── AffairRepository.java               # 办事指南库 (JdbcTemplate 查询 H2)
+│   │   ├── ChatHistoryRepository.java          # 对话历史仓储库 (持久化落库与上下文查询)
+│   │   └── KnowledgeGraphRepository.java       # 知识图谱三元组仓储库
+│   └── service/
+│       ├── GovAiService.java                  # 核心服务: 上下文拼接、Prompt 编排、图谱与向导组装
+│       ├── GovRagService.java                  # 本地政策规章精准 RAG 检索召回服务
+│       └── GovCrawlerService.java             # 广州政务公文爬虫采集服务
+├── src/main/resources/
+│   ├── application.properties                  # 核心配置 (H2 连接池、UTF-8 脚本编码、DashScope API Key)
+│   ├── schema.sql                              # 7 张核心业务表 DDL (UTF-8)
+│   ├── data.sql                                # 真实广州公文、办事指南与知识图谱初始数据 (UTF-8)
+│   └── static/
+│       ├── test_gz_assistant.html              # 广州市人民政府门户仿真平台
+│       ├── gz_assistant_embed.js               # 页面直插版问答专窗组件
+│       ├── gz_gov_ai_assistant.user.js         # 油猴脚本一键分发端点
+│       └── inject/                             # 镜像静态脚本
+└── data/
+    └── gz_gov_ai.mv.db                        # H2 嵌入式持久化数据文件
 ```
 
 ---
 
-## 3. 数据库与数据模型设计
+## 3. 数据库与持久化数据模型设计
 
-### 3.1 实体关系结构 (ER)
+### 3.1 实体关系结构 (ER) 与 7 张核心表
 
-```mermaid
-erDiagram
-    SysUser ||--o{ WorkOrder12345 : "提交/督办"
-    SysUser ||--o{ AffairGuide : "申报办件"
-    PolicyDoc ||--o{ AffairGuide : "法定出处依据"
-    AffairGuide ||--|{ MaterialItem : "包含申报材料"
-    AffairGuide ||--|{ ProcessStep : "办理流程节点"
+系统摒弃了早期的内存伪数据，采用 **H2 嵌入式关系数据库文件持久化模式**（路径为 `./data/gz_gov_ai.mv.db`），支持系统重启不丢数据。包含 7 张核心表：
 
-    SysUser {
-        Long id PK
-        String username "登录账号"
-        String password "登录密码"
-        String name "实名姓名"
-        String phone "手机号码"
-        String idCard "居民身份证"
-        String role "ADMIN 或 CITIZEN"
-        String roleName "角色中文名称"
-        String createTime "建档时间"
-    }
-
-    PolicyDoc {
-        Long id PK
-        String docTitle "法规公文名称"
-        String docNumber "红头发文字号"
-        String publishDept "发文主管机构"
-        String executeDate "正式施行日期"
-        String clauseNo "引用的法条编号"
-        String originalContent "法律条款原文章节切片"
-        String category "所属业务专题领域"
-    }
-
-    AffairGuide {
-        Long id PK
-        String affairCode "六级十二项标准编码"
-        String affairName "政务事项名称"
-        String category "业务类别"
-        String handlingAddress "实施机关与受理窗口"
-        Integer promisedLimitDays "承诺办结时限"
-        String qualifications "申办准入前置条件"
-        List materials "材料核验清单 (Checklist)"
-        List processSteps "办理步骤流程节点"
-    }
-
-    WorkOrder12345 {
-        Long id PK
-        String orderNo "统一派单编号"
-        String citizenName "群众姓名 (脱敏)"
-        String citizenPhone "联系电话 (脱敏)"
-        String affairType "反映事项类别"
-        String appealContent "主要诉求与陈述"
-        String status "处理状态: 待派单/办理中/已办结"
-        String officialReply "责任部门官方批复答复"
-        String createTime "提交登记时间"
-        String finishTime "办结归档时间"
-    }
+```text
+  ┌────────────────────────┐                   ┌────────────────────────┐
+  │      gov_policy_doc    │ 1               * │   gov_policy_clause    │
+  │  (广州现行政策公文表)   │───────────────────│    (公文条款切片表)    │
+  └────────────────────────┘                   └────────────────────────┘
+               │                                            │
+               │ (通过 target_id 关联)                       │
+               ▼                                            ▼
+  ┌─────────────────────────────────────────────────────────────────────┐
+  │                       gov_knowledge_relation                        │
+  │              (政务知识图谱三元组: 政策 ↔ 事项 ↔ 部门 ↔ 主体)         │
+  └─────────────────────────────────────────────────────────────────────┘
+               ▲                                            ▲
+               │ (通过 source_id 关联)                       │
+  ┌────────────────────────┐                   ┌────────────────────────┐
+  │    gov_affair_guide    │ 1               * │  gov_affair_material   │
+  │    (政务办事指南事项)  │───────────────────│    (申报材料清单表)    │
+  └───────────┬────────────┘                   └────────────────────────┘
+              │ 1
+              │
+              │ *
+  ┌───────────▼────────────┐                   ┌────────────────────────┐
+  │   gov_affair_process   │                   │    gov_chat_history    │
+  │    (办事流程环节表)    │                   │   (多轮问答历史落库表) │
+  └────────────────────────┘                   └────────────────────────┘
 ```
 
-### 3.2 核心实体模型详解
+### 3.2 数据库 DDL 结构详解
 
-#### 1. 用户与认证模型 (`SysUser.java`)
-- 承担统一身份认证中心（SSO）的公民建档与权限管理。
-- 区分 `ADMIN`（超级管理员，具备管理大屏查看、知识库维护、工单批复权限）与 `CITIZEN`（普通市民，具备日常问答、办事自检与申报权限）。
-- 支持用户名、手机号、身份证号“三合一”账号识别。
+在 `src/main/resources/schema.sql` 中完整定义：
 
-#### 2. 法规公文模型 (`PolicyDoc.java`)
-- 包含国家及省市政府真实颁布的红头文件信息（如《海口市关于进一步优化落实引进人才落户若干措施的实施细则》琼府办〔2024〕15号）。
-- 细化到具体发文字号、条款编号（如第二条、第四条）与权威正文切片，为大模型生成提供 Ground Truth 依据。
+```sql
+-- 1. 政策法规公文表
+CREATE TABLE IF NOT EXISTS gov_policy_doc (
+    id BIGINT PRIMARY KEY,
+    doc_number VARCHAR(100) NOT NULL,          -- 发文字号 (如: 穗府办规〔2024〕6号)
+    title VARCHAR(300) NOT NULL,               -- 文件全称 (如: 广州市公共租赁住房保障办法)
+    category VARCHAR(100) NOT NULL,            -- 政策类别 (住房保障/户籍管理/交通出行等)
+    issuer_dept VARCHAR(200) NOT NULL,         -- 发文机关 (如: 广州市人民政府办公厅)
+    publish_date VARCHAR(50),                  -- 发布日期
+    effective_date VARCHAR(50),                -- 施行日期
+    status INT DEFAULT 1,                      -- 效力状态 (1:现行有效, 0:已废止)
+    summary TEXT                               -- 政策核心准入与待遇摘要
+);
 
-#### 3. 事项指南模型 (`AffairGuide.java`)
-- 遵循国家政务服务六级十二项标准事项库编码规则。
-- 嵌入 `MaterialItem`（包含材料名称、是否为必备要件、是否支持容缺后补、样本提示）与 `ProcessStep`（环节编号、环节名称、办理时限）。
+-- 2. 政策法规条款表
+CREATE TABLE IF NOT EXISTS gov_policy_clause (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    policy_id BIGINT NOT NULL,                 -- 关联 gov_policy_doc.id
+    clause_no VARCHAR(100) NOT NULL,           -- 条款编号 (如: 第十一条【租赁补贴】)
+    clause_text TEXT NOT NULL                  -- 条款法定原文切片
+);
 
-#### 4. 12345 工单模型 (`WorkOrder12345.java`)
-- 记录诉求分类、诉求内容、承办部门批复答复与闭环状态（`已办结` / `处理中`）。
+-- 3. 政务办事指南事项表
+CREATE TABLE IF NOT EXISTS gov_affair_guide (
+    id BIGINT PRIMARY KEY,
+    affair_code VARCHAR(100) NOT NULL,         -- 实施编码 (如: GZ-ZJ-GZH001)
+    affair_name VARCHAR(300) NOT NULL,         -- 事项全称
+    category VARCHAR(100) NOT NULL,
+    service_object VARCHAR(100) DEFAULT '自然人',
+    legal_limit_days INT DEFAULT 15,           -- 法定办结时限
+    promised_limit_days INT DEFAULT 1,         -- 承诺办结时限 (极简便民时限)
+    qualifications TEXT,                       -- 准入自查核心条件
+    handling_address VARCHAR(500),             -- 线下受理网点地址
+    online_handle_url VARCHAR(500)             -- 办事平台标识 (仅作后台归档，不对前端输出外链)
+);
 
-### 3.3 数据隐私保护与脱敏设计
-遵循国家标准《个人信息安全规范》（GB/T 35273-2020），系统在公共区域展示涉及公民隐私信息时，由 `DataMaskUtils` 自动执行掩码脱敏：
-- **中文姓名**：两字姓名遮盖后字（如“张伟” ➔ `张*`）；三字及以上保留首尾字（如“李淑敏” ➔ `李*敏`）。
-- **手机号码**：保留前 3 位和后 4 位，中间 4 位隐藏（如 `138****3210`）。
-- **身份证号**：18 位身份证保留前 6 位与后 4 位（如 `460100********1234`）。
+-- 4. 办事指南申报材料表
+CREATE TABLE IF NOT EXISTS gov_affair_material (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    affair_id BIGINT NOT NULL,                 -- 关联 gov_affair_guide.id
+    name VARCHAR(300) NOT NULL,                -- 材料名称
+    mandatory BOOLEAN DEFAULT TRUE,            -- 是否必须
+    format VARCHAR(100),                       -- 介质形式 (电子证照免提交/数据联网核验)
+    sample_tip VARCHAR(500)                    -- 核验免提交说明
+);
+
+-- 5. 办事指南流程步骤表
+CREATE TABLE IF NOT EXISTS gov_affair_process (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    affair_id BIGINT NOT NULL,                 -- 关联 gov_affair_guide.id
+    step_no INT NOT NULL,                      -- 步骤序号
+    step_name VARCHAR(100) NOT NULL,           -- 步骤名称
+    description VARCHAR(500),                  -- 详细指引文字
+    time_cost VARCHAR(100)                     -- 耗时预估
+);
+
+-- 6. 对话历史持久化表 (Spring AI 上下文管理与回溯)
+CREATE TABLE IF NOT EXISTS gov_chat_history (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    session_id VARCHAR(100) NOT NULL,          -- 会话唯一 ID
+    user_id VARCHAR(100) DEFAULT 'citizen',
+    user_prompt TEXT NOT NULL,                 -- 用户原声提问
+    ai_reply TEXT NOT NULL,                    -- AI 大白话答复
+    doc_title VARCHAR(300),                    -- 溯源公文标题
+    doc_number VARCHAR(100),                   -- 溯源发文字号
+    create_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- 7. 政务知识图谱关联表 (三元组网络)
+CREATE TABLE IF NOT EXISTS gov_knowledge_relation (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    source_type VARCHAR(50) NOT NULL,          -- 源类型 (AFFAIR/POLICY)
+    source_id VARCHAR(100) NOT NULL,
+    source_name VARCHAR(200) NOT NULL,
+    relation_type VARCHAR(50) NOT NULL,        -- LEGAL_BASIS/GOVERNING_DEPT/JOINT_BUSINESS/APPLIES_TO
+    target_type VARCHAR(50) NOT NULL,
+    target_id VARCHAR(100) NOT NULL,
+    target_name VARCHAR(200) NOT NULL,
+    relation_desc VARCHAR(500)                 -- 链路通俗说明
+);
+```
+
+### 3.3 编码规范与防乱码机制 (UTF-8 强制对齐)
+
+在 Windows 操作系统中，系统默认编码多为 GBK，这极易导致 Spring Boot 启动初始化 `data.sql` 时出现中文字符错乱（双重编码乱码）。系统实施了四道编码防御壁垒：
+1. **配置文件显式绑定**：在 `application.properties` 中指定 `spring.sql.init.encoding=UTF-8`；
+2. **构建编码对齐**：在 `pom.xml` 中指定 `<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>`；
+3. **运行时 JVM 参数**：启动命令中注入 `-Dfile.encoding=UTF-8`；
+4. **源码无 BOM 保存**：所有 SQL 和 Java 文件严格使用无 BOM 的 UTF-8 编码落盘。
 
 ---
 
 ## 4. 核心业务逻辑与技术实现
 
-### 4.1 RAG 政策检索增强与精准溯源（防幻觉引擎）
-在政务严肃场景下，大模型如果凭空“捏造政策”将引发行政责任事故。本系统采用严格的 RAG 管道：
+### 4.1 权威公文检索增强与法定依据直溯 (RAG 防幻觉引擎)
 
-```mermaid
-sequenceDiagram
-    autonumber
-    actor Citizen as 市民群众 (Web 前端)
-    participant ChatCtrl as GovChatController
-    participant RagSvc as GovRagService
-    participant AiSvc as GovAiService
-    participant LLM as 通义千问 (DashScope)
+系统通过 `GovRagService` 实施公文检索增强，严防商业大模型凭空捏造。
+1. **公文规章切片索引**：系统将《广州市公共租赁住房保障办法》等现行文件按条款（Clause）切片，提取标题、发文字号、条款编号与条款正文；
+2. **两阶段检索召回**：
+   - 阶段一：关键词精准包含匹配（如“租赁补贴”、“积分入户”）；
+   - 阶段二：多维度语义比对与置信度打分。若置信度低于阈值，系统主动发起澄清或建议转接 12345；
+3. **严格直溯出处卡片**：一旦召回有效条款，AI 答复顶部与底部均注入 `citation` 数据块，前端渲染为公文出处卡片，点击即可展开条文原文抽屉。
 
-    Citizen->>ChatCtrl: 发送政务咨询 ("大专学历在海口怎么落户？")
-    ChatCtrl->>RagSvc: 检索政策法规库 (双路召回: 关键词 + 业务分类)
-    alt 命中相关公文法规
-        RagSvc-->>ChatCtrl: 返回置信度公文 PolicyDoc (发文字号、条款切片)
-        ChatCtrl->>AiSvc: 组装 Prompt (注入法定条款 + 严禁推测约束)
-        AiSvc->>LLM: 流式调用 (Stream Chat)
-        LLM-->>AiSvc: 输出流式字符
-        AiSvc-->>Citizen: 实时流式输出 (附带【法定依据】公文标签)
-    else 知识库未收录 / 明显超出范围 ("如何去火星办车牌？")
-        RagSvc-->>ChatCtrl: 未命中政策
-        ChatCtrl-->>Citizen: 触发防幻觉拒答，推送 12345 直通卡片建议
-    end
+### 4.2 政策条款“老百姓大白话”智能翻译引擎
+
+为了践行“把复杂的法款条例翻译成老百姓能听懂的语言”宗旨，系统在 `GovAiService` 中构建了严格的公文通俗化系统提示词（System Instruction）：
+
+```text
+你是广州市人民政府门户网站（www.gz.gov.cn）的政策智能咨询专家。
+【核心宗旨】通过通俗、清晰、接地气的大白话把晦涩法款条例翻译给老百姓听，便利市民生活。
+【回答结构要求】：
+1. 【快速答疑】：用 1-2 句话直接给出结论，说明核心标准或门槛（加粗核心数字）；
+2. 【办事要点】：
+   • 准入门槛：以清单方式列出年龄、户籍、社保月数、无房等硬性指标；
+   • 待遇标准/材料：明确说明金额标准、支持“电子证照免提交”的项目；
+   • 办事渠道：直接告知手机端通过“穗好办”APP/小程序的具体操作路径；
+   • 注意事项：提示断缴限制、申领期限等民生避坑指南。
+3. 【官方政策依据】：列明现行有效文件的正式发文字号与条款出处。
+【严禁事项】：严禁编造政策；全篇严禁出现任何 Emoji 表情和卡通图案！
 ```
 
-**防幻觉三道防线**：
-1. **输入过滤与边界研判**：对于火星车牌等荒谬输入，或涉及政治底线的敏感概念，前置知识库相似度打分低于 0.65 时直接拒答，不把无意义的上下文提交给大模型；
-2. **System Prompt 铁律约束**：设定 System 角色为“国家一体化政务服务平台严肃导办助手”，明确注入“仅根据参考法定依据回答，若依据中未明确提及，请明确声明‘知识库暂未收录’，严禁自行揣测”；
-3. **前端强绑定法定来源卡片**：在聊天气泡顶部固定附着带有文件图标的 `📜 法定依据` 徽章，点击即可弹出公文真实条款全文。
+### 4.3 Spring AI 多轮会话上下文管理与持久化 (Session Memory)
 
-### 4.2 意图识别与“边聊边办”智能导办卡片
-当大模型识别到市民具有明确的办件意向时（如“我想要办理人才落户”、“怎么补办身份证”），系统在返回文字解读的同时，通过 `AffairService` 激活**智能导办卡片（Guide Card）**：
-- **承诺时限徽章**：“承诺 1 个工作日办结”；
-- **准入条件栏**：清晰提示学历、年龄、社保等硬性准入门槛；
-- **交互式申报材料 Checklist**：列出必备要件与容缺后补要件，市民可在页面实时勾选已备齐的材料，点击“材料自检”查看备齐百分比；
-- **一键在线申报**：点击“🚀 立即网上申报”，自动拉取当前登录市民的实名信息，一键完成办件登记并生成业务受理编号。
+系统在 `GovAiService` 和 `ChatHistoryRepository` 中实现了完整的会话状态机：
+1. **上下文回溯机制**：客户端携带 `sessionId` 提问，系统在调用通义千问前，首先查询 `gov_chat_history` 表中该会话最近 4 轮的历史提问与答复，格式化为历史对话链；
+2. **多轮指代消除实测**：
+   * 轮次一：用户提问“广州新就业无房职工公租房租赁补贴的标准是多少？” ➔ 识别为公租房租赁补贴（穗建规字〔2022〕1号 / 穗府办规〔2024〕6号）；
+   * 轮次二：用户紧接着追问“外地人在广州也能申请这个补贴吗？” ➔ 系统将历史记录并联注入，AI 自动判定“这个补贴”即指前文的“新就业无房职工公租房租赁补贴”，精准回答外地户籍不受限制、但需满足学历及在穗连续缴纳 6 个月社保；
+3. **异步持久化落库**：大模型流式生成完毕后，触发异步持久化，将完整问答记录写回 `gov_chat_history`，保障多终端多轮状态可回溯。
 
-#### 4.2.1 多轮交互式条件追问与精准澄清 (Slot-filling & Clarification)
-针对政务咨询中群众普遍存在的模糊提问（如“我要落户”、“提取公积金”、“办通行证”、“异地就医”），系统不再直接盲目倾泻长篇通用文字，而是通过 `GovAiService.checkClarification()` 触发**条件澄清卡片 (`clarify_card`)**：
-- **场景槽位研判**：识别高频政策分流点（如落户渠道区分为大专人才、技能证书、随迁投靠；公积金提取区分为租房提取、购房提取、离职销户等）；
-- **结构化选项呈现**：以交互式徽章按钮（Condition Chips）的形式呈现具体情形，群众只需点击对应情形卡片，即可自动填入精准提问发起专项导办；
-- **消除多轮沟通摩擦**：将传统政务客服需要反复对话 4~5 轮才能厘清的身份与条件前置化，一键直达精准办理流程。
+### 4.4 扩展功能一：政务知识图谱三元组关联检索
 
-#### 4.2.2 “高效办成一件事”——链式关联事项推荐 (One-Thing Chain)
-深入贯彻国务院《关于进一步优化政务服务提升行政效能推动“高效办成一件事”的指导意见》（国发〔2024〕3号），在市民咨询完毕某项核心业务后，系统通过 `GovAiService.getRelatedRecommendations()` 主动推送**链式关联事项卡片 (`recommend_card`)**：
-- **全生命周期业务串联**：例如市民办理完“大专人才落户”后，卡片主动推荐其后续强相关的关联事项：
-  1. *“👉 申领海口引进人才住房租赁补贴（最高1500元/月）”*
-  2. *“👉 高校毕业生离校未就业档案与报到证协同托管”*
-  3. *“👉 外省养老保险关系免凭证网上转移接续”*
-- **猜你想问与主动政务**：打破各委办局之间的信息壁垒，由“人找政策”转变为“政策找人”，实现联办、畅办。
+系统在关系数据库中建立了政务知识图谱，当用户咨询某项业务或政策时，系统自动关联调取并展示四类关系链路：
+* `(公租房租赁补贴申领) ──[LEGAL_BASIS(法定依据)]──> 《广州市公共租赁住房保障办法》`
+* `(公租房租赁补贴申领) ──[JOINT_BUSINESS(业务联办)]──> 广州住房公积金无房租赁提取`
+* `(广州市公共租赁住房保障办法) ──[GOVERNING_DEPT(主管部门)]──> 广州市住房和城乡建设局`
+* `(广州市公共租赁住房保障办法) ──[APPLIES_TO(适用主体)]──> 新就业无房职工及外来务工人员`
 
-### 4.3 统一身份认证与 RBAC 权限控制
-- **统一登录入口**：首页将管理员与普通市民的登录界面彻底合并，群众无需自行区分入口，输入用户名、手机号或身份证号后，后台统一完成账号检索并自动分流其所属角色；
-- **动态权限路由**：
-  - 未登录状态：顶部右上角仅展示【🔑 注册 / 登录】按钮，不展示任何后台入口；若未登录直接咨询，AI 会温馨提示请先登录并弹出登录窗口；
-  - 普通市民登录：显示实名铭牌（如 `👤 张*`），隐藏管理员后台入口，只能体验咨询与导办；
-  - 超级管理员登录：显示警徽铭牌（`🛡️ 系统超级管理员`），且首页顶部导航栏与状态条自动激活【📊 数据看板与后台】直达入口。
+在前端渲染为紧凑直观的三元组网络链路卡片，辅助群众对政策出处、主管部门与下游联办事项一览无余。
 
-### 4.4 12345 民情工单闭环接诉即办与 AI 智能归口研判
-- **群众端一键转接**：针对疑难诉求、复杂投诉或特殊情况，群众可点击“一键转接 12345 工单”，唤起诉求提交模态窗口；
-- **AI 智能辅助归口研判 (AI Triage)**：
-  - 群众在文本框输入一段口语化、复杂的长篇诉求陈述后，可点击【🤖 AI 智能辅助归口研判】；
-  - 系统调用后端的 `POST /api/v1/gov/work-order/ai-triage`，依托 Spring AI 通义大模型实时对诉求进行语义结构化解析；
-  - **自动提取三项关键政务元数据**：
-    1. **公文式摘要标题**：如“关于大专毕业生落户申请咨询”；
-    2. **精准分流责任委办局**：如“海口市公安局（户政部门）”、“市人力资源与社会保障局”等，自动填入工单派发部门；
-    3. **业务分类与办结时限等级**：如“常规诉求 (3个工作日限时办结)”或“加急民生诉求 (24小时接诉即办)”；
-  - 极大降低群众提报工单时的门槛与部门误选率，显著提高接诉即办平台的流转效率；
-- **管理端闭环处置**：管理员在后台看板“12345 工单接诉即办台”中可实时查看待办列表（含 AI 研判建议的承办单位与摘要），录入责任部门处理意见与官方批复后，工单状态由“办理中”变为“已办结”，形成政务诉求闭环。
+### 4.5 扩展功能二：办事流程引导式对话向导 (沉浸式纯文字指引)
 
-### 4.5 典型民情案例公示回音壁
-- **精选 6 篇各委办局典型办结案例**：收录市医保局（跨省就医直接结算）、省社保中心（养老保险跨省转移）、市公安户政（大专生落户）、公积金中心（租房提取公积金）、公安交管（外地换驾照）、市场监管（个体户转型保留字号）；
-- **呈现与交互机制**：
-  1. 侧边栏专属 Tab（`🏛️ 12345案例`）：以精炼卡片列出真实办结答复，点击即可直接向 AI 调起该事项的智能全流程导办；
-  2. 12345 直通车卡片配置“查阅民情案例公示回音壁 ➔”：点击可弹出通栏沉浸式弹窗查看完整答复与办理成效，同时保持顶部主导航栏极简规范（仅保留 12345 工单与统一登录）。
+根据用户反馈，系统**彻底去除了容易打断用户办事的外部跳转链接**，全面升级为沉浸式的“分步文字引导向导”：
+* **步骤 1【资格自查】**：下发准入资格清单，让群众自检是否符合硬性门槛；
+* **步骤 2【材料清单】**：清单化呈现材料，标注身份证、社保缴费等已支持“电子证照免提交 / 大数据后台核验”；
+* **步骤 3【办事指引】（纯文字路径）**：
+  * **承诺办结时限**：标明承诺办结天数（如 3 个工作日）；
+  * **线上办理文字指引**：明确指引市民在手机微信搜索“穗好办”小程序 ➔ 顶部搜索框输入事项全称 ➔ 人脸刷脸完成实名核验 ➔ 系统调取免提交证照核对并提交；
+  * **线下办理网点**：明确给出对应街道政务服务中心综合窗口地址；
+  * **办结短信提醒**：告知审核通过后将下发结果短信与电子凭据。
 
-### 4.6 政务态势感知与研判大屏
-位于 `/admin.html`，由 `admin.js` 与 ECharts 驱动：
-- **四大核心 KPI 卡片**：累计智能咨询人次（问答实时自增计数）、群众满意率（基于好差评动态计算）、12345 诉求工单总量、AI 平均响应时延；
-- **民生诉求分类占比（ECharts 环形饼图）**：直观展示户籍管理、社保医保、住房保障、企业开办等业务咨询热度；
-- **近 7 日受理量波动趋势（ECharts 面积折线图）**：监控民情峰谷波动，提前研判办事大厅客流；
-- **三大管理工作台**：12345 诉求工单接办工作台、法定政策公文库台账、办事指南库清单；
-- **多维实时指标同步与交互反馈**：支持点击【🔄 刷新大屏监控指标】一键并发拉取最新全景数据，配备旋转动画状态控制、精确到秒的“最近同步时间”时间戳标识以及全局浮动绿色 Toast 成功通知，确保管理人员对政务态势监控即时感知。
+### 4.6 广州市政务公文爬虫采集服务 (Crawler Engine)
+
+内置 `GovCrawlerService`，支持自动化拓展政策数据库：
+* 接口：`POST /api/v1/gov/chat/crawl`；
+* 机制：使用 Jsoup 请求广州政务网网页或直接解析传入的公文 HTML；
+* 抽取器：自动通过正则表达式抽取标准公文元数据：
+  * 发文字号：匹配 `穗府〔\d{4}〕\d+号`、`穗府办规〔\d{4}〕\d+号` 等标准模式；
+  * 标题：提取 `h1.content-title` 或元数据标签；
+  * 结构化条款：按“第一条”、“第二条”切片提取条款编号与条款正文；
+* 持久化：自动执行事务写入 `gov_policy_doc` 与 `gov_policy_clause` 表，立即可供 RAG 问答检索。
 
 ---
 
-## 5. 接口规范与 API 参考
+## 5. 前端 UI/UX 设计与严肃公文规范
 
-所有业务接口均统一返回 `com.example.myai.common.Result<T>` 格式：
+### 5.1 严肃党政全直角公文视觉体系 (Sharp Corner Aesthetic)
+* **强制全直角规范**：党政公文追求庄严权威，前端所有容器、气泡、按钮、输入框均设置 `border-radius: 0 !important`；
+* **广州政务配色**：
+  * 广州政务深蓝 (`#0050b3` / `#003a8c`)：用于顶栏、主标题与官方徽标；
+  * 政务中国红 (`#c20505` / `#a30404`)：用于政务顶栏重点标识；
+  * 庄重背景浅灰 (`#f4f6fa`) 与公文边框灰 (`#d9d9d9` / `#e2e8f0`)。
+
+### 5.2 严格零表情零卡通规范 (Zero Emoji & Zero Cartoon)
+* 严肃政务场景下，卡通人物或趣味 Emoji 会损害政府公信力；
+* **前端脚本严格保持 Emoji 计数 = 0**，所有界面控制一律采用单色矢量 SVG 线性图标与简洁公文文字。
+
+### 5.3 标志性“快速答疑”与最简“复制”功能设计
+* **“快速答疑”徽标**：右下角常驻醒目的蓝底白字直角矩形标徽，字迹清晰工整；
+* **单行最简“复制”**：在 AI 答复下方提供纯净单行“复制”按钮，点击即可将大白话答复完整复制到剪贴板，方便市民留存或转发。
+
+### 5.4 Shadow DOM 样式物理隔离与双模无缝切换
+* 前端助手采用 Shadow DOM 封装挂载，在宿主网站上实现 CSS 样式的物理隔离，完全不会干扰真实网站的页面排版；
+* **双模支持**：
+  * 模式一（本地仿真）：直接在浏览器打开 `http://localhost:8080/`；
+  * 模式二（实网油猴）：在 Tampermonkey 中安装 `http://localhost:8080/gz_gov_ai_assistant.user.js` 后，即可在真实广州市人民政府门户（`https://www.gz.gov.cn`）右下角自动挂载运行。
+
+---
+
+## 6. 接口规范与 API 参考
+
+### 6.1 流式政务智能咨询接口 (`POST /stream`)
+* **URL**: `/api/v1/gov/chat/stream`
+* **Content-Type**: `application/json`
+* **Accept**: `text/event-stream`
+* **请求体**：
+```json
+{
+  "sessionId": "gz-citizen-session-001",
+  "prompt": "广州新就业无房职工公租房租赁补贴的标准是多少？",
+  "category": "住房保障"
+}
+```
+* **SSE 分块协议**：
+  * `citation`：法定公文出处元数据（发文字号、条款号、条款原文）；
+  * `chunk`：大白话通俗化正文打字机流式增量文本；
+  * `graph_card`：关联的政务知识图谱三元组列表；
+  * `guided_steps`：办事流程向导步骤卡片（自查、材料、办事指引）；
+  * `done`：生成结束标志。
+
+### 6.2 流程向导交互接口 (`POST /guide-step`)
+* **URL**: `/api/v1/gov/chat/guide-step`
+* **请求体**：
+```json
+{
+  "affairId": 101,
+  "stepNo": 3
+}
+```
+* **响应数据（全文字办事指引，无跳转外链）**：
 ```json
 {
   "code": 200,
-  "message": "操作成功",
-  "data": { ... }
+  "data": {
+    "stepName": "办事指引",
+    "promisedLimitDays": 3,
+    "handlingAddress": "广州市各区住房保障办公室或街道政务服务中心综合窗口",
+    "guidance": "【全流程文字办事指引】\n1. 承诺办结时限：3 个工作日。\n2. 线上办理路径：微信打开“穗好办”小程序或登录广东政务服务网广州专区，在顶部搜索栏输入“新就业无房职工公共租赁住房租赁补贴申领”，刷脸完成实名认证后，系统自动调用免提交证照核验，核对无误即可在线确认提交。\n3. 线下网点办理：可前往 广州市各区住房保障办公室或街道政务服务中心综合窗口，持身份证原件办理。\n4. 办结短信提醒：审批通过后，办理结果将以政务短信通知并下发电子凭据。"
+  }
 }
 ```
 
-### 5.1 智能问答与导办接口
+### 6.3 会话历史持久化接口 (`GET /history`, `DELETE /history`)
+* **GET `/api/v1/gov/chat/history?sessionId=xxx`**：查询该会话在数据库中的全部问答记录；
+* **DELETE `/api/v1/gov/chat/history?sessionId=xxx`**：重置并清空该会话历史。
 
-#### 1. 流式政务咨询问答 (SSE)
-- **请求方式**：`POST /api/v1/gov/chat/stream`
-- **请求类型**：`application/json`
-- **响应类型**：`text/event-stream;charset=UTF-8`
-- **请求体**：
-  ```json
-  {
-    "question": "全日制大专在海口落户需要什么材料？",
-    "category": "户籍管理",
-    "sessionId": "session-abcdef12",
-    "token": "gov-token-citizen-1725888888"
-  }
-  ```
-- **SSE 响应数据帧结构**：
-  - 文本流切片帧：`data: {"type":"chunk","content":"依据现行政策..."}`
-  - 政策法规溯源帧：`data: {"type":"citation","data":{"docTitle":"...","clauseNo":"...","clauseText":"..."}}`
-  - 智能导办卡片帧：`data: {"type":"guide_card","data":{"affairName":"...","materials":[...]}}`
-  - 交互条件澄清卡片帧：`data: {"type":"clarify_card","data":{"topic":"...","question":"...","options":[{"label":"...","query":"..."}]}}`
-  - 链式关联事项推荐卡片帧：`data: {"type":"recommend_card","data":[{"title":"...","query":"..."}]}`
-  - 结束标志帧：`data: {"type":"done","content":"[DONE]"}`
+### 6.4 政务知识图谱检索接口 (`GET /graph`)
+* **URL**: `/api/v1/gov/chat/graph?keyword=公租房`
+* **响应**：返回匹配的 `KnowledgeRelation` 三元组列表。
 
-#### 2. 回答满意度点赞/点踩评价
-- **请求方式**：`POST /api/v1/gov/chat/rate`
-- **请求体**：
-  ```json
-  {
-    "sessionId": "session-abcdef12",
-    "messageIndex": 1,
-    "score": 5,
-    "isLike": true
-  }
-  ```
-
----
-
-### 5.2 统一身份认证接口
-
-#### 1. 统一登录（密码 / 短信双模式）
-- **请求方式**：`POST /api/v1/gov/auth/login`
-- **请求体 (账号密码模式)**：
-  ```json
-  {
-    "account": "user",
-    "password": "123456",
-    "loginType": "PASSWORD"
-  }
-  ```
-- **请求体 (短信快捷模式)**：
-  ```json
-  {
-    "phone": "13876543210",
-    "code": "888888",
-    "loginType": "SMS"
-  }
-  ```
-- **成功响应**：
-  ```json
-  {
-    "code": 200,
-    "message": "登录成功",
-    "data": {
-      "id": 2,
-      "username": "user",
-      "name": "张伟",
-      "phone": "13876543210",
-      "role": "CITIZEN",
-      "roleName": "个人实名市民",
-      "token": "gov-token-citizen-1725888888"
-    }
-  }
-  ```
-
-#### 2. 公民实名建档注册
-- **请求方式**：`POST /api/v1/gov/auth/register`
-- **请求体**：
-  ```json
-  {
-    "username": "hainan_citizen",
-    "password": "password123",
-    "name": "李强",
-    "phone": "13912345678",
-    "idCard": "460100200001015678"
-  }
-  ```
-
----
-
-### 5.3 事项办理与材料自检接口
-
-#### 1. 获取事项类别列表
-- **请求方式**：`GET /api/v1/gov/affair/categories`
-- **响应**：`["户籍管理", "出入境服务", "社保医保", "住房保障", "企业开办", "车辆驾驶", "12345民情"]`
-
-#### 2. 提交网上在线申报受理
-- **请求方式**：`POST /api/v1/gov/affair/apply`
-- **请求体**：
-  ```json
-  {
-    "affairCode": "HA-HJ-2024-001",
-    "applicantName": "张伟",
-    "applicantIdCard": "460100199508081234",
-    "applicantPhone": "13876543210",
-    "memo": "已在学信网完成教育部大专学历认证"
-  }
-  ```
-- **响应数据**：
-  ```json
-  {
-    "code": 200,
-    "message": "申报已受理",
-    "data": {
-      "applyNo": "APPLY-20260909-08241",
-      "affairName": "高校毕业生引进人才落户",
-      "promisedDays": 1,
-      "status": "初审受理中"
-    }
-  }
-  ```
-
----
-
-### 5.4 12345 工单流转与 AI 研判接口
-
-#### 1. 12345 诉求 AI 智能归口研判
-- **请求方式**：`POST /api/v1/gov/work-order/ai-triage`
-- **请求类型**：`application/json`
-- **功能描述**：结合 Spring AI 对市民输入的自由文本诉求进行语义结构化解析，智能提炼公文标题摘要、分流归口委办局与时限等级。
-- **请求体**：
-  ```json
-  {
-    "appealContent": "外地大学毕业生在龙华区租房，想申请大专人才落户海口，要准备什么材料？"
-  }
-  ```
-- **响应数据**：
-  ```json
-  {
-    "code": 200,
-    "message": "AI智能研判归口成功",
-    "data": {
-      "summary": "关于大专毕业生落户申请咨询",
-      "suggestedCategory": "户籍管理",
-      "suggestedDept": "海口市公安局（户政部门）",
-      "urgentLevel": "常规诉求 (3个工作日限时办结)"
-    }
-  }
-  ```
-
-#### 2. 群众提报 12345 诉求工单
-- **请求方式**：`POST /api/v1/gov/work-order/submit`
-- **请求体**：
-  ```json
-  {
-    "citizenName": "李淑敏",
-    "citizenPhone": "13900001111",
-    "affairType": "住房保障",
-    "assignedDept": "海口市住房和城乡建设局",
-    "summary": "老旧小区加装电梯施工扰民",
-    "appealContent": "老旧小区物业加装电梯施工噪声扰民且占用消防通道，请协调相关部门核实处置。"
-  }
-  ```
-- **响应数据**：
-  ```json
-  {
-    "code": 200,
-    "message": "12345诉求提报成功",
-    "data": {
-      "orderNo": "12345-20260909-1088",
-      "status": "办理中",
-      "assignedDept": "海口市住房和城乡建设局",
-      "createTime": "2026-09-09 11:15:00"
-    }
-  }
-  ```
-
-#### 3. 管理端工单批复办结
-- **请求方式**：`POST /api/v1/gov/work-order/reply`
-- **请求体**：
-  ```json
-  {
-    "orderNo": "12345-20260909-1088",
-    "officialReply": "住建局已责成属地街道办和施工单位整改，调整作业时间至非休息时段，并留足消防通道。"
-  }
-  ```
-
-#### 4. 获取工单台账列表
-- **请求方式**：`GET /api/v1/gov/work-order/list`
-- **响应数据**：包含全部工单的编号、市民（脱敏）、归口部门、诉求内容、处理状态及官方答复。
-
----
-
-### 5.5 管理端民情研判看板接口
-
-#### 1. 核心 KPI 汇总统计
-- **请求方式**：`GET /api/v1/gov/dashboard/stats`
-- **响应数据**：
-  ```json
-  {
-    "code": 200,
-    "data": {
-      "totalQuestions": 12850,
-      "satisfactionRate": 98.6,
-      "totalWorkOrders": 482,
-      "avgResponseSeconds": 0.8
-    }
-  }
-  ```
-
-#### 2. 诉求分类占比与近期趋势
-- **请求方式**：`GET /api/v1/gov/dashboard/category-dist` 与 `GET /api/v1/gov/dashboard/trend`
-
----
-
-## 6. 前端 UI/UX 设计与排版规范
-
-### 6.1 权威党政红蓝金视觉体系
-依据《党政机关电子公文格式》（GB/T 3347-2014）与数字政府交互设计规范：
-- **政务红** (`#b71c1c` ~ `#d32f2f`)：用于顶部通栏、重点推进徽章、登录主按钮，传递党政权威性与公信力；
-- **便民蓝** (`#165dff` ~ `#0e42d2`)：用于智能对话气泡、高频选项卡、政策法规超链接，传递科技便民感；
-- **金色点缀** (`#ffd54f`)：用于重要导办高亮与承诺办结时限标识；
-- **全景 Hero 大横幅**：采用超清长城巍峨群山与金色祥云华表柱背景，辅以深度渐变滤镜，消除视觉生硬感；
-- **纯净对话环境**：对话区域与全局背景保持纯净舒适的浅灰底色（`#fafbfc` / `#f4f6fa`），移除一切干扰文字阅读的多余背景水印。
-
-### 6.2 专注式双栏排版与侧边栏双 Tab 联动
-主交互区严格对标“随申办”与“浙里办”的专注交互排版：
-- **完全摒弃主对话区下方堆叠案例网格的突兀排版**，页面高度适中，聊天滚动框（`chat-history`）与输入框（`gov-chat-input-wrapper`）成为视线核心；
-- **顶部主导航极简聚焦**：顶部栏只保留核心的【📞 12345接诉即办】与【🔑 注册 / 登录】（管理员登录后动态展示大屏入口），不再堆砌独立弹窗按钮；
-- **政务服务专题精准分类**：取消泛化的“全部”选项，默认选中【户籍管理】，按【出入境服务】、【社保医保】等专题精准筛选该领域的常见诉求，避免列表冗长杂乱；
-- **左侧边栏提供双选项卡切换**：
-  - `🔥 高频热点`：展示选中专题领域的 TOP 问答热词，一键点击带入右侧对话；
-  - `🏛️ 12345案例`：以紧凑精致卡片列出真实办结诉求，点击可直接向 AI 调起对应业务的智能全套导办。
-
-### 6.3 交互式多功能模态弹窗
-系统采用纯原生 CSS 弹性遮罩（`.gov-modal-mask`）与 Vue 条件渲染，统一风格：
-1. **12345 典型民情案例公示回音壁弹窗**（`showCasesModal`）：展示 6 大典型案例详实答复；
-2. **法定公文详情弹窗**（`showCitationModal`）：展示被引用的红头公文发文字号与原文章节；
-3. **申报材料自查与一键办件弹窗**（`showApplyModal`）：带入实名数据与申办说明；
-4. **统一实名认证与登录弹窗**（`showAuthModal`）：包含密码/短信登录与建档注册。
-
-### 6.4 拟人化流式打字与单气泡状态机
-针对流式大模型输出过程中的交互体验进行专项防抖与状态机优化：
-- **单气泡流式生命周期**：摒弃传统多气泡冗余堆叠缺陷（彻底消除在当前回答气泡下方额外弹出一个“正在检索...”幽灵气泡的现象）；系统在单气泡内部维护自适应状态机：
-  1. **首字未达阶段 (Pending)**：在气泡内部展示三点脉冲微动效（`.ai-loading-status`）与“正在检索本地权威政策库并拟制解答...”，消除等待白屏与空气泡突兀感；
-  2. **流式输出阶段 (Streaming)**：首字到达瞬间动效平滑淡出，正文字符伴随打字机流式光标（`.typing-cursor`）平稳输出；
-  3. **回答完成阶段 (Completed)**：流式光标自动隐去，并在气泡底部平滑唤起“好差评反馈操作栏”（`.feedback-actions`），确保评价条目只在生成完毕后出现，绝不在等待或输出过程中抢先渲染。
-
----
-
-## 7. 环境部署与运行调试指南
-
-### 7.1 环境依赖要求
-- **操作系统**：Windows 10/11、macOS、Linux (CentOS / Ubuntu)
-- **JDK 版本**：Java SE Development Kit 17 (推荐 Microsoft OpenJDK 17 或 Oracle JDK 17)
-- **构建工具**：Maven 3.8+（工程已内置 `mvnw` / `mvnw.cmd` 包装器，无需外部安装 Maven）
-- **浏览器**：Google Chrome、Microsoft Edge、Firefox 等现代浏览器（需支持 ES6 及 SSE）
-
-### 7.2 配置文件说明
-配置文件路径：`src/main/resources/application.properties`
-```properties
-# 统一服务端口
-server.port=8080
-spring.application.name=spring-ai-alibaba
-
-# 全局 UTF-8 字符集强制生效
-server.servlet.encoding.charset=UTF-8
-server.servlet.encoding.force=true
-server.servlet.encoding.enabled=true
-
-# 阿里云百炼 API Key 配置 (替换为您的有效 DashScope API Key)
-spring.ai.dashscope.api-key=sk-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
-
-# 文生图大模型配置 (可选)
-spring.ai.dashscope.image.options.model=wanx-v1
+### 6.5 公文爬虫采集入库接口 (`POST /crawl`)
+* **URL**: `/api/v1/gov/chat/crawl`
+* **请求体**：
+```json
+{
+  "url": "https://www.gz.gov.cn/zwgk/fggw/sfbgtwj/content/post_999999.html",
+  "category": "住房保障"
+}
 ```
 
-### 7.3 构建打包与启动命令
+---
 
-> [!IMPORTANT]
-> **静态资源打包关键说明**：  
-> 当使用 `java -jar target/spring-ai-alibaba-0.0.1-SNAPSHOT.jar` 运行时，Spring Boot 会从 Fat JAR 内部的 `BOOT-INF/classes/static/` 读取前端文件。因此修改 `index.html`、`app.js` 或 `gov-style.css` 后，**必须执行 `mvnw package` 重新打包**后再启动。
+## 7. 广州现行法定政策法规与真实测试基准库
 
-#### 1. 执行 Maven 编译与打包
-在项目根目录（`spring-ai-alibaba`）执行：
+系统内置了 8 部现行有效的广州市级规范性公文，全部来源于广州市人民政府公报及权威发布：
+
+| 序号 | 发文字号 | 文件全称 | 核心政策要点（大白话） |
+| :---: | :--- | :--- | :--- |
+| 1 | **穗府办规〔2024〕6号** | 《广州市公共租赁住房保障办法》 | 明确公共租赁住房租赁补贴标准为 35元/㎡/月，补贴期限最长 24 个月，已租住实物配租者不可重复申领。 |
+| 2 | **穗建规字〔2022〕1号** | 《广州市新就业无房职工公共租赁住房保障实施细则》 | 青年职工公租房补贴标准 300元/月，申请人不受户籍限制，需毕业未满5年、在穗连续缴纳社保满6个月。 |
+| 3 | **穗府规〔2023〕1号** | 《广州市积分制入户管理办法》 | 45周岁以下、持有效广东省居住证且在穗缴纳社保满4年即可申报，配偶及未成年子女可同步申请随迁。 |
+| 4 | **穗府办规〔2023〕15号** | 《广州市中小客车总量调控管理办法》 | 规定阶梯摇号与竞价规则，非广州户籍持居住证且近2年内累计缴纳医保满24个月可直接参与摇号。 |
+| 5 | **穗市监规〔2024〕2号** | 《关于深化企业开办“一网通办”改革的若干意见》 | 设立登记、刻制印章、申领发票、员工参保1个环节0.5天办结，政府免费发放全套4枚实体防伪印章。 |
+| 6 | **穗医保规〔2023〕5号** | 《关于灵活就业人员参加本市职工基本医疗保险的通知》 | 破除户籍门槛，灵活就业人员凭身份证即可参保职工医保，享受同等报销待遇，连续欠缴不超3个月可补缴。 |
+| 7 | **穗府〔2026〕6号** | 《广州市人民政府关于印发广州市政府投资管理办法的通知》 | 规范政府投资决策、年度计划、项目实施与资金监管全流程。 |
+| 8 | **国移发〔2023〕18号** | 《关于全面实施出入境证件“全国通办”的规定》 | 内地居民在广州跨省异地就近办理港澳通行证，免交居住证与社保，首次办证7个工作日办结，自助签注立等可取。 |
+
+---
+
+## 8. 环境部署与运行调试指南
+
+### 8.1 环境依赖与前置准备
+1. 操作系统：Windows 10/11、Linux、macOS 均可；
+2. 运行环境：**Java 17 LTS** 及以上；
+3. 阿里云百炼 API Key：在 `application.properties` 中已预配置好 DashScope 密钥。
+
+### 8.2 构建与强制 UTF-8 启动命令
+
 ```powershell
-# Windows PowerShell
-$env:JAVA_HOME = "C:\Users\Lenovo\.jdks\ms-17.0.20.1"
-.\mvnw.cmd package -DskipTests
-```
-或 Linux / macOS：
-```bash
-./mvnw package -DskipTests
-```
+# 1. 切换到项目根目录
+cd c:\Users\Lenovo\Desktop\实验项目\spring-ai-alibaba\spring-ai-alibaba
 
-#### 2. 启动服务
-```powershell
-# Windows 启动
-& "$env:JAVA_HOME\bin\java.exe" -jar target\spring-ai-alibaba-0.0.1-SNAPSHOT.jar
-```
-启动成功后，控制台输出：
-```text
-Tomcat started on port 8080 (http) with context path '/'
-Started SpringAiAlibabaApplication in 3.x seconds
+# 2. 执行 Maven 一键打包 (自动跳过单元测试)
+.\mvnw.cmd clean package -DskipTests
+
+# 3. 强制以 UTF-8 编码启动服务 (根除 Windows 下数据库中文字符集错乱)
+java -Dfile.encoding=UTF-8 -jar target\spring-ai-alibaba-0.0.1-SNAPSHOT.jar
 ```
 
-#### 3. 访问入口
-- **群众端智能咨询门户**：[http://localhost:8080/index.html](http://localhost:8080/index.html)
-- **政务研判与管理大屏**：[http://localhost:8080/admin.html](http://localhost:8080/admin.html)
+### 8.3 控制台与端点核验
+* **本地仿真门户**：浏览器访问 `http://localhost:8080/`
+* **H2 数据库管理控制台**：浏览器访问 `http://localhost:8080/h2-console`
+  * JDBC URL: `jdbc:h2:file:./data/gz_gov_ai`
+  * 用户名: `sa`，密码: 留空
+* **油猴脚本一键分发端点**：`http://localhost:8080/gz_gov_ai_assistant.user.js`
+* **健康检查 / 图谱测试**：`http://localhost:8080/api/v1/gov/chat/graph`
 
 ---
-
-### 7.4 预设演示账号体系
-
-系统初始化预置了满足实训演示与等保分权要求的多层级实名账号：
-
-| 账号类型 | 登录账号 (用户名/手机) | 默认密码 | 实名姓名 | 身份证号 (已等保脱敏) | 角色定位与测试关注点 |
-| :--- | :--- | :--- | :--- | :--- | :--- |
-| **超级管理员** | `admin` | `admin123` | 系统超级管理员 | `110101********0011` | 登录后首页激活“数据看板与后台”按钮，可进入研判大屏与批复工单 |
-| **实名普通市民 1** | `user` | `123456` | 张伟 | `460100********1234` | 标准普通公民账号，首页无管理后台入口，可直接发起办事申报 |
-| **实名普通市民 2** | `13900001111` | `123456` | 李淑敏 | `460100********2345` | 手机号作为账号快速登录，演示跨省就医与12345工单提报 |
-
----
-
-## 8. 安全合规与仿真沙箱机制说明
-
-### 8.1 仿真沙箱运行声明
-- 本系统为**高校软件工程实训项目 1.0 成果演示版**；
-- 系统中发生的所有政务问答、材料核验、在线申报与 12345 工单提交，均运行在**仿真政务安全沙箱环境**中，数据存储于本地线程安全受控内存仓储中；
-- **不会向任何国家部委或地方政府正式政务外网与 12345 系统发送外部数据**，群众及评审专家可完全放心进行各项交互操作与异常容错测试。
-
-### 8.2 等保合规与敏感数据处理
-- 严禁在浏览器客户端或未鉴权接口中明文传输、暴露公民完整 18 位身份证号码与联系电话；
-- 生产环境下密码均需引入 BCrypt 加盐散列存储；
-- 针对暴力破解验证码设置了 60 秒冷却定时器与图形校验码双重校验机制。
-
----
-
-## 9. 海口市高频政务咨询场景与测试基准库 (35项)
-
-为了全面检验与评测系统的 RAG 政策溯源检索与“六级十二项”导办卡片挂载能力，系统梳理并建立了覆盖海口市 8 大核心民生与商事领域的高频测试问题基准库：
-
-### 9.1 户籍管理与落户（公安户政）
-1. **人才引进落户**：“我是统招大专毕业，刚在海口找到工作，怎么办理先落户后就业？需要带什么材料？”
-2. **租房落户/公共集体户**：“在海口租房住没有买房，能把户口落到社区公共集体户吗？需要房东同意吗？”
-3. **夫妻投靠与随迁**：“我爱人是海口本地城镇户口，结婚满几年才可以办理夫妻投靠落户？”
-4. **跨省异地补换身份证**：“外地户口在海口工作，身份证快过期了，可以在海口换领吗？多久能拿到新证？”
-5. **新生儿出生登记**：“宝宝在海口医院出生，如何线上办理出生入户和医保登记‘一件事一次办’？”
-
-### 9.2 住房保障与公积金（公积金局 / 住建局）
-6. **安居房申购资格**：“海口安居型商品住房的申购条件是什么？单身人员需要满多少岁？社保要交多久？”
-7. **租房提取公积金**：“名下在海口没有住房，租房提取公积金一个月最多能提多少？需要提供租房发票吗？”
-8. **商贷购房提取公积金**：“在海口商业贷款买了商品房，可以每年提取一次公积金冲还房贷本息吗？”
-9. **离职公积金封存提取**：“从海口原单位离职回老家了，公积金账户封存满6个月怎么在手机上全额提取？”
-10. **异地公积金贷款**：“我在广州交的公积金，在海口买首套自住住房能申请异地公积金贷款吗？”
-
-### 9.3 医疗保障与社会保险（医保局 / 社保中心）
-11. **跨省异地就医直接结算**：“父母从外省过来海口常住带孙子，如果在海口医院看病住院，怎么办理医保直接报销备案？”
-12. **灵活就业人员参保**：“我是自由职业者/外卖骑手，没有本地户口，可以在海口自己交职工医保和养老保险吗？”
-13. **参保女职工生育津贴**：“在海口顺产小孩，产假期间的生育津贴怎么领？津贴是打给单位还是打给个人？”
-14. **门诊慢特病待遇认定**：“海口高血压、糖尿病等门诊慢特病怎么申请认定？认定后门诊拿药能报销多少比例？”
-15. **社保关系跨省转移**：“离开海口去深圳工作，之前在海口交的养老保险和医保年限怎么转过去？”
-
-### 9.4 企业营商与市场监管（市监局 / 营商环境建设局）
-16. **企业开办“一网通办”**：“想在海口注册一家有限责任公司，线上‘一网通办’多长时间能办好？免费送公章吗？”
-17. **个体工商户转型升级（个转企）**：“我开的个体餐饮店生意很好，想转成有限责任公司，能保留原来的老字号店名吗？”
-18. **食品经营许可核发**：“在海口开一家轻食奶茶店，线上办理《食品经营许可证》需要满足哪些厨房操作间条件？”
-19. **企业简易注销**：“公司注册后没有开展实际经营，也没有债权债务，怎么走简易注销流程？”
-20. **经营范围变更登记**：“企业增加新业态经营范围，需要全体股东到现场签字还是手机电子签名即可？”
-
-### 9.5 自贸港人才引育与补贴（人社局 / 委人才发展局）
-21. **高层次人才认定**：“海南自由贸易港高层次人才（C/D/E类）认定标准是什么？认定了有哪些专属待遇？”
-22. **自贸港引进人才住房补贴**：“本科毕业来海口落户就业，每月1500元的住房租赁补贴和购房补贴怎么申请？”
-23. **应届高校毕业生求职补贴**：“应届毕业生在海口求职创业，可以申领一次性求职创业补贴吗？标准是多少？”
-24. **流动人员人事档案托管**：“大学毕业档案被寄到了海口市人才劳动力交流服务中心，怎么查询存档状态和开具调档函？”
-
-### 9.6 公安交管与车管驾驶（交警支队）
-25. **驾驶证期满换证“警医邮”**：“我的C1驾照马上满6年该换证了，海口哪里有‘警医邮’微体检机？可以邮寄到家吗？”
-26. **新能源汽车增量指标申请**：“在海口购买新能源小客车，怎么申请新能源号牌增量指标排号？”
-27. **六年免检机动车合格标志申领**：“私家车第2年和第4年免上线检测，怎么在手机‘交管12123’上申领免检合格标志？”
-28. **机动车异地转籍/过户**：“外地牌照的二手小汽车想转入海口并上琼A绿牌，需要先回原籍车管所提档案吗？”
-
-### 9.7 出入境与涉外便民（出入境管理局）
-29. **往来港澳通行证全国通办**：“我是湖南户籍，人在海口，没有居住证可以在海口公安窗口办港澳通行证和旅游签注吗？”
-30. **港澳团队旅游再次签注智能速办**：“手里已经有港澳通行证了，去香港澳门的再次签注能在自助机上‘立等可取’吗？”
-31. **海南自贸港往来港澳人才签注**：“在海口重点园区（江东新区、复兴城）的高层次人才，可以申请多往返的港澳人才签注吗？”
-32. **普通护照首次申领**：“海口市民首次办理因私出国护照，需要带什么材料？未成年小孩需要父母陪同吗？”
-
-### 9.8 教育学位与民生救助（市教育局 / 市民政局）
-33. **公办义务教育阶段学位申请**：“海口幼升小/小升初公办学位什么时候开始网上填报？非本地户籍需要社保和居住证满几年？”
-34. **内地居民结婚登记跨省通办**：“男女双方都是外省户籍，都在海口工作居住，能在海口区的民政局登记领结婚证吗？”
-35. **高龄老人津贴发放申领**：“海口本地户籍老人满80周岁，高龄补贴发放标准是多少？行动不便怎么线上年审认证？”
-
----
-
-## 10. 海口全域政务知识库扩充规划与标准化架构
-
-### 10.1 数据源与抓取规范
-为解决知识库在实训初期样本数据量偏小的问题，系统接入海口市官方公开数据通道进行全量扩充：
-- **政策公文数据源**：海口市人民政府公报（`hkszfgb`，2023-2026年全期次）及海口市直各委办局（医保局、交警支队、人社局、住建局、市监局）公开规程。
-- **标准化数据模型**：
-  - `PolicyDoc`：官方发文字号（如`海府规〔...〕号`、`海府办规〔...〕号`）、标题、发文机关、印发/实施日期、摘要及分条切片（Clause）。
-  - `AffairGuide`：国家标准统一实施编码（如`HZ-HK-xxx`）、事项全称、服务对象、法定/承诺办结时限、准入条件、申报材料清单（含是否必备、介质形式、免交说明）、办理环节步骤及指定窗口。
-
-### 10.2 数据存储与加载架构
-由纯内存静态硬编码升级为**外置标准 JSON 资产持久化与自愈机制**：
-- 资产路径：`src/main/resources/data/haikou_policies.json` 与 `src/main/resources/data/haikou_affairs.json`；
-- 加载机制：通过 Jackson 与 Spring `ResourceLoader` 在服务启动时自动解析注入 `PolicyRepository` 和 `AffairRepository`，保持与前端大屏指标实时联动（50+ / 50+）。
-
----
-
-## 11. 广州市人民政府门户网站 (gz.gov.cn) 右下角圆形 AI 问答小助手前端脚本
-
-### 11.1 需求背景与设计定位
-针对将智能问答与导办能力无缝嵌入**广州市人民政府门户网站**（`https://www.gz.gov.cn/`）的业务需求，系统封装了一套专业级、即插即用的前端独立注入脚本。
-- **职责边界明晰**：前端专精于拟生动效、样式无缝适配与流式交互，后端由协作同学负责接口与数据库对接；
-- **视觉风格高度融合**：严格遵循广州市政府官网视觉规范，以岭南政务蓝（`#006ed5`）为主色调，搭配广州木棉红（`#d73816`）与政务金（`#fa8c16`），字体、卡片圆角及阴影与官网浑然一体。
-
-### 11.2 Shadow DOM 完全样式隔离
-为彻底杜绝第三方宿主网页（`gz.gov.cn` 原有全局 CSS 如 `table`, `a`, `button`, `body` 等）对小助手界面的样式干扰，脚本采用 **Shadow DOM (`attachShadow({ mode: 'open' })`)** 隔离架构：
-- 页面仅挂载单一宿主节点 `<div id="gz-gov-ai-root"></div>`；
-- 所有 CSS 规则、DOM 树完全内嵌于 Shadow Root 内部，实现**零样式泄露、零样式冲突**。
-
-### 11.3 核心拟生动效与交互体验
-1. **3D 微浮动运动 (`gzFloat`)**：右下角 66px 正圆形图标呈现纵向柔和悬浮运动，周期 3.2s，极具生命力；
-2. **呼吸光晕脉冲 (`gzAura`)**：悬浮球周围以径向渐变扩散呼吸光环，周期 2.6s，提供柔和的视觉焦点；
-3. **主动迎宾气泡 (`gz-ai-speech-bubble`)**：用户进入页面 2.5 秒后，悬浮球左侧平滑滑出迎宾提示卡片（“您好！我是穗政AI小助手…”），点击可直接呼出主对话框；
-4. **弹簧阻尼升起开合 (`cubic-bezier(0.16, 1, 0.3, 1)`)**：点击圆形小助手后，以右下角为锚点弹性形变升起为 440×680 现代化对话窗口；点击最小化或关闭时平滑缩回；
-5. **流式打字与导办卡片**：输出内容支持逐字打字机动画、红头政策依据展开卡（`穗府办规`）、六级十二项办事指南交互核验 Checklist 及一键直达网上申办。
-
-### 11.4 交付产物与使用方式
-系统提供三种灵活的使用形态，满足本地测试、线上演示与浏览器注入场景：
-
-| 交付文件 | 存放路径 | 适用场景与使用说明 |
-| :--- | :--- | :--- |
-| **独立嵌入脚本** | `src/main/resources/static/inject/gz_assistant_embed.js` | 可在浏览器 DevTools 控制台直接贴入执行，或在任意 HTML 中通过 `<script src="..."></script>` 引入 |
-| **Tampermonkey 油猴脚本** | `src/main/resources/static/inject/gz_gov_ai_assistant.user.js` | 适用于 Chrome/Edge 浏览器油猴插件一键安装，自动匹配 `https://www.gz.gov.cn/*` 并在打开官网时自动挂载小助手 |
-| **仿真测试预览页** | `src/main/resources/static/test_gz_assistant.html` | 本地内嵌仿真的广州市人民政府官网首页，浏览器直接访问 `http://localhost:8080/test_gz_assistant.html` 即可直观查看动效并测试问答 |
-
-### 11.5 与同学后端数据库的联调配置指南
-脚本内部实现了**双模通信适配器**，同学负责完成后端与数据库后，联调极为简便：
-```javascript
-// 修改 window.GzGovAiConfig 配置项（位于 gz_assistant_embed.js 顶部）
-window.GzGovAiConfig = {
-  apiEndpoint: 'http://localhost:8080/api/v1/gov/chat/stream', // 同学编写的问答接口
-  mockIfOffline: true, // 保持为 true 时：若后端离线或未启动，自动启动离线仿真知识库引擎，确保演示绝不翻车
-  assistantName: '穗小宝',
-  department: '广州市政务服务和数据管理局'
-};
-```
-- **接口请求格式**：`POST`，Body 为 JSON：`{ "prompt": "咨询内容" }`；
-- **接口返回格式**：JSON 包含 `content`（回答正文）、`policy`（可选红头法规依据）、`affair`（可选六级十二项标准事项指南）。
-
----
-*文档编制日期：2026年9月*  
-*所属工程：基于 SpringBoot+SpringAi 的智能政务咨询与导办系统 (1.0 Release)*
+*版权所有 © 2026 广州市政策法规 AI 智能问答系统研发团队。遵循 Apache License 2.0 协议。*
