@@ -544,14 +544,17 @@
       color: #389e0d;
     }
     .mat-tag-free {
-      font-size: 11.5px;
-      background: #f6ffed;
-      color: #389e0d;
-      border: 1px solid #b7eb8f;
-      padding: 0 3px;
-      margin-left: 4px;
-      font-weight: 600;
+      display: inline-block;
+      font-size: 11px;
+      background: #237804;
+      color: #ffffff;
+      border: none;
+      padding: 1px 5px;
+      margin-left: 5px;
+      font-weight: 700;
       border-radius: 0 !important;
+      cursor: default;
+      letter-spacing: 0.3px;
     }
     .mat-tip-sub {
       color: #8c8c8c;
