@@ -2004,7 +2004,7 @@
 
   function escapeText(str) {
     if (!str) return '';
-    return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+    return stripEmoji(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
   }
 
   // 接口请求 (优先连接后端 SSE 流式问答，流式解析并提取出处、卡片与知识图谱)

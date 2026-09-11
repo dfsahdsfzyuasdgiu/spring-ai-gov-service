@@ -181,8 +181,9 @@ public class GovAiService {
         // 组合完整事件流并实现自动落库持久化
         return Flux.fromIterable(prefixChunks)
                 .concatWith(textStream.map(chunk -> {
-                    replyAccumulator.append(chunk);
-                    return ChatResponseChunk.chunk(chunk);
+                    String cleanChunk = stripEmoji(chunk);
+                    replyAccumulator.append(cleanChunk);
+                    return ChatResponseChunk.chunk(cleanChunk);
                 }))
                 .concatWith(Flux.fromIterable(suffixChunks))
                 .doFinally(signal -> {
@@ -371,7 +372,7 @@ public class GovAiService {
         sb.append("【快速答疑】\n");
         sb.append("（开门见山用 1-2 句话直接说清楚核心结论，市民最关心的结果：到底能不能办、能领多少钱/补贴额度、最长有效期或最快多久办好）\n\n");
         sb.append("【注意事项与关键提醒】\n");
-        sb.append("（精炼列出社保断缴、申请时间截点等市民最容易踩坑的细节）\n\n");
+        sb.append("（精炼列出社保断缴、申请时间截点等市民最容易踩坑的细节。公文纪律：严禁使用 ❗、✅、⚠️、📅、📌 等任何 Emoji 符号，每项请以短横线或纯文字陈述）\n\n");
         sb.append("【官方政策依据】\n");
         sb.append("（注明依据的官方红头文件名称与文号，例如《广州市xxx规定》（穗府办规〔202x〕x号）。注意：正文切勿大篇幅摘抄法条原文，法定条款原文明细已由系统自动挂载至底部的“查看条文原文”抽屉供市民按需查验）\n\n");
         sb.append("（重要说明：准入门槛、申报材料与线上线下办理路径已由系统自动挂载为结构化【办事向导三步法】卡片，正文无需重复堆砌门槛和材料列表，请专注回答【快速答疑】的核心定性结论与【注意事项与关键提醒】）\n\n");
@@ -394,13 +395,35 @@ public class GovAiService {
             sb.append("【严格答复要求】\n");
             sb.append("1. 白话转换：必须将法规术语转换为群众日常生活用语（例如将“行政相对人”转换为“办事市民”，“本市行政区域内”转换为“广州全市”）。\n");
             sb.append("2. 杜绝虚构：严禁捏造未经检索依据记载的任何数据、补贴金额或行政门槛。\n");
-            sb.append("3. 风格亲民庄重：全篇不使用任何卡通表情符号（Emoji），符合广州市人民政府门户网站政务公文规范。\n");
+            sb.append("3. 严格零 Emoji 纪律：严禁在正文中出现任何表情符号、彩色图符（如 ❗、✅、⚠️、📅、📌、👉），Emoji 计数必须为 0，保持政府公文的严肃与庄重。\n");
         } else {
             sb.append("【广州官方政务政策库检索说明】\n");
             sb.append("当前检索到的政策与问题关联度较低。请向市民通俗说明：在广州市现行有效政策库中暂未检索到直接完全匹配的条款细则。\n");
             sb.append("可建议市民前往广州市人民政府门户网站查阅或拨打 12345 便民热线进行人工核实，切勿臆造政策规则。\n");
+            sb.append("严格保持严肃公文体例，绝不输出任何 Emoji 表情符号。\n");
         }
 
+        return sb.toString();
+    }
+
+    public static String stripEmoji(String text) {
+        if (text == null || text.isEmpty()) return text;
+        StringBuilder sb = new StringBuilder(text.length());
+        int len = text.length();
+        for (int i = 0; i < len; ) {
+            int cp = text.codePointAt(i);
+            int charCount = Character.charCount(cp);
+            i += charCount;
+            if ((cp >= 0x1F000 && cp <= 0x1FAFF)
+                    || (cp >= 0x2600 && cp <= 0x27BF)
+                    || (cp >= 0xFE00 && cp <= 0xFE0F)
+                    || (cp >= 0x2300 && cp <= 0x23FF)
+                    || (cp >= 0x2B00 && cp <= 0x2BFF)
+                    || cp == 0x200D) {
+                continue;
+            }
+            sb.appendCodePoint(cp);
+        }
         return sb.toString();
     }
 }
