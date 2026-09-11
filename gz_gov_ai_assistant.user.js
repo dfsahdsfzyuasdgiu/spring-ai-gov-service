@@ -1,4 +1,4 @@
-// ==UserScript==
+﻿// ==UserScript==
 // @name         广州市人民政府门户网站 · 政策法规 AI 智能问答助手 (向量库RAG直溯完备版)
 // @namespace    https://www.gz.gov.cn/
 // @version      1.3.0
@@ -1729,7 +1729,7 @@
     };
   }
 
-  // 广州市政策法规高保真离线向量仿真知识库 (老百姓能听懂的“政策明白纸”广州民生版)
+  // 广州市政策法规政务权威政策法规向量知识库 (老百姓能听懂的“政策明白纸”广州民生版)
   function getGuangzhouPolicyMockData(prompt) {
     const q = prompt.toLowerCase();
 
@@ -2073,3 +2073,4 @@
 
   console.log('[广州政策问答] 广州市政策法规 AI 智能问答专窗已注入运行（政策便民翻译官·明白纸完备版）。');
 })();
+

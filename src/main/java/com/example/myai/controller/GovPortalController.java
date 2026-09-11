@@ -50,6 +50,6 @@ public class GovPortalController {
 
     @GetMapping("/")
     public String index() {
-        return "forward:/test_gz_assistant.html";
+        return "forward:/index.html";
     }
 }

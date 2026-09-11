@@ -5,7 +5,7 @@
 > **核心宗旨**：**“通过 AI 把复杂的法款条例智能翻译成老百姓能听懂的语言，项目的本质是便利人民的生活。”**  
 > **建设标准**：对齐全国一体化在线政务服务平台标准规范、广东省“粤省事/粤商通”、广州市“穗好办”移动政务服务规范，以及党政机关严肃公文规范（全直角、无卡通、严格 0 Emoji）。  
 > **运行环境**：JDK 17 LTS + Spring Boot 3.3.4 + Spring AI Alibaba 1.0.0-M2.1 + H2 Database (MySQL Mode) + 原生 JavaScript (Shadow DOM 物理隔离) + Tampermonkey 油猴插件。  
-> **本地访问地址**：`http://localhost:8080/`（仿真政务门户） / `http://localhost:8080/gz_gov_ai_assistant.user.js`（油猴插件分发）
+> **本地访问地址**：`http://localhost:8080/`（服务中枢与真实网站接入测试） / `http://localhost:8080/gz_gov_ai_assistant.user.js`（油猴插件分发）
 
 ---
 
@@ -73,10 +73,10 @@
 
 ```text
 ┌────────────────────────────────────────────────────────────────────────┐
-│                        前端交互层 (Dual-Mode UI)                        │
+│                     前端真实网站伴随交互层 (Shadow DOM)                │
 │  ┌───────────────────────────────┐   ┌──────────────────────────────┐  │
-│  │ 真实政务网油猴插件             │   │ 广州政务门户本地仿真底座      │  │
-│  │ (gz_gov_ai_assistant.user.js) │   │ (test_gz_assistant.html)     │  │
+│  │ 真实政务网油猴插件             │   │ 真实政务网控制台动态注入      │  │
+│  │ (gz_gov_ai_assistant.user.js) │   │ (gz_assistant_embed.js)      │  │
 │  └───────────────┬───────────────┘   └──────────────┬───────────────┘  │
 │                  └─────────────────┬────────────────┘                  │
 │                                    ▼                                   │
@@ -178,7 +178,7 @@ spring-ai-alibaba/
 │   ├── schema.sql                              # 7 张核心业务表 DDL (UTF-8)
 │   ├── data.sql                                # 真实广州公文、办事指南与知识图谱初始数据 (UTF-8)
 │   └── static/
-│       ├── test_gz_assistant.html              # 广州市人民政府门户仿真平台
+│       ├── index.html                          # 真实网站测试与服务中枢管理页面
 │       ├── gz_assistant_embed.js               # 页面直插版问答专窗组件
 │       ├── gz_gov_ai_assistant.user.js         # 油猴脚本一键分发端点
 │       └── inject/                             # 镜像静态脚本
@@ -406,11 +406,14 @@ CREATE TABLE IF NOT EXISTS gov_knowledge_relation (
 * **“快速答疑”徽标**：右下角常驻醒目的蓝底白字直角矩形标徽，字迹清晰工整；
 * **单行最简“复制”**：在 AI 答复下方提供纯净单行“复制”按钮，点击即可将大白话答复完整复制到剪贴板，方便市民留存或转发。
 
-### 5.4 Shadow DOM 样式物理隔离与双模无缝切换
-* 前端助手采用 Shadow DOM 封装挂载，在宿主网站上实现 CSS 样式的物理隔离，完全不会干扰真实网站的页面排版；
-* **双模支持**：
-  * 模式一（本地仿真）：直接在浏览器打开 `http://localhost:8080/`；
-  * 模式二（实网油猴）：在 Tampermonkey 中安装 `http://localhost:8080/gz_gov_ai_assistant.user.js` 后，即可在真实广州市人民政府门户（`https://www.gz.gov.cn`）右下角自动挂载运行。
+### 5.4 Shadow DOM 样式物理隔离与真实网站多途径接入
+* 前端助手采用 Shadow DOM 封装挂载，在宿主网站上实现 CSS 样式的物理隔离，完全不会干扰真实官方政务网站的原生页面排版与全局样式；
+* **真实网站测试与接入途径**：
+  * **途径一（油猴脚本持久伴随）**：在 Tampermonkey 中安装 `http://localhost:8080/gz_gov_ai_assistant.user.js`，访问真实广州市人民政府门户（`https://www.gz.gov.cn`）或广东政务服务网广州分厅（`https://wsbs.gz.gov.cn`）自动挂载；
+  * **途径二（控制台快速注入）**：打开真实官方政务网站，在浏览器开发者工具 Console 中粘贴运行一行指令：
+    `const s = document.createElement('script'); s.src = 'http://localhost:8080/gz_assistant_embed.js'; document.body.appendChild(s);`
+    即可免装插件直接在真实页面右下角唤起助手进行功能测试；
+  * **途径三（服务中枢控制台）**：浏览器访问 `http://localhost:8080/`，查看后端运行状态并一键获取脚本分发、管理后台大屏与答辩演示。
 
 ---
 
@@ -515,7 +518,7 @@ java -Dfile.encoding=UTF-8 -jar target\spring-ai-alibaba-0.0.1-SNAPSHOT.jar
 ```
 
 ### 8.3 控制台与端点核验
-* **本地仿真门户**：浏览器访问 `http://localhost:8080/`
+* **服务中枢与真实网站测试中心**：浏览器访问 `http://localhost:8080/`
 * **H2 数据库管理控制台**：浏览器访问 `http://localhost:8080/h2-console`
   * JDBC URL: `jdbc:h2:file:./data/gz_gov_ai`
   * 用户名: `sa`，密码: 留空

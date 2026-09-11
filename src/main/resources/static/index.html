@@ -3,375 +3,462 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>广州市人民政府门户网站 (www.gz.gov.cn) - 政务智能咨询仿真平台</title>
+  <title>广州市政务 AI 智能咨询与导办系统 · 真实网站测试与服务中枢</title>
   <style>
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-      font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+    :root {
+      --gov-red: #c20505;
+      --gov-darkred: #9a0404;
+      --gov-blue: #0050b3;
+      --gov-darkblue: #003a8c;
+      --gov-light-bg: #f4f6fa;
+      --gov-card-bg: #ffffff;
+      --gov-border: #e2e8f0;
+      --text-main: #1f2937;
+      --text-muted: #64748b;
+      --status-green: #10b981;
     }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
-      background: #f4f6fa;
-      color: #333333;
+      background-color: var(--gov-light-bg);
+      color: var(--text-main);
+      font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+      line-height: 1.6;
     }
 
-    /* 顶部政务红栏 */
-    .gov-topbar {
-      background: #c20505;
+    .topbar {
+      background: var(--gov-red);
       color: #ffffff;
-      padding: 6px 40px;
+      padding: 8px 40px;
       font-size: 13px;
       display: flex;
       justify-content: space-between;
       align-items: center;
     }
-    .gov-topbar a {
-      color: #ffffff;
-      text-decoration: none;
-      margin-left: 16px;
-      font-size: 12px;
-    }
-    .gov-topbar a:hover {
-      text-decoration: underline;
-    }
 
-    /* 广州市政府标志性主头部 */
-    .gov-header {
-      background: linear-gradient(135deg, #0050b3 0%, #006ed5 100%);
+    .header-box {
+      background: linear-gradient(135deg, var(--gov-blue) 0%, #0070d8 100%);
       color: #ffffff;
-      padding: 28px 40px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
+      padding: 36px 40px;
     }
-    .gov-brand {
-      display: flex;
-      align-items: center;
-      gap: 16px;
-    }
-    .gov-emblem {
-      width: 48px;
-      height: 48px;
-      background: #ffffff;
-      border-radius: 0;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      color: #c20505;
-      font-weight: 900;
-      font-size: 22px;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.18);
-      border: 1px solid #ffd666;
-    }
-    .gov-title h1 {
-      font-size: 25px;
-      letter-spacing: 1px;
-      font-weight: 700;
-    }
-    .gov-title p {
-      font-size: 12px;
-      opacity: 0.9;
-      margin-top: 4px;
-      letter-spacing: 0.3px;
-    }
-
-    /* 导航菜单 (广州政务深蓝) */
-    .gov-nav {
-      background: #003a8c;
-      padding: 0 40px;
-      display: flex;
-      gap: 28px;
-    }
-    .gov-nav-item {
-      color: #ffffff;
-      text-decoration: none;
-      padding: 13px 0;
-      font-size: 15px;
-      font-weight: 500;
-      border-bottom: 3px solid transparent;
-      transition: all 0.2s ease;
-    }
-    .gov-nav-item:hover, .gov-nav-item.active {
-      border-bottom-color: #ffd666;
-      color: #ffd666;
-    }
-
-    /* 搜索栏与热搜关键词 */
-    .gov-search-section {
-      background: #ffffff;
-      padding: 32px 40px;
-      text-align: center;
-      border-bottom: 1px solid #e2e8f0;
-    }
-    .search-box {
-      max-width: 660px;
-      margin: 0 auto;
-      display: flex;
-      border: 2px solid #006ed5;
-      border-radius: 0;
-      overflow: hidden;
-      box-shadow: 0 4px 16px rgba(0, 110, 213, 0.1);
-    }
-    .search-box input {
-      flex: 1;
-      padding: 12px 18px;
-      font-size: 15px;
-      border: none;
-      outline: none;
-    }
-    .search-box button {
-      background: #c20505;
-      color: #ffffff;
-      border: none;
-      padding: 0 32px;
-      font-size: 15px;
-      font-weight: 700;
-      cursor: pointer;
-      transition: background 0.2s ease;
-    }
-    .search-box button:hover {
-      background: #a30404;
-    }
-    .search-keywords {
-      margin-top: 12px;
-      font-size: 13px;
-      color: #64748b;
-    }
-    .search-keywords a {
-      color: #006ed5;
-      margin: 0 6px;
-      text-decoration: none;
-    }
-    .search-keywords a:hover {
-      text-decoration: underline;
-    }
-
-    /* 主体内容区 (双列网格) */
-    .gov-container {
+    .header-content {
       max-width: 1200px;
-      margin: 28px auto;
+      margin: 0 auto;
+    }
+    .header-title {
+      font-size: 26px;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+      margin-bottom: 8px;
+    }
+    .header-subtitle {
+      font-size: 14px;
+      opacity: 0.9;
+    }
+
+    .main-container {
+      max-width: 1200px;
+      margin: -24px auto 40px;
       padding: 0 20px;
+    }
+
+    .status-bar {
+      background: var(--gov-card-bg);
+      border-radius: 8px;
+      padding: 16px 24px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+      border: 1px solid var(--gov-border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 24px;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+    .status-left {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .status-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: var(--status-green);
+      box-shadow: 0 0 8px var(--status-green);
+    }
+    .status-text {
+      font-weight: 600;
+      color: #0f766e;
+      font-size: 14px;
+    }
+    .status-tags {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+    .badge {
+      background: #eff6ff;
+      color: #1d4ed8;
+      border: 1px solid #bfdbfe;
+      padding: 4px 10px;
+      border-radius: 4px;
+      font-size: 12px;
+      font-weight: 500;
+    }
+
+    .grid-2 {
       display: grid;
-      grid-template-columns: 2fr 1fr;
+      grid-template-columns: 1fr 1fr;
       gap: 24px;
+      margin-bottom: 24px;
+    }
+    @media (max-width: 860px) {
+      .grid-2 { grid-template-columns: 1fr; }
     }
 
     .card {
-      background: #ffffff;
-      border-radius: 0;
-      padding: 22px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.04);
-      border: 1px solid #e2e8f0;
+      background: var(--gov-card-bg);
+      border-radius: 8px;
+      padding: 24px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+      border: 1px solid var(--gov-border);
     }
-    .card h2 {
-      font-size: 17px;
-      color: #0f172a;
+    .card-header {
+      border-bottom: 2px solid #f1f5f9;
+      padding-bottom: 12px;
       margin-bottom: 16px;
       display: flex;
-      align-items: center;
-      gap: 8px;
-      border-left: 4px solid #006ed5;
-      padding-left: 10px;
-    }
-
-    .news-item {
-      padding: 11px 0;
-      border-bottom: 1px dashed #e2e8f0;
-      display: flex;
       justify-content: space-between;
       align-items: center;
+    }
+    .card-title {
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--gov-blue);
+    }
+    .card-badge {
+      background: #fef2f2;
+      color: var(--gov-red);
+      border: 1px solid #fecaca;
+      font-size: 12px;
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-weight: 600;
+    }
+
+    .step-item {
+      margin-bottom: 16px;
+      padding-left: 28px;
+      position: relative;
+    }
+    .step-num {
+      position: absolute;
+      left: 0;
+      top: 0;
+      width: 20px;
+      height: 20px;
+      background: var(--gov-blue);
+      color: #ffffff;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+      font-weight: 700;
+    }
+    .step-title {
+      font-weight: 600;
+      margin-bottom: 4px;
       font-size: 14px;
     }
-    .news-item a {
-      color: #334155;
-      text-decoration: none;
-    }
-    .news-item a:hover {
-      color: #006ed5;
-    }
-    .news-date {
-      color: #94a3b8;
-      font-size: 12px;
+    .step-desc {
+      font-size: 13px;
+      color: var(--text-muted);
     }
 
-    /* “高效办成一件事” 业务网格 (纯矢量单色 SVG，无卡通图标) */
-    .service-grid {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
+    .btn-group {
+      display: flex;
       gap: 12px;
+      margin-top: 16px;
+      flex-wrap: wrap;
     }
-    .service-btn {
-      background: #f8fafc;
-      border: 1px solid #e2e8f0;
-      border-radius: 0;
-      padding: 14px 8px;
-      text-align: center;
+    .gov-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 10px 18px;
+      border-radius: 6px;
       text-decoration: none;
-      color: #1e293b;
-      font-size: 13px;
+      font-size: 14px;
+      font-weight: 600;
       transition: all 0.2s ease;
+      cursor: pointer;
+      border: 1px solid transparent;
+    }
+    .gov-btn-primary {
+      background: var(--gov-blue);
+      color: #ffffff;
+    }
+    .gov-btn-primary:hover {
+      background: var(--gov-darkblue);
+    }
+    .gov-btn-outline {
+      background: #ffffff;
+      color: var(--gov-blue);
+      border-color: var(--gov-blue);
+    }
+    .gov-btn-outline:hover {
+      background: #eff6ff;
+    }
+    .gov-btn-red {
+      background: var(--gov-red);
+      color: #ffffff;
+    }
+    .gov-btn-red:hover {
+      background: var(--gov-darkred);
+    }
+
+    .code-box {
+      background: #0f172a;
+      color: #38bdf8;
+      padding: 12px 16px;
+      border-radius: 6px;
+      font-family: ui-monospace, Menlo, Monaco, Consolas, monospace;
+      font-size: 12px;
+      word-break: break-all;
+      margin: 10px 0;
+      position: relative;
+    }
+    .copy-btn {
+      position: absolute;
+      right: 8px;
+      top: 8px;
+      background: #1e293b;
+      color: #e2e8f0;
+      border: 1px solid #334155;
+      padding: 3px 8px;
+      border-radius: 4px;
+      font-size: 11px;
+      cursor: pointer;
+    }
+    .copy-btn:hover {
+      background: #334155;
+      color: #ffffff;
+    }
+
+    .nav-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 16px;
+      margin-top: 16px;
+    }
+    @media (max-width: 860px) {
+      .nav-grid { grid-template-columns: repeat(2, 1fr); }
+    }
+    .nav-tile {
+      background: #ffffff;
+      border: 1px solid var(--gov-border);
+      border-radius: 8px;
+      padding: 16px;
+      text-decoration: none;
+      color: var(--text-main);
       display: flex;
       flex-direction: column;
-      align-items: center;
+      justify-content: space-between;
+      transition: all 0.2s ease;
     }
-    .service-btn:hover {
-      background: #eff6ff;
-      border-color: #93c5fd;
-      color: #1d4ed8;
+    .nav-tile:hover {
+      border-color: var(--gov-blue);
       transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0, 80, 179, 0.1);
     }
-    .service-svg {
-      margin-bottom: 8px;
-      transition: transform 0.2s ease;
+    .nav-tile-title {
+      font-weight: 700;
+      font-size: 15px;
+      color: var(--gov-blue);
+      margin-bottom: 6px;
     }
-    .service-btn:hover .service-svg {
-      transform: scale(1.08);
+    .nav-tile-desc {
+      font-size: 12px;
+      color: var(--text-muted);
     }
 
-    /* 运行状态提示条 */
-    .status-banner {
-      background: #f0fdf4;
-      border: 1px solid #bbf7d0;
-      color: #166534;
-      padding: 12px 18px;
-      border-radius: 0;
-      margin-bottom: 20px;
+    .footer {
+      text-align: center;
+      padding: 24px 20px;
       font-size: 13px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
+      color: var(--text-muted);
+      border-top: 1px solid var(--gov-border);
+      background: #ffffff;
     }
   </style>
 </head>
 <body>
 
-  <!-- 顶部状态栏 -->
-  <div class="gov-topbar">
-    <div>欢迎访问广州市人民政府门户网站（www.gz.gov.cn）</div>
-    <div>
-      <a href="javascript:;">无障碍浏览</a>
-      <a href="javascript:;">市民网页</a>
-      <a href="javascript:;">穗好办APP</a>
-      <a href="javascript:;">12345政务热线</a>
+  <!-- 顶部政务红条 -->
+  <div class="topbar">
+    <span>广州市政务政策法规 AI 智能咨询与导办系统 · 真实网站测试运行中枢</span>
+    <span>服务端口：8080 · 运行环境：本地开发/联调模式</span>
+  </div>
+
+  <!-- 主头部 -->
+  <div class="header-box">
+    <div class="header-content">
+      <h1 class="header-title">广州市政务 AI 智能服务中枢</h1>
+      <p class="header-subtitle">
+        基于 Spring Boot 3 + Spring AI + 阿里云通义千问 + 广州市公开政策法规知识库。系统专注于直接在真实的广州市政务网站上提供智能问答、办事导办与 12345 闭环服务。
+      </p>
     </div>
   </div>
 
-  <!-- 头部Logo区 -->
-  <header class="gov-header">
-    <div class="gov-brand">
-      <div class="gov-emblem">穗</div>
-      <div class="gov-title">
-        <h1>广州市人民政府门户网站</h1>
-        <p>The People's Government of Guangzhou Municipality · 广东政务服务网广州专区</p>
+  <!-- 主体卡片区 -->
+  <div class="main-container">
+
+    <!-- 运行状态指示条 -->
+    <div class="status-bar">
+      <div class="status-left">
+        <div class="status-dot"></div>
+        <div class="status-text">AI 后端服务已就绪 (Spring Boot Port 8080)</div>
+      </div>
+      <div class="status-tags">
+        <span class="badge">Spring AI 1.0.0-M2</span>
+        <span class="badge">Qwen-Max 大模型接入</span>
+        <span class="badge">H2 政策知识库持久化</span>
+        <span class="badge">跨域 CORS 全开 (允许任意真实政务域挂载)</span>
       </div>
     </div>
-  </header>
 
-  <!-- 导航栏 -->
-  <nav class="gov-nav">
-    <a href="javascript:;" class="gov-nav-item active">首页</a>
-    <a href="javascript:;" class="gov-nav-item">政务公开</a>
-    <a href="javascript:;" class="gov-nav-item">政务服务</a>
-    <a href="javascript:;" class="gov-nav-item">互动交流</a>
-    <a href="javascript:;" class="gov-nav-item">政策发布</a>
-    <a href="javascript:;" class="gov-nav-item">魅力广州</a>
-  </nav>
+    <!-- 测试方案左右网格 -->
+    <div class="grid-2">
 
-  <!-- 搜索栏 -->
-  <section class="gov-search-section">
-    <div class="search-box">
-      <input type="text" placeholder="请输入政策文件名称、办事事项或关键字..." />
-      <button>搜 索</button>
-    </div>
-    <div class="search-keywords">
-      热搜：
-      <a href="javascript:;">社保</a>
-      <a href="javascript:;">医保</a>
-      <a href="javascript:;">高质量发展</a>
-      <a href="javascript:;">居住证</a>
-      <a href="javascript:;">绿美广州</a>
-      <a href="javascript:;">营商环境</a>
-      <a href="javascript:;">助企纾困</a>
-      <a href="javascript:;">公租房申请</a>
-    </div>
-  </section>
-
-  <!-- 仿真页面主体 -->
-  <main class="gov-container">
-    <div class="left-col">
-      <div class="status-banner">
-        <span><strong style="color:#0050b3;">[政务专窗运行环境]</strong> 页面已加载<strong>“广州市人民政府门户网站 · 政务智能咨询”</strong>独立脚本，请观察右下角庄重蓝金悬浮微标与交互窗口。</span>
-        <span style="font-size:12px; color:#15803d; font-weight:700;">服务正常</span>
-      </div>
-
+      <!-- 方案一：油猴插件真实挂载 -->
       <div class="card">
-        <h2>政务要闻 · 工作动态</h2>
-        <div class="news-item">
-          <a href="javascript:;">广州市召开深化推进“高效办成一件事”打造一流营商环境大会</a>
-          <span class="news-date">2026-09-10</span>
+        <div class="card-header">
+          <div class="card-title">方案一：油猴插件挂载测试（推荐）</div>
+          <div class="card-badge">无感伴随</div>
         </div>
-        <div class="news-item">
-          <a href="javascript:;">广州市发布2026年度来穗人员积分制入户申报指南及指标分配方案</a>
-          <span class="news-date">2026-09-08</span>
+
+        <div class="step-item">
+          <div class="step-num">1</div>
+          <div class="step-title">安装浏览器扩展</div>
+          <div class="step-desc">确保 Chrome / Edge 浏览器已安装 Tampermonkey（油猴）或 ScriptCat（脚本猫）插件。</div>
         </div>
-        <div class="news-item">
-          <a href="javascript:;">《广州市公共租赁住房保障办法》全面落实“减材料、并联审批”新规</a>
-          <span class="news-date">2026-09-05</span>
+
+        <div class="step-item">
+          <div class="step-num">2</div>
+          <div class="step-title">一键安装政务助手用户脚本</div>
+          <div class="step-desc">点击下方按钮直接打开脚本源码，在弹出窗口中点击“安装”。</div>
+          <div class="btn-group">
+            <a href="/gz_gov_ai_assistant.user.js" target="_blank" class="gov-btn gov-btn-primary">
+              一键安装 gz_gov_ai_assistant.user.js
+            </a>
+          </div>
         </div>
-        <div class="news-item">
-          <a href="javascript:;">广州推进个体工商户转型升级为有限责任公司（个转企）便民绿通</a>
-          <span class="news-date">2026-09-02</span>
-        </div>
-        <div class="news-item">
-          <a href="javascript:;">广州市全面推行出入境证件“全国通办”，往来港澳签注随到随办</a>
-          <span class="news-date">2026-08-29</span>
+
+        <div class="step-item">
+          <div class="step-num">3</div>
+          <div class="step-title">打开真实广州政务网站直接测试</div>
+          <div class="step-desc">安装完成后，访问任意真实官方页面，页面右下角将自动唤起“广州政务 AI 智能助手”徽章：</div>
+          <div class="btn-group">
+            <a href="https://www.gz.gov.cn/" target="_blank" class="gov-btn gov-btn-outline">
+              访问 广州市人民政府门户网站 (www.gz.gov.cn)
+            </a>
+            <a href="https://wsbs.gz.gov.cn/" target="_blank" class="gov-btn gov-btn-outline">
+              访问 广东政务服务网广州分厅 (wsbs.gz.gov.cn)
+            </a>
+          </div>
         </div>
       </div>
-    </div>
 
-    <div class="right-col">
+      <!-- 方案二：控制台注入即测 -->
       <div class="card">
-        <h2>“高效办成一件事”专区</h2>
-        <div class="service-grid">
-          <a href="javascript:;" class="service-btn">
-            <svg class="service-svg" viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="#006ed5" stroke-width="2" stroke-linecap="square"><path d="M3 9.5L12 3l9 6.5V20a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9.5z"/><path d="M9 21V12h6v9"/></svg>
-            <span>公租房申请</span>
-          </a>
-          <a href="javascript:;" class="service-btn">
-            <svg class="service-svg" viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="#006ed5" stroke-width="2" stroke-linecap="square"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 11l-3 3-2-2"/></svg>
-            <span>积分入户</span>
-          </a>
-          <a href="javascript:;" class="service-btn">
-            <svg class="service-svg" viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="#006ed5" stroke-width="2" stroke-linecap="square"><rect x="4" y="2" width="16" height="20"/><path d="M9 22v-4h6v4"/><line x1="8" y1="6" x2="10" y2="6"/><line x1="14" y1="6" x2="16" y2="6"/><line x1="8" y1="10" x2="10" y2="10"/><line x1="14" y1="10" x2="16" y2="10"/></svg>
-            <span>企业开办</span>
-          </a>
-          <a href="javascript:;" class="service-btn">
-            <svg class="service-svg" viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="#006ed5" stroke-width="2" stroke-linecap="square"><rect x="3" y="4" width="18" height="16"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
-            <span>职工医保</span>
-          </a>
-          <a href="javascript:;" class="service-btn">
-            <svg class="service-svg" viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="#006ed5" stroke-width="2" stroke-linecap="square"><rect x="3" y="3" width="18" height="18"/><circle cx="12" cy="10" r="3"/><path d="M7 19a5 5 0 0 1 10 0"/></svg>
-            <span>港澳签注</span>
-          </a>
-          <a href="javascript:;" class="service-btn">
-            <svg class="service-svg" viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="#006ed5" stroke-width="2" stroke-linecap="square"><rect x="2" y="5" width="20" height="14"/><circle cx="7" cy="19" r="2"/><circle cx="17" cy="19" r="2"/><path d="M5 12h14"/></svg>
-            <span>车牌摇号</span>
-          </a>
+        <div class="card-header">
+          <div class="card-title">方案二：控制台注入测试（免装插件）</div>
+          <div class="card-badge">即开即测</div>
+        </div>
+
+        <div class="step-item">
+          <div class="step-num">1</div>
+          <div class="step-title">打开任意真实政务页面</div>
+          <div class="step-desc">在浏览器中打开真实政务网站，如广州市人民政府网政策页面或办事窗口。</div>
+        </div>
+
+        <div class="step-item">
+          <div class="step-num">2</div>
+          <div class="step-title">打开开发者工具 Console 控制台</div>
+          <div class="step-desc">在目标政务网页上按键盘 <code>F12</code> 键（或点击鼠标右键选择“检查”），切换到 <code>Console</code>（控制台）面板。</div>
+        </div>
+
+        <div class="step-item">
+          <div class="step-num">3</div>
+          <div class="step-title">复制并执行一行注入脚本</div>
+          <div class="step-desc">将下方代码复制并粘贴到控制台回车，即可瞬间挂载助手并在真实政务页面上展开交互测试：</div>
+          <div class="code-box" id="codeSnippet">
+            const s=document.createElement('script');s.src='http://localhost:8080/gz_assistant_embed.js';document.body.appendChild(s);
+            <button class="copy-btn" onclick="copyCode()">复制指令</button>
+          </div>
         </div>
       </div>
 
-      <div class="card" style="margin-top: 20px;">
-        <h2>广州市政策法规 · 智能问答专栏</h2>
-        <p style="font-size: 13px; color: #64748b; line-height: 1.65;">
-          如需查询广州市各项现行政策公文、扶持办法或条款依据，请直接点击<strong>右下角的政策智能咨询专窗</strong>，支持 7×24 小时全天候政策精准解答与法条出处直溯。
-        </p>
+    </div>
+
+    <!-- 下方快速导航与演示 -->
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title">数字化协同管理与汇报演示中心</div>
+      </div>
+      <div class="nav-grid">
+        <a href="/admin.html" class="nav-tile">
+          <div>
+            <div class="nav-tile-title">数字化协同管理大屏</div>
+            <div class="nav-tile-desc">12345 工单研判分流、诉求办理答复、热点民情研判与知识库审计大屏。</div>
+          </div>
+          <div style="font-size: 12px; color: var(--gov-blue); font-weight: 600; margin-top: 10px;">进入管理后台 ➔</div>
+        </a>
+
+        <a href="/presentation.html" class="nav-tile">
+          <div>
+            <div class="nav-tile-title">实训答辩汇报 PPT</div>
+            <div class="nav-tile-desc">8 页全屏交互式答辩演示胶片，涵盖项目背景、技术架构、核心攻关与未来愿景。</div>
+          </div>
+          <div style="font-size: 12px; color: var(--gov-blue); font-weight: 600; margin-top: 10px;">全屏演示汇报 ➔</div>
+        </a>
+
+        <a href="/api/v1/gov/policy/search?keyword=%E5%85%AC%E7%A7%9F%E6%88%BF" target="_blank" class="nav-tile">
+          <div>
+            <div class="nav-tile-title">政策法规检索接口</div>
+            <div class="nav-tile-desc">直接调用后端 REST API 探测真实公租房政策公文条款及法条出处结构化 JSON。</div>
+          </div>
+          <div style="font-size: 12px; color: var(--gov-blue); font-weight: 600; margin-top: 10px;">调用政策 API ➔</div>
+        </a>
+
+        <a href="/api/v1/gov/work-order/list" target="_blank" class="nav-tile">
+          <div>
+            <div class="nav-tile-title">12345 工单数据接口</div>
+            <div class="nav-tile-desc">查看接诉即办闭环工单列表，验证多部门智能流转、字段脱敏与官方答复数据。</div>
+          </div>
+          <div style="font-size: 12px; color: var(--gov-blue); font-weight: 600; margin-top: 10px;">调用工单 API ➔</div>
+        </a>
       </div>
     </div>
-  </main>
 
-  <!-- 注入右下角广州市人民政府政务智能咨询助手脚本 -->
-  <script src="/inject/gz_assistant_embed.js"></script>
+  </div>
 
+  <!-- 页脚 -->
+  <footer class="footer">
+    <p>广州市政务政策法规 AI 智能咨询与导办系统 · 技术架构：Spring Boot 3 + Spring AI + DashScope · 纯真实网站嵌入模式</p>
+  </footer>
+
+  <script>
+    function copyCode() {
+      const code = "const s=document.createElement('script');s.src='http://localhost:8080/gz_assistant_embed.js';document.body.appendChild(s);";
+      navigator.clipboard.writeText(code).then(() => {
+        alert('注入指令已复制到剪贴板！请在真实政务页面按 F12 粘贴至 Console 运行即可。');
+      }).catch(() => {
+        prompt('请手动复制以下注入指令：', code);
+      });
+    }
+  </script>
 </body>
 </html>

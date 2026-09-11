@@ -12,9 +12,9 @@
 
 ---
 
-## 🏛️ 项目定位与建设宗旨
+## 一、 项目定位与建设宗旨
 
-本项目严格依据课题指标规范，基于 **SpringBoot 3.3.4 + SpringAI + 阿里云百炼大模型（通义千问）** 研发。
+本项目严格依据课题规格指标，基于 **SpringBoot 3.3.4 + SpringAI + 阿里云百炼大模型（通义千问）** 研发。
 
 **核心建设宗旨**：
 > **“把复杂的法款条例智能翻译成老百姓能听懂的语言，项目的本质是便利人民的生活。”**
@@ -23,11 +23,12 @@
 1. **权威公文严格直溯**：依托广州现行真实公文规章切片，提供精准法条依据直溯，绝不信口胡编；
 2. **百姓视角大白话翻译**：大模型自动将法律条款拆解为资格门槛、待遇标准、办事要点与注意事项；
 3. **沉浸式全文字办事指引**：彻底剔除容易打断办事的外部跳转链接，通过纯文字交互分步引导市民线上与线下办事路径；
-4. **严肃规范的政务视觉体系**：遵循党政机关严肃庄重规范，界面全直角公文风格（`border-radius: 0`），**全篇严格 0 Emoji、0 卡通图案**，常驻标志性 **“快速答疑”** 徽标与单行最简 **“复制”** 功能。
+4. **纯真实网站伴随挂载测试**：完全摒弃本地虚假仿真网页底座，专注通过油猴脚本（Tampermonkey）或控制台脚本动态注入，直接在真实的广州市人民政府门户（`www.gz.gov.cn`）及广东政务服务网（`wsbs.gz.gov.cn`）等官方网站上无感挂载运行；
+5. **严肃规范的政务视觉体系**：遵循党政机关严肃庄重规范，界面全直角公文风格（`border-radius: 0`），**全篇严格 0 Emoji、0 卡通图案**，常驻标志性 **“快速答疑”** 徽标与单行最简 **“复制”** 功能。
 
 ---
 
-## 🌟 核心功能与特色亮点
+## 二、 核心功能与特色亮点
 
 ### 1. 政策法规大白话翻译与法定公文直溯
 - 深度对接广州真实政策公文库，群众提问后由 RAG 检索增强引擎实时召回匹配公文；
@@ -62,14 +63,14 @@
 - 内置 `GovCrawlerService`，提供自动化数据采集接口；
 - 支持传入广州政务网公文 URL 或直接传入政务网页 HTML，自动正则提取公文发文字号、发文机关、成文日期、政策分类及章节条款，并结构化持久化落库。
 
-### 6. 双模前端支持（油猴脚本 + 本地门户底座）
-- **本地政务仿真底座**：访问 `http://localhost:8080/` 即可进入广州市人民政府门户（www.gz.gov.cn）仿真平台；
-- **油猴插件实网运行**：提供 `gz_gov_ai_assistant.user.js`，安装到 Tampermonkey 后可直接在真实广州市政务官网（`https://www.gz.gov.cn`、`https://zwfw.gd.gov.cn`）右下角自适应挂载运行；
-- **Shadow DOM 样式隔离**：采用 Shadow DOM 物理隔离，确保助手样式与宿主网站原生样式互不干扰。
+### 6. 纯真实政务网站伴随挂载与 Shadow DOM 物理隔离
+- **无侵入真实网站测试**：不依赖任何本地伪造仿真门户，系统专注运行于真实政务网；
+- **油猴插件实网运行**：提供 `gz_gov_ai_assistant.user.js`，安装后直接在真实广州市政务官网（`https://www.gz.gov.cn`、`https://wsbs.gz.gov.cn`）右下角自适应挂载；
+- **Shadow DOM 样式物理隔离**：核心组件完全封装在 Shadow DOM 内部，确保 AI 助手的政务红蓝风格与宿主官方页面的 CSS 样式零冲突。
 
 ---
 
-## 🛠️ 技术架构与技术栈
+## 三、 技术架构与技术栈
 
 | 层次 | 技术选型 | 版本 / 说明 |
 | :--- | :--- | :--- |
@@ -80,11 +81,11 @@
 | **数据采集爬虫** | Jsoup + Regex Engine | 广州市政务公文发文字号、条款与办事要素结构化抽取 |
 | **流式通信协议** | Server-Sent Events (SSE) | HTTP/1.1 `text/event-stream` 打字机流式响应 |
 | **前端交互** | 原生 JavaScript + Shadow DOM | 无外部依赖，轻量极速，完全避免样式污染 |
-| **浏览器插件适配** | Tampermonkey (油猴) | 支持一键唤起安装，全网段自动匹配注入 |
+| **浏览器插件适配** | Tampermonkey (油猴) | 支持一键唤起安装，真实政务全网段自动匹配注入 |
 
 ---
 
-## 🗄️ 数据库核心数据表结构
+## 四、 数据库核心数据表结构
 
 系统在 `src/main/resources/schema.sql` 中定义了 7 张核心业务表，并在 `src/main/resources/data.sql` 中内置了广州市真实政务数据：
 
@@ -100,7 +101,7 @@ gov_knowledge_relation    ── 政务知识图谱三元组表 (source_type, so
 
 ---
 
-## 🚀 快速启动与运行指南
+## 五、 快速构建与启动
 
 ### 1. 环境要求
 - **JDK 17** 及以上环境（配置好 `JAVA_HOME`）；
@@ -119,35 +120,50 @@ cd spring-ai-alibaba
 java -Dfile.encoding=UTF-8 -jar target/spring-ai-alibaba-0.0.1-SNAPSHOT.jar
 ```
 
-服务启动成功后，Tomcat 监听在 `8080` 端口。
+服务启动成功后，Tomcat 监听在 `8080` 端口。访问 `http://localhost:8080/` 可打开服务中枢与真实网站接入测试控制台。
 
 ---
 
-## 💻 体验与测试指南
+## 六、 真实政务网站功能测试指南
 
-### 方式 A：直接在浏览器中打开本地仿真平台（最简便）
+系统完全摒弃了本地虚拟底座，支持以下两种便捷途径直接在**真实广州市政务官方网站**上进行全功能测试：
 
-在浏览器直接访问：  
-👉 **`http://localhost:8080/`** （或 `http://localhost:8080/test_gz_assistant.html`）
+### 方案一：油猴插件真实挂载测试（推荐·持久伴随）
 
-**操作流程**：
-1. 页面加载广州市人民政府门户网站仿真底座；
-2. 屏幕右下角点击蓝底白字的 **“快速答疑”** 徽标展开专窗；
-3. 输入测试问题即可开始多轮问答。
-
----
-
-### 方式 B：通过油猴脚本在真实广州政务网上运行
-
-1. 确保浏览器已安装 **Tampermonkey（油猴）** 插件；
-2. 在浏览器地址栏中直接访问：  
-   👉 **`http://localhost:8080/gz_gov_ai_assistant.user.js`**
-3. 油猴将自动弹出【安装脚本】界面，点击左侧 **【安装】**；
-4. 打开真实的广州市政务网站（如 **`https://www.gz.gov.cn`**），刷新后右下角即可自动加载助手！
+1. **安装浏览器扩展**：确保 Chrome 或 Edge 浏览器已安装 **Tampermonkey（油猴）** 或 ScriptCat 扩展；
+2. **一键安装用户脚本**：在浏览器地址栏访问：  
+   `http://localhost:8080/gz_gov_ai_assistant.user.js`  
+   油猴插件将自动弹出安装确认窗口，点击左侧 **【安装】**；
+3. **在真实政务网测试体验**：在浏览器中直接打开真实的广州官方政务网站：
+   - [广州市人民政府门户网站（www.gz.gov.cn）](https://www.gz.gov.cn/)
+   - [广东政务服务网广州分厅（wsbs.gz.gov.cn）](https://wsbs.gz.gov.cn/)
+4. **功能交互**：网页加载完成后，页面右下角将自动唤起蓝底白字的 **“快速答疑”** 徽标，点击即可展开直角专窗，体验政策大白话解读、法条溯源、向导式办事指引与 12345 闭环工单。
 
 ---
 
-## 📋 真实测试用例验收清单
+### 方案二：控制台注入测试（免装插件·即开即测）
+
+若测试电脑未安装油猴插件，可直接使用主流浏览器开发者工具进行瞬时测试：
+
+1. 打开任意真实官方政务网页（如 `https://www.gz.gov.cn/`）；
+2. 按键盘 `F12` 键（或鼠标右键选择“检查”），切换到 **Console（控制台）** 标签页；
+3. 复制并执行以下注入指令：
+   ```javascript
+   const s=document.createElement('script');s.src='http://localhost:8080/gz_assistant_embed.js';document.body.appendChild(s);
+   ```
+4. 真实政务网页右下角将瞬间挂载并唤起“广州政务 AI 智能助手”，可直接开始多轮交互测试。
+
+---
+
+### 方案三：管理中枢与汇报大屏
+
+- **服务中枢与测试中心**：`http://localhost:8080/`（查看服务健康状态、一键获取注入脚本、直达真实政务网链接）；
+- **12345 数字化协同管理大屏**：`http://localhost:8080/admin.html`（工单智能研判分流、诉求办理答复、热点民情研判）；
+- **实训答辩汇报交互式演示**：`http://localhost:8080/presentation.html`（8 页全屏交互式答辩汇报胶片）。
+
+---
+
+## 七、 真实测试用例验收清单
 
 | 用例编号 | 测试提问 (Prompt) | 验收要点 |
 | :--- | :--- | :--- |
@@ -161,7 +177,7 @@ java -Dfile.encoding=UTF-8 -jar target/spring-ai-alibaba-0.0.1-SNAPSHOT.jar
 
 ---
 
-## 🔌 核心 API 接口清单
+## 八、 核心 API 接口清单
 
 | 接口路径 | 方法 | 说明 |
 | :--- | :--- | :--- |
@@ -172,40 +188,52 @@ java -Dfile.encoding=UTF-8 -jar target/spring-ai-alibaba-0.0.1-SNAPSHOT.jar
 | `/api/v1/gov/chat/graph` | `GET` | 检索政务知识图谱关联三元组（支持关键字过滤） |
 | `/api/v1/gov/chat/crawl` | `POST` | 广州政务政策公文爬虫采集接口（输入 URL 或 HTML 自动解析入库） |
 | `/gz_gov_ai_assistant.user.js`| `GET` | 油猴脚本一键分发安装端点 |
+| `/gz_assistant_embed.js` | `GET` | 真实网站通用内嵌/控制台注入脚本端点 |
 
 ---
 
-## 📁 核心工程目录结构
+## 九、 核心工程目录结构
 
 ```text
 spring-ai-alibaba/
 ├── pom.xml                                     # Maven 依赖配置 (Spring Boot 3.3.4, Spring AI, UTF-8 配置)
-├── README.md                                   # 项目权威说明文档 (广州政务全功能专版)
+├── README.md                                   # 项目权威说明文档 (真实政务网测试专版)
 ├── DEVELOPMENT.md                              # 架构设计与技术实现详述规范
 ├── gz_gov_ai_assistant.user.js                # 广州政务 AI 智能问答油猴前端脚本 (全直角、0 Emoji、纯文字引导)
+├── presentation.html                           # 实训答辩汇报交互式演示胶片 (离线全屏)
 ├── src/main/
 │   ├── java/com/example/myai/
 │   │   ├── SpringAiAlibabaApplication.java    # Spring Boot 主启动类
 │   │   ├── common/                             # 通用响应类 (Result, DataMaskUtils)
 │   │   ├── controller/
 │   │   │   ├── GovChatController.java         # 智能咨询 SSE 流式接口、导办向导交互、爬虫触发
-│   │   │   └── GovPortalController.java       # 门户根路径与油猴脚本分发路由控制器
+│   │   │   ├── GovPortalController.java       # 服务中枢转发与脚本分发路由控制器
+│   │   │   └── GovWorkOrderController.java     # 12345 工单 AI 归口研判与全闭环流转
 │   │   ├── model/                              # 数据模型 (PolicyDoc, AffairGuide, KnowledgeRelation 等)
 │   │   ├── repository/                         # 数据库持久层 (JdbcTemplate 查询 H2 关系数据表)
 │   │   └── service/
 │   │       ├── GovAiService.java              # Spring AI 多轮对话、知识图谱召回、卡片拼装核心服务
-│   │       └── GovCrawlerService.java         # 广州政务公文与办事数据爬虫引擎
+│   │       ├── GovRagService.java             # 本地政务公文精确 RAG 检索召回
+│   │       ├── GovCrawlerService.java         # 广州政务公文与办事数据爬虫引擎
+│   │       └── WorkOrderService.java          # 12345 民情工单业务调度服务
 │   └── resources/
 │       ├── application.properties              # 应用配置 (H2 数据库、UTF-8 脚本初始化、DashScope 密钥)
 │       ├── schema.sql                          # 7 张核心业务表 DDL 定义 (UTF-8)
 │       ├── data.sql                            # 广州真实公文、办事指南与知识图谱初始数据 (UTF-8)
-│       └── static/                             # 静态资源 (仿真门户 test_gz_assistant.html, 嵌入脚本等)
+│       └── static/
+│           ├── index.html                      # 真实政务网站测试与服务中枢管理页面
+│           ├── admin.html                      # 12345 数字化协同管理与民情研判大屏
+│           ├── presentation.html               # 实训答辩汇报交互式演示胶片
+│           ├── gz_assistant_embed.js           # 真实网站控制台注入与嵌入核心组件
+│           ├── gz_gov_ai_assistant.user.js     # 油猴脚本一键分发端点
+│           ├── css/gov-style.css               # 政务大屏样式表
+│           └── inject/                         # 静态脚本静态镜像
 └── data/
     └── gz_gov_ai.mv.db                        # H2 嵌入式关系数据库持久化文件 (运行自动生成)
 ```
 
 ---
 
-## 📄 开源许可证
+## 十、 开源许可证
 
 本项目基于 [Apache License 2.0](LICENSE) 协议发布。
