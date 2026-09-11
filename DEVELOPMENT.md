@@ -1,4 +1,4 @@
-# 《基于 SpringBoot + SpringAI 的智能政务政策咨询与导办系统》开发与技术实现文档
+﻿# 《基于 SpringBoot + SpringAI 的智能政务政策咨询与导办系统》开发与技术实现文档
 ### 广州市人民政府门户网站（www.gz.gov.cn）专版
 
 > **项目名称**：智能政务政策法规咨询与导办系统（Guangzhou Smart Government Policy AI Consultation & Guiding System）  
@@ -56,7 +56,7 @@
 
 **本系统的核心宗旨与双轨机制**：
 > **“把复杂的法款条例智能翻译成老百姓能听懂的语言，问政策答依据，问办事给步骤带直达链接，项目的本质是便利人民的生活。”**
-系统对标广州市人民政府门户（`www.gz.gov.cn`）政策与广东政务服务网（`zwfw.gd.gov.cn`）办事指引，通过 Spring AI + 真实公文 RAG 检索增强 + 32 项全生命周期事项库 + 办事向导三步法直出卡片，构筑权威、通俗、连贯且带官方申报直达的便民中枢。
+系统对标广州市人民政府门户（`www.gz.gov.cn`）政策与广东政务服务网（`www.gdzwfw.gov.cn`）办事指引，通过 Spring AI + 真实公文 RAG 检索增强 + 32 项全生命周期事项库 + 办事向导三步法直出卡片，构筑权威、通俗、连贯且带官方申报直达的便民中枢。
 
 ### 1.2 关键指标与功能特性
 * **广州政务政策全域支撑**：入库《广州市公共租赁住房保障办法》（穗府办规〔2024〕6号）、《广州市积分制入户管理办法》（穗府规〔2023〕1号）等 27 部真实公文规章；
@@ -136,7 +136,7 @@
 | **数据初始化框架** | Spring SQL Initialization | 启动时自动执行 DDL 与预置公文，严格对齐 `UTF-8` 编码 |
 | **HTML 爬虫引擎** | Jsoup 1.17.2 | 爬取广州政务网网页并正则提取公文发文字号、条款及正文 |
 | **前端样式隔离** | Web Components (Shadow DOM) | 确保插件在真实政府官网中运行时，CSS 样式 100% 物理隔离 |
-| **浏览器自动化挂载** | Tampermonkey (油猴) 5.x | 支持在真实政府网（`gz.gov.cn`、`zwfw.gd.gov.cn`）一键挂载专窗 |
+| **浏览器自动化挂载** | Tampermonkey (油猴) 5.x | 支持在真实政府网（`gz.gov.cn`、`www.gdzwfw.gov.cn`）一键挂载专窗 |
 
 ### 2.3 工程代码目录组织结构
 
@@ -513,43 +513,43 @@ CREATE TABLE IF NOT EXISTS gov_knowledge_relation (
 
 ## 7. 广州现行法定政策法规与 32 大核心政务事项全生命周期矩阵
 
-系统深度沉淀了 **32 项高频热门政务办事指南** 与 **27 部官方现行红头法规规章**，每一项办事指南均严格配置**广东政务服务网（`zwfw.gd.gov.cn`）真实实施编码与在线申报直达跳转链接**：
+系统深度沉淀了 **32 项高频热门政务办事指南** 与 **27 部官方现行红头法规规章**，每一项办事指南均严格配置**广东政务服务网（`www.gdzwfw.gov.cn`）真实实施编码与在线申报直达跳转链接**：
 
 ### 7.1 全生命周期 32 大核心办事事项一览表
 
 | 领域 | 序号 | 实施编码 | 事项全称 | 办结时限 | 广东政务服务网直达入口 / 办理途径 |
 | :--- | :---: | :--- | :--- | :---: | :--- |
-| **住房与公积金** | 1 | GZ-ZJ-GZH001 | 新就业无房职工公共租赁住房租赁补贴申领 | 3天 | [广东政务服务网直通](https://zwfw.gd.gov.cn/portal/v2/guide/11440100007482875P3440118001000) |
-| | 2 | GZ-ZJ-SWPZ007 | 本市户籍中等偏下收入家庭公租房实物配租轮候 | 5天 | [广东政务服务网直通](https://zwfw.gd.gov.cn/portal/v2/guide/11440100007482875P3440118002000) |
-| | 3 | GZ-GJJ-ZFTQ008 | 个人住房公积金无房租赁按月提取 | 1天 | [广东政务服务网直通](https://zwfw.gd.gov.cn/portal/v2/guide/12440100749969446B3442111003000) |
-| | 4 | GZ-GJJ-HFTQ009 | 个人住房公积金按月冲还房贷本息提取 | 1天 | [广东政务服务网直通](https://zwfw.gd.gov.cn/portal/v2/guide/12440100749969446B3442111004000) |
+| **住房与公积金** | 1 | GZ-ZJ-GZH001 | 新就业无房职工公共租赁住房租赁补贴申领 | 3天 | [广东政务服务网直通](https://www.gdzwfw.gov.cn/portal/v2/search?keyword=%E5%85%AC%E7%A7%9F%E6%88%BF&region=440100) |
+| | 2 | GZ-ZJ-SWPZ007 | 本市户籍中等偏下收入家庭公租房实物配租轮候 | 5天 | [广东政务服务网直通](https://www.gdzwfw.gov.cn/portal/v2/search?keyword=%E5%85%AC%E7%A7%9F%E6%88%BF%E9%85%8D%E7%A7%9F&region=440100) |
+| | 3 | GZ-GJJ-ZFTQ008 | 个人住房公积金无房租赁按月提取 | 1天 | [广东政务服务网直通](https://www.gdzwfw.gov.cn/portal/v2/search?keyword=%E7%A7%9F%E6%88%BF%E6%8F%90%E5%8F%96&region=440100) |
+| | 4 | GZ-GJJ-HFTQ009 | 个人住房公积金按月冲还房贷本息提取 | 1天 | [广东政务服务网直通](https://www.gdzwfw.gov.cn/portal/v2/search?keyword=%E8%BF%98%E8%B4%B7%E6%8F%90%E5%8F%96&region=440100) |
 | **户籍与人才** | 5 | GZ-LS-JFRH002 | 广州市来穗人员积分制入户申报 | 5天 | [广州市来穗人员积分系统直通](https://djjd.gzlsrc.com.cn/) |
-| | 6 | GZ-RS-XLRH010 | 全日制青年高校毕业生在穗落户（学历入户） | 2天 | [广东政务服务网直通](https://zwfw.gd.gov.cn/portal/v2/guide/1144010000748347103440114002000) |
-| | 7 | GZ-RS-RCBT011 | 广州市新引进人才住房补贴与安家费申领 | 3天 | [广东政务服务网直通](https://zwfw.gd.gov.cn/portal/v2/guide/1144010000748347103440114009000) |
-| | 8 | GZ-GA-JZZ012 | 广东省居住证首次申领与电子居住证签注 | 1天 | [广东政务服务网直通](https://zwfw.gd.gov.cn/portal/v2/guide/11440100007483172Q3440106041000) |
-| | 9 | GZ-GA-XSE013 | 新生儿出生登记与随父/随母落户申报 | 1天 | [广东政务服务网直通](https://zwfw.gd.gov.cn/portal/v2/guide/11440100007483172Q3440106013000) |
+| | 6 | GZ-RS-XLRH010 | 全日制青年高校毕业生在穗落户（学历入户） | 2天 | [广东政务服务网直通](https://www.gdzwfw.gov.cn/portal/v2/search?keyword=%E5%AD%A6%E5%8E%86%E5%85%A5%E6%88%B7&region=440100) |
+| | 7 | GZ-RS-RCBT011 | 广州市新引进人才住房补贴与安家费申领 | 3天 | [广东政务服务网直通](https://www.gdzwfw.gov.cn/portal/v2/search?keyword=%E4%BA%BA%E6%89%8D%E8%A1%A5%E8%B4%B4&region=440100) |
+| | 8 | GZ-GA-JZZ012 | 广东省居住证首次申领与电子居住证签注 | 1天 | [广东政务服务网直通](https://www.gdzwfw.gov.cn/portal/v2/search?keyword=%E5%B1%85%E4%BD%8F%E8%AF%81&region=440100) |
+| | 9 | GZ-GA-XSE013 | 新生儿出生登记与随父/随母落户申报 | 1天 | [广东政务服务网直通](https://www.gdzwfw.gov.cn/portal/v2/search?keyword=%E6%96%B0%E7%94%9F%E5%84%BF%E5%87%BA%E7%94%9F%E7%99%BB%E8%AE%B0&region=440100) |
 | **交通与车管** | 10 | GZ-JT-CPYH003 | 广州市中小客车个人增量指标摇号申请 | 1天 | [广州中小客车调控系统直通](https://jtzl.jtj.gz.gov.cn/) |
 | | 11 | GZ-JT-JNC014 | 节能车增量指标直接摇号申领 | 1天 | [广州中小客车调控系统直通](https://jtzl.jtj.gz.gov.cn/) |
 | | 12 | GZ-GA-JSZ015 | 机动车驾驶证期满换证“警医邮”网办到家 | 1天 | [互联网交通安全综合服务平台直通](https://gd.122.gov.cn/) |
 | | 13 | GZ-GA-CLNJ016 | 机动车免检车辆电子检验合格标志申领 | 1天 | [互联网交通安全综合服务平台直通](https://gd.122.gov.cn/) |
 | **出入境便民** | 14 | GZ-GA-GAQZ006 | 往来港澳通行证及团队旅游签注申领（全国通办） | 7天 | [广东政务服务网直通](https://www.gdzwfw.gov.cn/portal/v2/guide/11440100007483172Q3440106043001) |
-| | 15 | GZ-GA-ZNJ017 | 赴港澳旅游再次签注（智能签注机立等可取） | 1天 | [广东政务服务网直通](https://zwfw.gd.gov.cn/portal/v2/guide/11440100007483172Q3440106043002) |
-| | 16 | GZ-GA-HZ018 | 中华人民共和国普通护照首次申领与加急 | 7天 | [广东政务服务网直通](https://zwfw.gd.gov.cn/portal/v2/guide/11440100007483172Q3440106044000) |
-| | 17 | GZ-GA-TW019 | 大陆居民往来台湾通行证及赴台签注申领 | 7天 | [广东政务服务网直通](https://zwfw.gd.gov.cn/portal/v2/guide/11440100007483172Q3440106045000) |
+| | 15 | GZ-GA-ZNJ017 | 赴港澳旅游再次签注（智能签注机立等可取） | 1天 | [广东政务服务网直通](https://www.gdzwfw.gov.cn/portal/v2/search?keyword=%E6%B8%AF%E6%BE%B3%E7%AD%BE%E6%B3%A8&region=440100) |
+| | 16 | GZ-GA-HZ018 | 中华人民共和国普通护照首次申领与加急 | 7天 | [广东政务服务网直通](https://www.gdzwfw.gov.cn/portal/v2/search?keyword=%E6%8A%A4%E7%85%A7&region=440100) |
+| | 17 | GZ-GA-TW019 | 大陆居民往来台湾通行证及赴台签注申领 | 7天 | [广东政务服务网直通](https://www.gdzwfw.gov.cn/portal/v2/search?keyword=%E5%8F%B0%E6%B9%BE%E9%80%9A%E8%A1%8C%E8%AF%81&region=440100) |
 | **医疗保障** | 18 | GZ-YB-LHJY005 | 灵活就业人员职工基本医疗保险参保登记 | 1天 | [广东省电子税务局直通](https://etax.guangdong.chinatax.gov.cn/) |
-| | 19 | GZ-YB-CXJM020 | 城乡居民基本医疗保险年度参保登记 | 1天 | [广东政务服务网直通](https://zwfw.gd.gov.cn/portal/v2/guide/11440100MB2D01672K3440115001000) |
-| | 20 | GZ-YB-JTGJ021 | 职工医保个人账户家庭成员共济绑定 | 1天 | [广东政务服务网直通](https://zwfw.gd.gov.cn/portal/v2/guide/11440100MB2D01672K3440115003000) |
+| | 19 | GZ-YB-CXJM020 | 城乡居民基本医疗保险年度参保登记 | 1天 | [广东政务服务网直通](https://www.gdzwfw.gov.cn/portal/v2/search?keyword=%E5%9F%8E%E4%B9%A1%E5%B1%85%E6%B0%91%E5%8C%BB%E4%BF%9D&region=440100) |
+| | 20 | GZ-YB-JTGJ021 | 职工医保个人账户家庭成员共济绑定 | 1天 | [广东政务服务网直通](https://www.gdzwfw.gov.cn/portal/v2/search?keyword=%E5%AE%B6%E5%BA%AD%E5%85%B1%E6%B5%8E&region=440100) |
 | | 21 | GZ-YB-YDJY022 | 跨省异地就医直接结算联网备案 | 1天 | [国家医保服务平台直通](https://fuwu.nhsa.gov.cn/) |
-| | 22 | GZ-YB-SYJT023 | 职工生育保险待遇申领与生育津贴核发 | 3天 | [广东政务服务网直通](https://zwfw.gd.gov.cn/portal/v2/guide/11440100MB2D01672K3440115005000) |
-| **就业与社保** | 23 | GZ-RS-SYBX024 | 失业保险金与失业补助金按月申领 | 1天 | [广东政务服务网直通](https://zwfw.gd.gov.cn/portal/v2/guide/1144010000748347103440114015000) |
+| | 22 | GZ-YB-SYJT023 | 职工生育保险待遇申领与生育津贴核发 | 3天 | [广东政务服务网直通](https://www.gdzwfw.gov.cn/portal/v2/search?keyword=%E7%94%9F%E8%82%B2%E6%B4%A5%E8%B4%B4&region=440100) |
+| **就业与社保** | 23 | GZ-RS-SYBX024 | 失业保险金与失业补助金按月申领 | 1天 | [广东政务服务网直通](https://www.gdzwfw.gov.cn/portal/v2/search?keyword=%E5%A4%B1%E4%B8%9A%E4%BF%9D%E9%99%A9%E9%87%91&region=440100) |
 | | 24 | GZ-RS-JNBT025 | 职业技能提升补贴与职业技能等级证书奖补 | 3天 | [广东省统一人社公共服务平台直通](https://ggfw.hrss.gd.gov.cn/) |
-| | 25 | GZ-RS-LHBT026 | 高校毕业生灵活就业社会保险补贴 | 2天 | [广东政务服务网直通](https://zwfw.gd.gov.cn/portal/v2/guide/1144010000748347103440114018000) |
+| | 25 | GZ-RS-LHBT026 | 高校毕业生灵活就业社会保险补贴 | 2天 | [广东政务服务网直通](https://www.gdzwfw.gov.cn/portal/v2/search?keyword=%E7%81%B5%E6%B4%BB%E5%B0%B1%E4%B8%9A%E7%A4%BE%E4%BF%9D%E8%A1%A5%E8%B4%B4&region=440100) |
 | **营商环境与创新** | 26 | GZ-SC-QYKB004 | 开办企业一网通办设立登记与免费发章 | 1天 | [广州开办企业一网通平台直通](https://qykb.scsfda.gov.cn/) |
-| | 27 | GZ-SC-GZQ027 | 个体工商户转型升级为企业（个转企）直接登记 | 1天 | [广东政务服务网直通](https://zwfw.gd.gov.cn/portal/v2/guide/1144010000748332463440117006000) |
-| | 28 | GZ-SC-SPXK028 | 食品经营许可告知承诺制“证照联办” | 1天 | [广东政务服务网直通](https://zwfw.gd.gov.cn/portal/v2/guide/1144010000748332463440117012000) |
+| | 27 | GZ-SC-GZQ027 | 个体工商户转型升级为企业（个转企）直接登记 | 1天 | [广东政务服务网直通](https://www.gdzwfw.gov.cn/portal/v2/search?keyword=%E4%B8%AA%E8%BD%AC%E4%BC%81&region=440100) |
+| | 28 | GZ-SC-SPXK028 | 食品经营许可告知承诺制“证照联办” | 1天 | [广东政务服务网直通](https://www.gdzwfw.gov.cn/portal/v2/search?keyword=%E9%A3%9F%E5%93%81%E7%BB%8F%E8%90%A5%E8%AE%B8%E5%8F%AF&region=440100) |
 | | 29 | GZ-KJ-GXJS029 | 高新技术企业认定培育入库奖励补贴 | 5天 | [广州市科学技术局官网直通](https://kjj.gz.gov.cn/) |
-| | 30 | GZ-SC-JYZX030 | 企业简易注销登记一网公告办结 | 1天 | [广东政务服务网直通](https://zwfw.gd.gov.cn/portal/v2/guide/1144010000748332463440117025000) |
-| **老龄与青年** | 31 | GZ-MZ-LNYD031 | 广州市老年人优待卡申领与长寿保健金发放 | 1天 | [广东政务服务网直通](https://zwfw.gd.gov.cn/portal/v2/guide/1144010000748301823440111002000) |
+| | 30 | GZ-SC-JYZX030 | 企业简易注销登记一网公告办结 | 1天 | [广东政务服务网直通](https://www.gdzwfw.gov.cn/portal/v2/search?keyword=%E7%AE%80%E6%98%93%E6%B3%A8%E9%94%80&region=440100) |
+| **老龄与青年** | 31 | GZ-MZ-LNYD031 | 广州市老年人优待卡申领与长寿保健金发放 | 1天 | [广东政务服务网直通](https://www.gdzwfw.gov.cn/portal/v2/search?keyword=%E8%80%81%E5%B9%B4%E4%BA%BA%E4%BC%98%E5%BE%85%E5%8D%A1&region=440100) |
 | | 32 | GZ-TW-QNYZ032 | 广州各区青年人才驿站免租住宿与人才公寓申请 | 1天 | [广州青年人才驿站平台直通](https://www.12355.net/gz/youth-station) |
 
 ### 7.2 27 部广州市现行法定红头公文数据库

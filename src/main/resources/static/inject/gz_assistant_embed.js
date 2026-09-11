@@ -1,4 +1,4 @@
-/**
+﻿/**
  * 广州市人民政府门户网站 (www.gz.gov.cn)
  * 政策法规 AI 智能问答专窗 · 前端独立注入插件 (完备版)
  * 
@@ -1652,7 +1652,7 @@
               ${gs.onlineHandleUrl ? `
               <div class="step-official-direct-link" style="margin-top:8px; padding:7px 10px; background:#f6ffed; border:1px solid #d9f7be; border-left:3px solid #389e0d;">
                 <div style="font-weight:700; color:#237804; font-size:11px; margin-bottom:3px;">【广东政务服务网 · 官方在线申办直达】</div>
-                <a href="${escapeText(gs.onlineHandleUrl)}" target="_blank" rel="noopener noreferrer" style="color:#237804; font-weight:700; text-decoration:none; font-size:11px; display:inline-flex; align-items:center; gap:4px;">
+                <a href="${escapeText((gs.onlineHandleUrl || '').replace(/https?:\/\/zwfw\.gd\.gov\.cn/g, 'https://www.gdzwfw.gov.cn'))}" target="_blank" rel="noopener noreferrer" style="color:#237804; font-weight:700; text-decoration:none; font-size:11px; display:inline-flex; align-items:center; gap:4px;">
                   点击直达官方申报入口 [${escapeText(gs.affairCode || '统一实施编码')}] ↗
                 </a>
               </div>` : ''}
@@ -2019,7 +2019,7 @@
           affairId: 101,
           affairCode: 'GZ-ZJ-GZH001',
           affairName: '公租房租赁补贴申领',
-          onlineHandleUrl: 'https://zwfw.gd.gov.cn/portal/v2/guide/11440100007482875P3440118001000',
+          onlineHandleUrl: 'https://www.gdzwfw.gov.cn/portal/v2/search?keyword=%E5%85%AC%E7%A7%9F%E6%88%BF&region=440100',
           qualifications: '具有大专及以上学历（毕业未满5年），在穗连续缴纳社保满6个月，本人及配偶名下在穗无自有产权住房，家庭人均年收入低于保障线（约每人每月低于3800元）。',
           promisedLimitDays: 3,
           materials: [
@@ -2255,7 +2255,7 @@
           affairId: 108,
           affairCode: 'GZ-GJJ-ZFTQ008',
           affairName: '住房公积金无房租赁按月提取',
-          onlineHandleUrl: 'https://zwfw.gd.gov.cn/portal/v2/guide/12440100749969446B3442111003000',
+          onlineHandleUrl: 'https://www.gdzwfw.gov.cn/portal/v2/search?keyword=%E7%A7%9F%E6%88%BF%E6%8F%90%E5%8F%96&region=440100',
           qualifications: '缴存人及配偶在本市行政区域内无自有产权住房，连续缴存公积金满3个月且租房自住。',
           promisedLimitDays: 1,
           materials: [
@@ -2331,7 +2331,7 @@
           affairId: 123,
           affairCode: 'GZ-YB-SYJT023',
           affairName: '职工生育保险待遇与生育津贴核发',
-          onlineHandleUrl: 'https://zwfw.gd.gov.cn/portal/v2/guide/11440100MB2D01672K3440115005000',
+          onlineHandleUrl: 'https://www.gdzwfw.gov.cn/portal/v2/search?keyword=%E7%94%9F%E8%82%B2%E6%B4%A5%E8%B4%B4&region=440100',
           qualifications: '用人单位按时足额缴纳生育保险费，且参保职工符合国家计划生育政策生育。',
           promisedLimitDays: 3,
           materials: [
@@ -2407,7 +2407,7 @@
           affairId: 131,
           affairCode: 'GZ-MZ-LNYD031',
           affairName: '老年人优待卡申领与长寿保健金发放',
-          onlineHandleUrl: 'https://zwfw.gd.gov.cn/portal/v2/guide/1144010000748301823440111002000',
+          onlineHandleUrl: 'https://www.gdzwfw.gov.cn/portal/v2/search?keyword=%E8%80%81%E5%B9%B4%E4%BA%BA%E4%BC%98%E5%BE%85%E5%8D%A1&region=440100',
           qualifications: '广州市户籍或持本市居住证年满60周岁长者（70周岁以上享受长寿保健金）。',
           promisedLimitDays: 1,
           materials: [
