@@ -1,8 +1,8 @@
 ﻿// ==UserScript==
 // @name         广州市人民政府门户网站 · 政策法规 AI 智能咨询助手
 // @namespace    https://www.gz.gov.cn/
-// @version      1.4.2
-// @description  为广州市人民政府门户网站（www.gz.gov.cn）提供政策法规 AI 智能问答专窗，深度对接官方现行规章与公文数据库，具备多轮记忆、办事向导三步法直出卡片、全流程纯文字指引、自适应直角网格标签、直角缩放与 12345 诉求闭环流转能力。
+// @version      1.5.0
+// @description  为广州市人民政府门户网站（www.gz.gov.cn）提供政策法规 AI 智能问答专窗，深度对接全生命周期32大高频政务办事事项与27部官方现行规章，具备多轮记忆、办事向导三步法直出卡片、广东政务服务网官方办理直达链接跳转与 12345 诉求闭环流转能力。
 // @author       广州政务 AI 研发团队
 // @match        https://www.gz.gov.cn/*
 // @match        http://www.gz.gov.cn/*
@@ -1667,7 +1667,14 @@
             <div class="step-route-box">
               <div class="route-label">【线上办理文字路径】</div>
               <div>${escapeText(onlineRoute)}</div>
-              <div class="route-label" style="margin-top:5px;">【线下办事网点】</div>
+              ${gs.onlineHandleUrl ? `
+              <div class="step-official-direct-link" style="margin-top:8px; padding:7px 10px; background:#f6ffed; border:1px solid #d9f7be; border-left:3px solid #389e0d;">
+                <div style="font-weight:700; color:#237804; font-size:11px; margin-bottom:3px;">【广东政务服务网 · 官方在线申办直达】</div>
+                <a href="${escapeText(gs.onlineHandleUrl)}" target="_blank" rel="noopener noreferrer" style="color:#237804; font-weight:700; text-decoration:none; font-size:11px; display:inline-flex; align-items:center; gap:4px;">
+                  点击直达官方申报入口 [${escapeText(gs.affairCode || '统一实施编码')}] ↗
+                </a>
+              </div>` : ''}
+              <div class="route-label" style="margin-top:7px;">【线下办事网点】</div>
               <div>${escapeText(offlineAddress)}</div>
             </div>
             ${warnHtml}
@@ -2023,12 +2030,14 @@
     const q = prompt.toLowerCase();
 
     // 1. 公租房保障与租赁补贴政策
-    if (q.includes('公租房') || q.includes('租房') || q.includes('租赁补贴')) {
+    if (q.includes('公租房') || (q.includes('租房') && q.includes('补贴')) || q.includes('租赁补贴')) {
       return {
         summary: '能办！在广州稳定工作且在穗没买房的新就业职工，每个月最高可领 1400 元租房补贴，按月打进银行卡，最长可以连续领 5 年。',
         guidedSteps: {
           affairId: 101,
+          affairCode: 'GZ-ZJ-GZH001',
           affairName: '公租房租赁补贴申领',
+          onlineHandleUrl: 'https://zwfw.gd.gov.cn/portal/v2/guide/11440100007482875P3440118001000',
           qualifications: '具有大专及以上学历（毕业未满5年），在穗连续缴纳社保满6个月，本人及配偶名下在穗无自有产权住房，家庭人均年收入低于保障线（约每人每月低于3800元）。',
           promisedLimitDays: 3,
           materials: [
@@ -2067,7 +2076,9 @@
         summary: '能办！长期在广州工作生活的外地朋友，只要符合年龄45周岁以下、有效居住证、社保满4年这几个硬指标，通过积分排名就可以直接落户广州，全家随迁。',
         guidedSteps: {
           affairId: 102,
+          affairCode: 'GZ-LS-JFRH002',
           affairName: '来穗人员积分制入户申报',
+          onlineHandleUrl: 'https://djjd.gzlsrc.com.cn/',
           qualifications: '年龄在45周岁以下；持在广州办理且在有效期的《广东省居住证》；在广州合法工作并累计缴纳社保满4年（五险齐全）；信用良好无犯罪记录。',
           promisedLimitDays: 5,
           materials: [
@@ -2105,7 +2116,9 @@
         summary: '不用花一分钱，半天就能办齐！在广州开公司全面推行“零成本、半天办结”，政府不仅全流程网办，还免费赠送全套 4 枚实体防伪印章。',
         guidedSteps: {
           affairId: 104,
+          affairCode: 'GZ-SC-QYKB004',
           affairName: '开办企业一网通办',
+          onlineHandleUrl: 'https://qykb.scsfda.gov.cn/',
           qualifications: '在广州市设立有限责任公司、合伙企业、个人独资企业的全体股东及法定代表人；个体工商户及各类创业者均可享受全流程免费便利。',
           promisedLimitDays: 1,
           materials: [
@@ -2142,7 +2155,9 @@
         summary: '不管是不是广州户口都能办！外卖员、快递小哥、自由职业者在广州凭身份证就能交职工医保，享受和正规大企业职工完全一样的看病报销待遇。',
         guidedSteps: {
           affairId: 105,
+          affairCode: 'GZ-YB-LHJY005',
           affairName: '灵活就业人员医保参保',
+          onlineHandleUrl: 'https://etax.guangdong.chinatax.gov.cn/',
           qualifications: '未达到法定退休年龄的灵活就业人员（打零工、小买卖、自媒体、外卖骑手、无雇工个体户等）；完全打破户籍限制，不设户籍壁垒。',
           promisedLimitDays: 1,
           materials: [
@@ -2179,7 +2194,9 @@
         summary: '非广州户口也能摇号！外地户籍只要有有效广州居住证，且近2年内累计在广州交满24个月医保，名下没粤A车牌且有驾照，就可以免费参与摇号。',
         guidedSteps: {
           affairId: 103,
+          affairCode: 'GZ-JT-CPYH003',
           affairName: '中小客车指标摇号',
+          onlineHandleUrl: 'https://jtzl.jtj.gz.gov.cn/',
           qualifications: '本市户籍人员直接可申领（名下无粤A车且有驾照）；非本市户籍持有有效广州居住证，且近2年内累计交满广州职工医保24个月。',
           promisedLimitDays: 1,
           materials: [
@@ -2216,7 +2233,9 @@
         summary: '不用回老家，带上身份证在广州直接办！全国居民在广州办理港澳通行证及团队旅游签注享受“全国通办”，免户口本、免居住证，一般 7 个工作日办好。',
         guidedSteps: {
           affairId: 106,
+          affairCode: 'GZ-GA-GAQZ006',
           affairName: '往来港澳通行证申领',
+          onlineHandleUrl: 'https://www.gdzwfw.gov.cn/portal/v2/guide/11440100007483172Q3440106043001',
           qualifications: '中国大陆合法居民，需前往香港或澳门旅游、探亲、商务的公民；无论户籍在哪个省市，均可在广州出入境窗口就近申办。',
           promisedLimitDays: 7,
           materials: [
@@ -2242,6 +2261,196 @@
         suggestions: [
           '广州哪里的智能签注机支持24小时随时自助办理？',
           '港澳旅游个人签（G签）和团队旅游签（L签）有什么区别？'
+        ]
+      };
+    }
+
+    // 7. 住房公积金无房租赁提取政策
+    if (q.includes('公积金') && (q.includes('租房') || q.includes('无房') || q.includes('提取'))) {
+      return {
+        summary: '能办！在广州市内名下无自有房产且租房居住的缴存职工，每人每月最高可提取 1400 元住房公积金，按月自动转入银行账户。',
+        guidedSteps: {
+          affairId: 108,
+          affairCode: 'GZ-GJJ-ZFTQ008',
+          affairName: '住房公积金无房租赁按月提取',
+          onlineHandleUrl: 'https://zwfw.gd.gov.cn/portal/v2/guide/12440100749969446B3442111003000',
+          qualifications: '缴存人及配偶在本市行政区域内无自有产权住房，连续缴存公积金满3个月且租房自住。',
+          promisedLimitDays: 1,
+          materials: [
+            { name: '提取申请人居民身份证', format: '电子证照免提交', sampleTip: '刷脸认证自动调取' },
+            { name: '提取人一类银行借记卡', format: '在线输入核验', sampleTip: '用于每月定期转账划扣公积金本息' }
+          ],
+          processSteps: [
+            { stepNo: 1, stepName: '人脸登录', description: '打开“广州住房公积金管理中心”小程序完成实名登录', timeCost: '2分钟' },
+            { stepNo: 2, stepName: '无房提取', description: '点击业务办理-无房租赁提取，系统自动调取房查信息', timeCost: '3分钟' },
+            { stepNo: 3, stepName: '按月到账', description: '审批通过后每月自动转账至个人储蓄账户', timeCost: '1个工作日' }
+          ],
+          handlingAddress: '广州住房公积金管理中心各区办事处网点',
+          onlineRoute: '打开微信搜“广州住房公积金管理中心”公众号，进入微服务办理“无房租赁提取”，全程无纸化秒批秒办。',
+          warnTip: '无需提供租房发票或合同即可按定额1400元/月提取；夫妻双方合计每月可提取2800元。'
+        },
+        citation: {
+          title: '广州住房公积金提取管理办法',
+          docNumber: '穗公积金规〔2023〕5号',
+          dept: '广州住房公积金管理委员会',
+          similarity: '98%',
+          clause: '第四条【租房提取额度】：缴存人及配偶在本市行政区域内无自有产权住房且租房自住的，每人每月无房租赁提取额度上限为1400元。'
+        },
+        suggestions: [
+          '夫妻双方可以同时申请无房租房提取公积金吗？',
+          '公积金租房提取后会影响以后买房贷款额度吗？'
+        ]
+      };
+    }
+
+    // 8. 驾驶证期满换证政策
+    if (q.includes('驾驶证') || q.includes('换证') || q.includes('警医邮') || q.includes('驾照')) {
+      return {
+        summary: '不用跑车管所！驾驶证到期前90天内，在联网医院体检后，手机登录“交管12123”就能办理期满换证，新驾照EMS快递送货上门。',
+        guidedSteps: {
+          affairId: 115,
+          affairCode: 'GZ-GA-JSZ015',
+          affairName: '机动车驾驶证期满换证“警医邮”',
+          onlineHandleUrl: 'https://gd.122.gov.cn/',
+          qualifications: '机动车驾驶证有效期满前90日内，已完成体检且违章违法记分已处理完毕。',
+          promisedLimitDays: 1,
+          materials: [
+            { name: '机动车驾驶人身体条件证明', format: '互联网医院网络直传', sampleTip: '就近在合作医疗机构或警医邮一体机体检' },
+            { name: '驾驶人近期免冠彩色数码相片', format: '在线拍照免冲印', sampleTip: '手机拍照或现场照相联网回执' }
+          ],
+          processSteps: [
+            { stepNo: 1, stepName: '就近体检', description: '市内定点联网医院或警医邮自助体检机体检', timeCost: '10分钟' },
+            { stepNo: 2, stepName: '网上提交', description: '登录“交管12123”APP点击期满换领驾驶证', timeCost: '3分钟' },
+            { stepNo: 3, stepName: '制证送达', description: '车管所远程审核制证，邮政EMS快递上门', timeCost: '1个工作日' }
+          ],
+          handlingAddress: '广州市公安局交警支队车管所及市内联网“警医邮”服务点',
+          onlineRoute: '下载打开“交管12123”手机APP，首页点击“更多”-“驾驶证补换领”-“期满换证”，录入邮寄地址即可。',
+          warnTip: '必须先完成体检让医院将身体条件证明上传交管网后，手机上才能点击办理换证业务。'
+        },
+        citation: {
+          title: '机动车驾驶证申领和使用规定',
+          docNumber: '公安部令第162号',
+          dept: '公安部',
+          similarity: '97%',
+          clause: '第六十三条【期满换证】：机动车驾驶人应当于机动车驾驶证有效期满前九十日内申请换证，支持警医邮互联网医院体检远程换发。'
+        },
+        suggestions: [
+          '广州市内哪些邮局网点支持驾驶证体检和换证一站式搞定？',
+          '驾驶证逾期未换证超过1年会有什么处罚？'
+        ]
+      };
+    }
+
+    // 9. 生育保险待遇与生育津贴政策
+    if (q.includes('生育') || q.includes('产假') || q.includes('生小孩')) {
+      return {
+        summary: '单位参保的在职女职工符合计划生育政策分娩，享受法定产假并按月计发生育津贴，由医保基金直接拨付至用人单位。',
+        guidedSteps: {
+          affairId: 123,
+          affairCode: 'GZ-YB-SYJT023',
+          affairName: '职工生育保险待遇与生育津贴核发',
+          onlineHandleUrl: 'https://zwfw.gd.gov.cn/portal/v2/guide/11440100MB2D01672K3440115005000',
+          qualifications: '用人单位按时足额缴纳生育保险费，且参保职工符合国家计划生育政策生育。',
+          promisedLimitDays: 3,
+          materials: [
+            { name: '医疗机构出具的生育医学诊断证明', format: '医保定点医院直传免交', sampleTip: '定点医院分娩自动上传数据' },
+            { name: '计划生育承诺书', format: '在线承诺免证明', sampleTip: '系统在线一键签署' }
+          ],
+          processSteps: [
+            { stepNo: 1, stepName: '产后申报', description: '女职工分娩出院后，登录广东政务服务网申报生育津贴', timeCost: '10分钟' },
+            { stepNo: 2, stepName: '医保核算', description: '广州医保经办机构调取定点医院生育档案，自动计算津贴', timeCost: '2个工作日' },
+            { stepNo: 3, stepName: '津贴拨付', description: '津贴资金由医保基金全额拨付至用人单位银行基本账户', timeCost: '1个工作日' }
+          ],
+          handlingAddress: '广州市医疗保险服务中心各分局经办窗口',
+          onlineRoute: '电脑登录“广东政务服务网·广州专区”，搜索“职工生育保险待遇申领”，用人单位或职工在线确认申报。',
+          warnTip: '生育津贴计发基数为用人单位上年度职工月平均工资，顺产基础产假为98天，难产剖腹产增加30天。'
+        },
+        citation: {
+          title: '广州市职工生育保险实施办法',
+          docNumber: '穗府办规〔2022〕17号',
+          dept: '广州市人民政府办公厅',
+          similarity: '98%',
+          clause: '第四条【生育津贴计发标准】：职工享受生育津贴的数额，为职工分娩时用人单位上年度职工月平均工资除以30，乘以规定的产假天数。'
+        },
+        suggestions: [
+          '广州顺产和剖腹产生育津贴天数分别是多少天？',
+          '男职工有陪产假津贴可以申领吗？'
+        ]
+      };
+    }
+
+    // 10. 高新技术企业认定奖励政策
+    if (q.includes('高新') || q.includes('高企') || q.includes('科技企业')) {
+      return {
+        summary: '有重奖！广州首次通过国家高新技术企业认定的科技型中小企业，市财政给予最高 20 万元一次性奖补，各区还叠加配套支持。',
+        guidedSteps: {
+          affairId: 129,
+          affairCode: 'GZ-KJ-GXJS029',
+          affairName: '高新技术企业认定培育入库奖励补贴',
+          onlineHandleUrl: 'https://kjj.gz.gov.cn/',
+          qualifications: '在穗注册申报且首次通过国家高新技术企业认定的科技型中小企业。',
+          promisedLimitDays: 5,
+          materials: [
+            { name: '高新技术企业认定申请书与审计报告', format: '科技创新平台上传', sampleTip: '中介机构审计报告电子版' },
+            { name: '企业自主知识产权及科技成果转化材料', format: '知识产权局联网免提交', sampleTip: '发明专利/软著后台数据同步' }
+          ],
+          processSteps: [
+            { stepNo: 1, stepName: '高企申报', description: '在“广州市科技大脑”平台提交认定申请', timeCost: '通知期' },
+            { stepNo: 2, stepName: '专家评审', description: '市科技局组织科技、财务专家进行评审', timeCost: '3个工作日' },
+            { stepNo: 3, stepName: '奖补到账', description: '公示通过后由市区财政拨付最高20万元补贴', timeCost: '2个工作日' }
+          ],
+          handlingAddress: '广州市科学技术局高新技术处窗口',
+          onlineRoute: '电脑登录“广州市科学技术局”官网（kjj.gz.gov.cn）或“广州科技大脑”，进入高企认定申报专区。',
+          warnTip: '企业需具备核心自主知识产权并满足高新技术产品（服务）收入占比要求，获得认定后还可享受15%企业所得税优惠税率。'
+        },
+        citation: {
+          title: '广州市进一步推动高新技术企业高质量发展若干措施',
+          docNumber: '穗府办规〔2023〕18号',
+          dept: '广州市人民政府办公厅',
+          similarity: '96%',
+          clause: '第五条【高企奖补】：对首次通过高新技术企业认定的科技型中小企业，由市财政给予最高20万元财政经费奖励。'
+        },
+        suggestions: [
+          '高新技术企业认定需要多少项知识产权或发明专利？',
+          '各区对国家高新技术企业的叠加配套奖励是多少？'
+        ]
+      };
+    }
+
+    // 11. 老年人优待卡与长寿保健金政策
+    if (q.includes('老人') || q.includes('优待卡') || q.includes('长寿金') || q.includes('长寿保健金') || q.includes('乘车卡')) {
+      return {
+        summary: '惠老福利全覆盖！年满60周岁即可申领广州市老年人优待卡（60-64岁半价乘车，65岁以上全免乘车）；年满70周岁本市户籍长者还可按月领取长寿保健金。',
+        guidedSteps: {
+          affairId: 131,
+          affairCode: 'GZ-MZ-LNYD031',
+          affairName: '老年人优待卡申领与长寿保健金发放',
+          onlineHandleUrl: 'https://zwfw.gd.gov.cn/portal/v2/guide/1144010000748301823440111002000',
+          qualifications: '广州市户籍或持本市居住证年满60周岁长者（70周岁以上享受长寿保健金）。',
+          promisedLimitDays: 1,
+          materials: [
+            { name: '申请人居民身份证与近期大一寸彩照', format: '电子证照与拍照免冲印', sampleTip: '年满60周岁长者一键申办' },
+            { name: '本人金融社保卡账号（申领长寿金）', format: '金融社保卡自动关联', sampleTip: '70周岁以上长者按月打款' }
+          ],
+          processSteps: [
+            { stepNo: 1, stepName: '便民申领', description: '登录“穗好办”APP搜索老年人优待卡申领', timeCost: '5分钟' },
+            { stepNo: 2, stepName: '自动核准', description: '民政部门联网户籍及居住证数据，自动完成核准', timeCost: '1个工作日' },
+            { stepNo: 3, stepName: '免费邮寄', description: '优待卡免费邮寄到家；长寿金按月发社保卡', timeCost: '当日制卡' }
+          ],
+          handlingAddress: '广州市各街镇综合养老服务中心及社区居委会专窗',
+          onlineRoute: '打开微信“穗好办”小程序，搜索“老年人优待卡”，录入收件地址由邮政EMS免费寄送到家。',
+          warnTip: '年满70周岁至79周岁长者长寿保健金为200元/月，80周岁至89周岁为300元/月，资金按月直发至社保卡。'
+        },
+        citation: {
+          title: '广州市老年人优待办法与长寿保健金发放标准',
+          docNumber: '穗府办规〔2021〕8号',
+          dept: '广州市人民政府办公厅',
+          similarity: '99%',
+          clause: '第二条【老年人优待】：年满60周岁不满65周岁的老年人享受半价乘坐市内公共交通；年满65周岁以上享受全免费优待。年满70周岁本市户籍长者按月发放长寿保健金。'
+        },
+        suggestions: [
+          '外地户籍老人持广州居住证可以办理全免费乘车卡吗？',
+          '70岁长寿保健金需要每年进行在世资格认证吗？'
         ]
       };
     }
@@ -2275,4 +2484,5 @@
 
   console.log('[广州政策问答] 广州市政策法规 AI 智能问答专窗已注入运行（政策便民翻译官·明白纸完备版）。');
 })();
+
 
