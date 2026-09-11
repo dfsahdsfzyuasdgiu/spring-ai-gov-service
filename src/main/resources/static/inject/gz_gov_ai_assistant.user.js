@@ -456,25 +456,25 @@
       margin-bottom: 6px;
     }
     .guided-step-block {
-      background: #fafbfc;
-      border: 1px solid #e2e8f0;
-      border-left: 3px solid #0050b3;
+      background: #fcfffa;
+      border: 1px solid #d9f7be;
+      border-left: 3px solid #389e0d;
       border-radius: 0 !important;
       padding: 7px 9px;
       font-size: 11.5px;
       line-height: 1.5;
     }
     .guided-step-block.step-1 {
-      border-left-color: #0050b3;
-      background: #fdfefe;
+      border-left-color: #389e0d;
+      background: #fcfffa;
     }
     .guided-step-block.step-2 {
       border-left-color: #389e0d;
       background: #fcfffa;
     }
     .guided-step-block.step-3 {
-      border-left-color: #c20505;
-      background: #fffdfd;
+      border-left-color: #389e0d;
+      background: #fcfffa;
     }
     .step-block-header {
       display: flex;
@@ -487,20 +487,21 @@
       font-weight: 700;
       padding: 1px 5px;
       color: #ffffff;
+      background: #389e0d;
       border-radius: 0 !important;
       letter-spacing: 0.5px;
     }
-    .step-1 .step-badge { background: #0050b3; }
+    .step-1 .step-badge { background: #389e0d; }
     .step-2 .step-badge { background: #389e0d; }
-    .step-3 .step-badge { background: #c20505; }
+    .step-3 .step-badge { background: #389e0d; }
     .step-block-title {
       font-weight: 700;
       font-size: 11.5px;
       color: #0f172a;
     }
     .step-qual-box {
-      background: #f0f5ff;
-      border: 1px solid #d6e4ff;
+      background: #f6ffed;
+      border: 1px solid #b7eb8f;
       border-radius: 0 !important;
       padding: 5px 8px;
       color: #1e293b;
@@ -510,7 +511,7 @@
     }
     .step-sub-note {
       font-size: 10px;
-      color: #64748b;
+      color: #52c41a;
       line-height: 1.4;
     }
     .step-mat-list {
@@ -557,7 +558,8 @@
       font-weight: 500;
     }
     .step-limit-banner strong {
-      color: #c20505;
+      color: #389e0d;
+      font-weight: 700;
     }
     .step-proc-chain {
       background: #f8fafc;
@@ -578,8 +580,9 @@
       color: #0f172a;
     }
     .step-route-box {
-      background: #f0f5ff;
-      border-left: 3px solid #0050b3;
+      background: #f6ffed;
+      border: 1px solid #d9f7be;
+      border-left: 3px solid #389e0d;
       border-radius: 0 !important;
       padding: 6px 8px;
       font-size: 11px;
@@ -589,16 +592,16 @@
     }
     .route-label {
       font-weight: 700;
-      color: #003a8c;
+      color: #237804;
       margin-bottom: 2px;
     }
     .step-warn-box {
-      background: #fff7e6;
-      border: 1px solid #ffd591;
-      border-left: 3px solid #fa8c16;
+      background: #f6ffed;
+      border: 1px solid #b7eb8f;
+      border-left: 3px solid #52c41a;
       border-radius: 0 !important;
       padding: 5px 8px;
-      color: #d4380d;
+      color: #135200;
       font-size: 10.5px;
       line-height: 1.45;
       margin-top: 4px;
@@ -626,14 +629,19 @@
       margin-bottom: 2px;
       font-size: 11px;
     }
-    .mb-item.warn .mb-item-title { color: #c20505; }
+    .mb-item.warn .mb-item-title { color: #237804; }
+    .mb-item.warn {
+      background: #f6ffed;
+      border: 1px solid #d9f7be;
+      border-left: 3px solid #389e0d;
+    }
     .mb-item-content { color: #1e293b; font-size: 11.5px; }
 
     /* 官方政策依据直溯 */
     .mingbai-source-card {
-      background: #fdfbf7;
-      border: 1px solid #faecd8;
-      border-left: 3px solid #c20505;
+      background: #fcfffa;
+      border: 1px solid #d9f7be;
+      border-left: 3px solid #389e0d;
       border-radius: 0 !important;
       padding: 6px 8px;
       margin-top: 6px;
@@ -657,9 +665,9 @@
       margin-top: 2px;
     }
     .source-btn-toggle {
-      color: #c20505;
+      color: #237804;
       background: #ffffff;
-      border: 1px solid #ffa39e;
+      border: 1px solid #b7eb8f;
       font-size: 9.5px;
       padding: 1px 6px;
       cursor: pointer;
@@ -669,8 +677,8 @@
       user-select: none;
     }
     .source-btn-toggle:hover {
-      background: #fff1f0;
-      border-color: #c20505;
+      background: #f6ffed;
+      border-color: #389e0d;
     }
     .source-clause-drawer {
       margin-top: 6px;
