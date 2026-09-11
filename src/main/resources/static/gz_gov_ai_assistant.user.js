@@ -1,8 +1,8 @@
 ﻿// ==UserScript==
 // @name         广州市人民政府门户网站 · 政策法规 AI 智能咨询助手
 // @namespace    https://www.gz.gov.cn/
-// @version      1.4.0
-// @description  为广州市人民政府门户网站（www.gz.gov.cn）提供政策法规 AI 智能问答专窗，深度对接官方现行规章与公文数据库，具备多轮记忆、知识图谱关联、向导式办事导办、直角缩放与 12345 诉求闭环流转能力。
+// @version      1.4.1
+// @description  为广州市人民政府门户网站（www.gz.gov.cn）提供政策法规 AI 智能问答专窗，深度对接官方现行规章与公文数据库，具备多轮记忆、知识图谱关联、向导式办事导办、自适应直角网格标签、直角缩放与 12345 诉求闭环流转能力。
 // @author       广州政务 AI 研发团队
 // @match        https://www.gz.gov.cn/*
 // @match        http://www.gz.gov.cn/*
@@ -333,35 +333,39 @@
       line-height: 1.2;
     }
 
-    /* 快捷分类标签条 */
+    /* 政策高频咨询快捷标签网格 (自适应整齐直角网格，默认模式 3列×2行 完整展示，大屏自动单行展开) */
     .gz-quick-bar {
       background: #f5f8fc;
       border-bottom: 1px solid #d9e6f2;
-      padding: 5px 8px;
-      display: flex;
-      gap: 4px;
-      overflow-x: auto;
-      white-space: nowrap;
+      padding: 6px 8px;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(118px, 1fr));
+      gap: 5px;
       flex-shrink: 0;
     }
-    .gz-quick-bar::-webkit-scrollbar { height: 2px; }
-    .gz-quick-bar::-webkit-scrollbar-thumb { background: #adc6ff; }
     .quick-chip {
       background: #ffffff;
       border: 1px solid #b0cbe8;
-      border-radius: 0;
+      border-radius: 0 !important;
       color: #003a8c;
-      font-size: 10.5px;
-      padding: 2px 7px;
+      font-size: 11px;
+      padding: 4px 4px;
       cursor: pointer;
       transition: all 0.15s ease;
       line-height: 1.3;
       user-select: none;
+      text-align: center;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      white-space: nowrap;
+      box-shadow: 0 1px 2px rgba(0, 58, 140, 0.04);
     }
     .quick-chip:hover {
       background: #0050b3;
       color: #ffffff;
       border-color: #0050b3;
+      box-shadow: 0 2px 4px rgba(0, 58, 140, 0.15);
     }
 
     /* 消息对话主视窗 */
