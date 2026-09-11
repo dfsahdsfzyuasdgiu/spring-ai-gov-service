@@ -150,4 +150,90 @@ public class PolicyRepository {
         }
         return doc;
     }
+
+    /**
+     * 模糊检索政策条款与法规出处 (支持高频同义词/简称自动扩展)
+     */
+    public List<Map<String, Object>> searchClauses(String keyword) {
+        String kw = (keyword == null) ? "" : keyword.trim();
+        try {
+            if (kw.isEmpty()) {
+                String sql = "SELECT c.id, c.policy_id, c.clause_no, c.clause_text, d.title, d.doc_number, d.issuer_dept, d.category " +
+                        "FROM gov_policy_clause c " +
+                        "JOIN gov_policy_doc d ON c.policy_id = d.id " +
+                        "ORDER BY c.id ASC LIMIT 20";
+                return queryClauseList(sql, new Object[]{});
+            }
+
+            // 智能同义词与公文规范简称扩充
+            Set<String> keywords = new LinkedHashSet<>();
+            keywords.add(kw);
+            if (kw.contains("公租房")) {
+                keywords.add("公共租赁住房");
+                keywords.add("租赁住房");
+            }
+            if (kw.contains("医保")) {
+                keywords.add("医疗保险");
+                keywords.add("医疗保障");
+            }
+            if (kw.contains("社保")) {
+                keywords.add("社会保险");
+            }
+            if (kw.contains("公积金")) {
+                keywords.add("住房公积金");
+            }
+            if (kw.contains("落户")) {
+                keywords.add("入户");
+                keywords.add("户口");
+            }
+            if (kw.contains("摇号") || kw.contains("车牌")) {
+                keywords.add("中小客车");
+                keywords.add("指标");
+            }
+            if (kw.contains("高企")) {
+                keywords.add("高新技术企业");
+            }
+
+            StringBuilder whereClause = new StringBuilder();
+            List<Object> args = new ArrayList<>();
+            int idx = 0;
+            for (String term : keywords) {
+                if (idx > 0) {
+                    whereClause.append(" OR ");
+                }
+                whereClause.append("(c.clause_text LIKE ? OR d.title LIKE ? OR c.clause_no LIKE ? OR d.doc_number LIKE ?)");
+                String p = "%" + term + "%";
+                args.add(p);
+                args.add(p);
+                args.add(p);
+                args.add(p);
+                idx++;
+            }
+
+            String sql = "SELECT c.id, c.policy_id, c.clause_no, c.clause_text, d.title, d.doc_number, d.issuer_dept, d.category " +
+                    "FROM gov_policy_clause c " +
+                    "JOIN gov_policy_doc d ON c.policy_id = d.id " +
+                    "WHERE " + whereClause + " ORDER BY c.id ASC";
+
+            return queryClauseList(sql, args.toArray());
+        } catch (Exception e) {
+            log.error("模糊检索政策条款异常: keyword={}", kw, e);
+            return Collections.emptyList();
+        }
+    }
+
+    private List<Map<String, Object>> queryClauseList(String sql, Object[] args) {
+        return jdbcTemplate.query(sql, (rs, rowNum) -> {
+            Map<String, Object> map = new LinkedHashMap<>();
+            map.put("clauseId", rs.getLong("id"));
+            map.put("policyId", rs.getLong("policy_id"));
+            map.put("title", rs.getString("title"));
+            map.put("docNumber", rs.getString("doc_number"));
+            map.put("issuerDept", rs.getString("issuer_dept"));
+            map.put("category", rs.getString("category"));
+            map.put("clauseNo", rs.getString("clause_no"));
+            map.put("clauseText", rs.getString("clause_text"));
+            return map;
+        }, args);
+    }
 }

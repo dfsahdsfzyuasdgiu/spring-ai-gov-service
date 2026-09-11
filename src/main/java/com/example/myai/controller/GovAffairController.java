@@ -8,6 +8,7 @@ import com.example.myai.service.AffairService;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/v1/gov")
@@ -56,5 +57,13 @@ public class GovAffairController {
         return affairService.getById(id)
                 .map(Result::success)
                 .orElseGet(() -> Result.error(404, "政务事项不存在"));
+    }
+
+    /**
+     * 模糊检索政策条款与法规出处结构化数据 (支持 keyword 模糊检索)
+     */
+    @GetMapping({"/policy/search", "/policies/search"})
+    public Result<List<Map<String, Object>>> searchPolicyClauses(@RequestParam(required = false, defaultValue = "") String keyword) {
+        return Result.success(policyRepository.searchClauses(keyword));
     }
 }
