@@ -31,9 +31,17 @@
       if (host === 'wsbs.gz.gov.cn') {
         return pathname === '/' || pathname === '/index.html' || pathname === '/index.htm' || pathname === '';
       }
-      // 广东政务服务网 (www.gdzwfw.gov.cn) 首页及广州专区首页
+      // 广东政务服务网 (www.gdzwfw.gov.cn) 首页及广州专区首页 (全版本覆盖 v3/v2/v1)
       if (host === 'www.gdzwfw.gov.cn' || host === 'gdzwfw.gov.cn') {
-        return pathname === '/' || pathname === '/index.html' || pathname === '/portal/index' || pathname === '/portal/v2/index' || pathname === '';
+        return pathname === '/' ||
+               pathname === '/index.html' ||
+               pathname === '/portal/v3/index' ||
+               pathname.startsWith('/portal/v3/index') ||
+               pathname === '/portal/v2/index' ||
+               pathname.startsWith('/portal/v2/index') ||
+               pathname === '/portal/index' ||
+               pathname.startsWith('/portal/index') ||
+               pathname === '';
       }
       // 其它环境默认仅根路径首页挂载
       return pathname === '/' || pathname === '/index.html' || pathname === '';

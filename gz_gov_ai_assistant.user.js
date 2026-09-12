@@ -1,9 +1,19 @@
 // ==UserScript==
 // @name         广州市人民政府门户网站 · 政策法规与办事导办 AI 智能问答专窗
 // @namespace    https://www.gz.gov.cn/
-// @version      2.1.3
-// @description  广州市政务服务与政策法规 AI 智能问答专窗（官方原生“叻仔”政务助手，仅在官网首页挂载）
+// @version      2.1.4
+// @description  广州市政务服务与政策法规 AI 智能问答专窗（官方原生“叻仔”政务助手，支持广东政务服务网 v3 广州站等官网首页）
 // @author       Guangzhou Smart Gov Project Team
+// @match        https://www.gdzwfw.gov.cn/portal/v3/index*
+// @match        https://www.gdzwfw.gov.cn/portal/v2/index*
+// @match        https://www.gdzwfw.gov.cn/portal/index*
+// @match        https://www.gdzwfw.gov.cn/
+// @match        https://www.gdzwfw.gov.cn/index.html
+// @match        http://www.gdzwfw.gov.cn/portal/v3/index*
+// @match        http://www.gdzwfw.gov.cn/portal/v2/index*
+// @match        http://www.gdzwfw.gov.cn/portal/index*
+// @match        http://www.gdzwfw.gov.cn/
+// @match        http://www.gdzwfw.gov.cn/index.html
 // @match        https://www.gz.gov.cn/
 // @match        https://www.gz.gov.cn/index.html
 // @match        https://www.gz.gov.cn/index.htm
@@ -14,10 +24,6 @@
 // @match        https://wsbs.gz.gov.cn/index.html
 // @match        http://wsbs.gz.gov.cn/
 // @match        http://wsbs.gz.gov.cn/index.html
-// @match        https://www.gdzwfw.gov.cn/
-// @match        https://www.gdzwfw.gov.cn/index.html
-// @match        https://www.gdzwfw.gov.cn/portal/index*
-// @match        https://www.gdzwfw.gov.cn/portal/v2/index*
 // @match        http://localhost:8080/
 // @match        http://localhost:8080/index.html
 // @match        http://127.0.0.1:8080/
@@ -58,9 +64,17 @@
       if (host === 'wsbs.gz.gov.cn') {
         return pathname === '/' || pathname === '/index.html' || pathname === '/index.htm' || pathname === '';
       }
-      // 广东政务服务网 (www.gdzwfw.gov.cn) 首页及广州专区首页
+      // 广东政务服务网 (www.gdzwfw.gov.cn) 首页及广州专区首页 (全版本覆盖 v3/v2/v1)
       if (host === 'www.gdzwfw.gov.cn' || host === 'gdzwfw.gov.cn') {
-        return pathname === '/' || pathname === '/index.html' || pathname === '/portal/index' || pathname === '/portal/v2/index' || pathname === '';
+        return pathname === '/' ||
+               pathname === '/index.html' ||
+               pathname === '/portal/v3/index' ||
+               pathname.startsWith('/portal/v3/index') ||
+               pathname === '/portal/v2/index' ||
+               pathname.startsWith('/portal/v2/index') ||
+               pathname === '/portal/index' ||
+               pathname.startsWith('/portal/index') ||
+               pathname === '';
       }
       // 其它环境默认仅根路径首页挂载
       return pathname === '/' || pathname === '/index.html' || pathname === '';
