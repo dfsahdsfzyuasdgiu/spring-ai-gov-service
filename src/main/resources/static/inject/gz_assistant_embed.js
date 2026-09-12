@@ -513,12 +513,27 @@
         width: 100%;
       }
 
-      /* 消除生硬八股框：纯净自然语言流段落 */
+      /* 消除生硬八股框：纯净自然语言流段落 (规范段落首行缩进 2 字符) */
       .lezai-natural-paragraph {
         font-size: var(--gz-font-base);
         line-height: var(--gz-line-height);
         color: #1e293b;
         margin-bottom: 10px;
+        text-align: justify;
+      }
+      .lezai-natural-paragraph p {
+        margin-bottom: 8px;
+        line-height: var(--gz-line-height);
+      }
+      .lezai-natural-paragraph p:last-child {
+        margin-bottom: 0;
+      }
+      .lezai-natural-paragraph p.indent-para {
+        text-indent: 2em;
+      }
+      .lezai-natural-paragraph p.indent-list-item {
+        text-indent: 0;
+        padding-left: 1.2em;
       }
       .lezai-natural-paragraph strong {
         color: #0056b3;
@@ -1372,6 +1387,28 @@
       return html.replace(/\n/g, '<br/>');
     }
 
+    // AI 回答段落首行缩进 2 字符排版解析器
+    function formatAnswerParagraphs(str) {
+      if (!str) return '';
+      const clean = stripEmoji(str);
+      const rawLines = clean.split(/\r?\n+/);
+      const htmlParas = [];
+      for (let raw of rawLines) {
+        const line = raw.trim();
+        if (!line) continue;
+        let formatted = escapeText(line)
+          .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+          .replace(/\*(.*?)\*/g, '<em>$1</em>');
+        const isList = /^[•▪\-\*]/.test(line) || /^\d+[\.、]/.test(line);
+        if (isList) {
+          htmlParas.push(`<p class="indent-list-item">${formatted}</p>`);
+        } else {
+          htmlParas.push(`<p class="indent-para">${formatted}</p>`);
+        }
+      }
+      return htmlParas.length > 0 ? htmlParas.join('') : `<p class="indent-para">${escapeText(clean)}</p>`;
+    }
+
     // 核心渲染器：自然对话流 + 随文导办（彻底剔除生硬八股框）
     function renderPolicyAnswer(data) {
       const div = document.createElement('div');
@@ -1402,7 +1439,7 @@
       }
 
       // 构造自然文本主体
-      let mainHtml = `<div class="lezai-natural-paragraph">${formatMarkdownLike(cleanSummary)}</div>`;
+      let mainHtml = `<div class="lezai-natural-paragraph">${formatAnswerParagraphs(cleanSummary)}</div>`;
 
       // 随文办事导办清单 (若有事项指引，以极简流线呈现，无嵌套丑陋边框)
       if (gs && (gs.qualifications || (gs.materials && gs.materials.length > 0) || (gs.processSteps && gs.processSteps.length > 0))) {
