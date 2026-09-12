@@ -1,8 +1,8 @@
 // ==UserScript==
 // @name         广州市人民政府门户网站 · 政策法规与办事导办 AI 智能问答专窗
 // @namespace    https://www.gz.gov.cn/
-// @version      2.1.5
-// @description  广州市政务服务与政策法规 AI 智能问答专窗（官方原生“叻仔”政务助手，精简高效纯净版）
+// @version      2.1.6
+// @description  广州市政务服务与政策法规 AI 智能问答专窗（官方原生“叻仔”政务助手，点击快捷标签即时清空输入框）
 // @author       Guangzhou Smart Gov Project Team
 // @match        https://www.gdzwfw.gov.cn/portal/v3/index*
 // @match        https://www.gdzwfw.gov.cn/portal/v2/index*
@@ -1150,7 +1150,7 @@
             try { localStorage.setItem('gz_lezai_recent_q', JSON.stringify(recentQuestions)); } catch (err) {}
             renderHistoryChips();
           } else {
-            textInput.value = q;
+            textInput.value = '';
             doSendMessage(q);
           }
         });
@@ -1243,7 +1243,10 @@
       shadow.querySelectorAll('.prompt-pill-btn').forEach(btn => {
         btn.onclick = () => {
           const q = btn.getAttribute('data-query');
-          if (q) doSendMessage(q);
+          if (q) {
+            textInput.value = '';
+            doSendMessage(q);
+          }
         };
       });
     }
@@ -1253,7 +1256,10 @@
     shadow.querySelectorAll('.topic-pill-tag').forEach(tag => {
       tag.onclick = () => {
         const q = tag.getAttribute('data-query');
-        if (q) doSendMessage(q);
+        if (q) {
+          textInput.value = '';
+          doSendMessage(q);
+        }
       };
     });
 
@@ -1310,6 +1316,7 @@
     });
 
     function doSendMessage(content) {
+      textInput.value = '';
       appendUserRow(content);
       addRecentQuestion(content);
       const loadingElem = appendLoadingRow();
@@ -1647,7 +1654,10 @@
       div.querySelectorAll('.sugg-chip').forEach(ch => {
         ch.onclick = () => {
           const q = ch.getAttribute('data-query');
-          if (q) doSendMessage(q);
+          if (q) {
+            textInput.value = '';
+            doSendMessage(q);
+          }
         };
       });
 

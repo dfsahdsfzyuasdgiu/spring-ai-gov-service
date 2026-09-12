@@ -1117,7 +1117,7 @@
             try { localStorage.setItem('gz_lezai_recent_q', JSON.stringify(recentQuestions)); } catch (err) {}
             renderHistoryChips();
           } else {
-            textInput.value = q;
+            textInput.value = '';
             doSendMessage(q);
           }
         });
@@ -1210,7 +1210,10 @@
       shadow.querySelectorAll('.prompt-pill-btn').forEach(btn => {
         btn.onclick = () => {
           const q = btn.getAttribute('data-query');
-          if (q) doSendMessage(q);
+          if (q) {
+            textInput.value = '';
+            doSendMessage(q);
+          }
         };
       });
     }
@@ -1220,7 +1223,10 @@
     shadow.querySelectorAll('.topic-pill-tag').forEach(tag => {
       tag.onclick = () => {
         const q = tag.getAttribute('data-query');
-        if (q) doSendMessage(q);
+        if (q) {
+          textInput.value = '';
+          doSendMessage(q);
+        }
       };
     });
 
@@ -1277,6 +1283,7 @@
     });
 
     function doSendMessage(content) {
+      textInput.value = '';
       appendUserRow(content);
       addRecentQuestion(content);
       const loadingElem = appendLoadingRow();
@@ -1614,7 +1621,10 @@
       div.querySelectorAll('.sugg-chip').forEach(ch => {
         ch.onclick = () => {
           const q = ch.getAttribute('data-query');
-          if (q) doSendMessage(q);
+          if (q) {
+            textInput.value = '';
+            doSendMessage(q);
+          }
         };
       });
 
