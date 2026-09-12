@@ -555,100 +555,277 @@
         width: 100%;
       }
 
-      /* 消除生硬八股框：纯净自然语言流段落 (规范段落首行缩进 2 字符) */
+      /* 智能排版引擎：多维立体层次化呈现 (告别全篇机械缩进与僵硬感) */
       .lezai-natural-paragraph {
         font-size: var(--gz-font-base);
         line-height: var(--gz-line-height);
         color: #1e293b;
-        margin-bottom: 10px;
-        text-align: justify;
-      }
-      .lezai-natural-paragraph p {
-        margin-bottom: 8px;
-        line-height: var(--gz-line-height);
-      }
-      .lezai-natural-paragraph p:last-child {
-        margin-bottom: 0;
-      }
-      .lezai-natural-paragraph p.indent-para {
-        text-indent: 2em;
-      }
-      .lezai-natural-paragraph p.indent-list-item {
-        text-indent: 0;
-        padding-left: 1.2em;
-      }
-      .lezai-natural-paragraph strong {
-        color: #0056b3;
-        font-weight: 600;
-      }
-
-      /* 办事向导流线化排版 (无丑陋灰框嵌套，轻量通透) */
-      .lezai-affair-flow {
-        margin-top: 10px;
-        border-top: 1px dashed rgba(0, 113, 227, 0.15);
-        padding-top: 10px;
         display: flex;
         flex-direction: column;
         gap: 8px;
       }
-      .flow-sec-title {
-        font-size: var(--gz-font-title);
-        font-weight: 700;
+      .gov-smart-para {
+        margin: 0;
+        line-height: var(--gz-line-height);
+        color: #1e293b;
+        word-break: break-word;
+      }
+      .gov-smart-para strong, .gov-strong {
         color: #0056b3;
-        margin-bottom: 4px;
+        font-weight: 600;
+      }
+      /* 核心指标/金额加粗高亮 */
+      .gov-stat-highlight {
+        color: #0056b3;
+        font-weight: 700;
+        padding: 0 2px;
+      }
+      /* 官方惠民轻量徽章 */
+      .gov-badge-green {
+        display: inline-block;
+        background: #f6ffed;
+        border: 1px solid #b7eb8f;
+        color: #389e0d;
+        font-size: 11.5px;
+        font-weight: 600;
+        padding: 0 5px;
+        border-radius: 4px;
+        vertical-align: baseline;
+        margin: 0 2px;
+      }
+
+      /* 智能列表项：左侧挂起对齐，层次清晰 */
+      .gov-smart-list-item {
+        display: flex;
+        align-items: flex-start;
+        gap: 6px;
+        line-height: 1.6;
+        margin: 2px 0;
+        font-size: var(--gz-font-base);
+      }
+      .gov-smart-list-item .list-bullet {
+        color: #0071e3;
+        font-size: 13px;
+        flex-shrink: 0;
+        line-height: 1.6;
+      }
+      .gov-smart-list-item .list-content {
+        color: #334155;
+        flex: 1;
+      }
+
+      /* 智能注意事项卡片 (Notice Box) */
+      .gov-smart-notice-box {
+        background: rgba(250, 140, 22, 0.05);
+        border: 1px solid rgba(250, 140, 22, 0.22);
+        border-left: 3px solid #fa8c16;
+        border-radius: 8px;
+        padding: 8px 12px;
+        margin: 4px 0;
+      }
+      .notice-box-head {
         display: flex;
         align-items: center;
         gap: 5px;
-      }
-      .flow-sec-title::before {
-        content: "";
-        display: inline-block;
-        width: 3px;
-        height: 14px;
-        background: #0071e3;
-        border-radius: 2px;
-      }
-      .flow-sec-content {
-        font-size: var(--gz-font-base);
-        color: #334155;
-        line-height: 1.6;
-        padding-left: 8px;
-      }
-      .flow-mat-list {
-        list-style: none;
-        padding-left: 8px;
-      }
-      .flow-mat-list li {
-        position: relative;
-        padding-left: 12px;
+        color: #d46b08;
+        font-size: var(--gz-font-small);
+        font-weight: 700;
         margin-bottom: 4px;
-        font-size: var(--gz-font-base);
       }
-      .flow-mat-list li::before {
-        content: "▪";
-        position: absolute;
-        left: 0;
-        color: #0071e3;
+      .notice-box-icon {
+        display: inline-flex;
+        align-items: center;
+        color: #fa8c16;
       }
-      .flow-step-list {
-        padding-left: 8px;
+      .notice-box-list {
+        list-style: none;
+        padding: 0;
+        margin: 0;
         display: flex;
         flex-direction: column;
         gap: 4px;
       }
-      .flow-step-item {
+      .notice-box-list li {
+        position: relative;
+        padding-left: 14px;
+        font-size: var(--gz-font-small);
+        color: #475569;
+        line-height: 1.55;
+      }
+      .notice-box-list li::before {
+        content: "";
+        position: absolute;
+        left: 3px;
+        top: 7px;
+        width: 5px;
+        height: 5px;
+        border-radius: 50%;
+        background: #fa8c16;
+      }
+
+      /* 智能办理渠道指引盒 (Channel Box) */
+      .gov-smart-channel-box {
+        background: #f8fbff;
+        border: 1px solid #d0e2ff;
+        border-left: 3px solid #0071e3;
+        border-radius: 8px;
+        padding: 8px 12px;
+        margin: 4px 0;
+      }
+      .channel-box-head {
+        display: flex;
+        align-items: center;
+        gap: 5px;
+        color: #0056b3;
+        font-size: var(--gz-font-small);
+        font-weight: 700;
+        margin-bottom: 4px;
+      }
+      .channel-box-icon {
+        display: inline-flex;
+        align-items: center;
+        color: #0071e3;
+      }
+      .channel-box-text {
         font-size: var(--gz-font-base);
         color: #334155;
+        line-height: 1.6;
       }
-      .flow-step-item strong {
+      .gov-platform-tag {
+        display: inline-flex;
+        align-items: center;
+        background: #e6f4ff;
+        color: #0958d9;
+        border: 1px solid #91caff;
+        border-radius: 4px;
+        padding: 1px 6px;
+        font-size: 11.5px;
+        font-weight: 600;
+        margin: 0 2px;
+      }
+
+      /* 官方政务导办专卡 (Affair Guide Card) */
+      .gov-affair-guide-card {
+        background: #ffffff;
+        border: 1px solid #d0e2ff;
+        border-radius: 10px;
+        padding: 10px 12px;
+        margin-top: 6px;
+        box-shadow: 0 2px 8px rgba(0, 113, 227, 0.04);
+      }
+      .guide-card-head {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        border-bottom: 1px solid #edf2f7;
+        padding-bottom: 6px;
+        margin-bottom: 8px;
+        flex-wrap: wrap;
+        gap: 6px;
+      }
+      .guide-badge-wrap {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+      }
+      .guide-gov-badge {
+        background: #0071e3;
+        color: #ffffff;
+        font-size: 10.5px;
+        font-weight: 700;
+        padding: 2px 6px;
+        border-radius: 4px;
+      }
+      .guide-affair-title {
+        font-size: var(--gz-font-title);
+        font-weight: 700;
+        color: #0f172a;
+      }
+      .guide-limit-tag {
+        font-size: var(--gz-font-small);
+        color: #64748b;
+      }
+      .guide-limit-tag strong {
+        color: #0071e3;
+      }
+      .guide-section-block {
+        margin-bottom: 8px;
+      }
+      .guide-section-label {
+        font-size: var(--gz-font-small);
+        font-weight: 700;
         color: #0056b3;
+        margin-bottom: 3px;
+        display: flex;
+        align-items: center;
+        gap: 4px;
+      }
+      .guide-section-content {
+        font-size: var(--gz-font-base);
+        color: #334155;
+        line-height: 1.55;
+        padding-left: 2px;
+      }
+      .guide-mat-wrap {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+      }
+      .guide-mat-chip {
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        background: #f1f5f9;
+        border: 1px solid #e2e8f0;
+        border-radius: 6px;
+        padding: 3px 8px;
+        font-size: 11.5px;
+        color: #334155;
+      }
+      .guide-mat-chip strong {
+        color: #1e293b;
+      }
+      .guide-mat-chip .mat-fmt {
+        color: #64748b;
+        font-size: 10.5px;
+      }
+      .guide-step-flow {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+      }
+      .guide-step-node {
+        display: flex;
+        align-items: baseline;
+        gap: 6px;
+        font-size: var(--gz-font-base);
+        line-height: 1.5;
+      }
+      .guide-step-node .step-num {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 16px;
+        height: 16px;
+        border-radius: 50%;
+        background: #0071e3;
+        color: #ffffff;
+        font-size: 10px;
+        font-weight: 700;
+        flex-shrink: 0;
+      }
+      .guide-step-node .step-name {
+        font-weight: 600;
+        color: #0056b3;
+      }
+      .guide-step-node .step-desc {
+        color: #475569;
       }
 
       /* 官方在线申办直达按钮 (药丸质感) */
       .lezai-direct-btn-wrap {
         margin-top: 8px;
         margin-bottom: 4px;
-        padding-left: 8px;
       }
       .lezai-direct-btn {
         display: inline-flex;
@@ -1426,36 +1603,115 @@
       return html.replace(/\n/g, '<br/>');
     }
 
-    // AI 回答段落首行缩进 2 字符排版解析器
-    function formatAnswerParagraphs(str) {
+    // 文本行内高亮与便民徽标处理
+    function formatGovInlineText(str) {
+      if (!str) return '';
+      let s = escapeText(str)
+        .replace(/\*\*(.*?)\*\*/g, '<strong class="gov-strong">$1</strong>')
+        .replace(/\*(.*?)\*/g, '<em>$1</em>');
+      s = s.replace(/(\d+(?:,\d+)?(?:元|个工作日|周岁|年|月|日))/g, '<strong class="gov-stat-highlight">$1</strong>');
+      s = s.replace(/“零跑动”/g, '<span class="gov-badge-green">“零跑动”</span>')
+           .replace(/“免申即享”/g, '<span class="gov-badge-green">“免申即享”</span>');
+      return s;
+    }
+
+    // 官方渠道关键词胶囊标签化
+    function formatGovChannelPills(str) {
+      if (!str) return '';
+      return str
+        .replace(/“粤省事”微信小程序|“粤省事”小程序|“粤省事”/g, '<span class="gov-platform-tag">“粤省事”小程序</span>')
+        .replace(/“穗好办”APP|“穗好办”App|“穗好办”/g, '<span class="gov-platform-tag">“穗好办”APP</span>')
+        .replace(/广州住房公积金管理中心官网/g, '<span class="gov-platform-tag">公积金管理中心官网</span>')
+        .replace(/广东政务服务网/g, '<span class="gov-platform-tag">广东政务服务网</span>')
+        .replace(/广州市人民政府门户网站/g, '<span class="gov-platform-tag">市政府门户网站</span>');
+    }
+
+    // 智能政务 AI 回答排版解析引擎（告别僵硬与死板，建立清晰多维语义层级）
+    function formatSmartGovAnswer(str) {
       if (!str) return '';
       const clean = stripEmoji(str);
       const rawLines = clean.split(/\r?\n+/);
-      const htmlParas = [];
-      for (let raw of rawLines) {
-        const line = raw.trim();
-        if (!line) continue;
-        let formatted = escapeText(line)
-          .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
-          .replace(/\*(.*?)\*/g, '<em>$1</em>');
-        const isList = /^[•▪\-\*]/.test(line) || /^\d+[\.、]/.test(line);
-        if (isList) {
-          htmlParas.push(`<p class="indent-list-item">${formatted}</p>`);
-        } else {
-          htmlParas.push(`<p class="indent-para">${formatted}</p>`);
-        }
+      const lines = [];
+      for (let r of rawLines) {
+        const t = r.trim();
+        if (t) lines.push(t);
       }
-      return htmlParas.length > 0 ? htmlParas.join('') : `<p class="indent-para">${escapeText(clean)}</p>`;
+      if (lines.length === 0) return '';
+
+      const noticeHeadPat = /^(需要注意的(是|事项)?|注意事项|温馨提示|特别提醒|关键提醒|申报注意|申请须知|关键要点)[:：]?$/;
+      const channelHeadPat = /^(具体操作|办理渠道|办理方式|如何办理|线上办理|办理指引|申报渠道)[:：]?|具体操作您可通过|您可通过|可通过手机登录/;
+      const listPat = /^[•▪\-\*]|^\d+[\.、]|^[（(][\d一二三四五]+[）)]/;
+
+      const resultParts = [];
+      let i = 0;
+      while (i < lines.length) {
+        const line = lines[i];
+
+        // 1. 注意事项 / 温馨提示 卡片组
+        if (noticeHeadPat.test(line)) {
+          const headTitle = line.replace(/[:：]$/, '');
+          const items = [];
+          i++;
+          while (i < lines.length) {
+            const sub = lines[i];
+            if (noticeHeadPat.test(sub) || channelHeadPat.test(sub)) break;
+            items.push(sub.replace(/^[•▪\-\*]\s*/, ''));
+            i++;
+          }
+          let boxHtml = '<div class="gov-smart-notice-box">';
+          boxHtml += '<div class="notice-box-head">';
+          boxHtml += '<span class="notice-box-icon"><svg viewBox="0 0 24 24" width="13" height="13" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/></svg></span>';
+          boxHtml += '<span class="notice-box-title">' + escapeText(headTitle) + '</span>';
+          boxHtml += '</div>';
+          if (items.length > 0) {
+            boxHtml += '<ul class="notice-box-list">';
+            for (let it of items) {
+              boxHtml += '<li>' + formatGovInlineText(it) + '</li>';
+            }
+            boxHtml += '</ul>';
+          }
+          boxHtml += '</div>';
+          resultParts.push(boxHtml);
+          continue;
+        }
+
+        // 2. 官方办理渠道指引盒
+        if (channelHeadPat.test(line)) {
+          let chHtml = '<div class="gov-smart-channel-box">';
+          chHtml += '<div class="channel-box-head">';
+          chHtml += '<span class="channel-box-icon"><svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg></span>';
+          chHtml += '<span>官方申办渠道指引</span>';
+          chHtml += '</div>';
+          chHtml += '<div class="channel-box-text">' + formatGovChannelPills(formatGovInlineText(line)) + '</div>';
+          chHtml += '</div>';
+          resultParts.push(chHtml);
+          i++;
+          continue;
+        }
+
+        // 3. 独立列表项 (悬挂缩进)
+        if (listPat.test(line)) {
+          const cleanLine = line.replace(/^[•▪\-\*]\s*/, '');
+          resultParts.push('<div class="gov-smart-list-item"><span class="list-bullet">▪</span><span class="list-content">' + formatGovInlineText(cleanLine) + '</span></div>');
+          i++;
+          continue;
+        }
+
+        // 4. 自然流畅的段落
+        resultParts.push('<p class="gov-smart-para">' + formatGovInlineText(line) + '</p>');
+        i++;
+      }
+
+      return resultParts.join('');
     }
 
-    // 核心渲染器：自然对话流 + 随文导办（彻底剔除生硬八股框）
+    // 核心渲染器：自然对话流 + 随文导办专卡（多维层次架构）
     function renderPolicyAnswer(data) {
       const div = document.createElement('div');
       div.className = 'chat-row ai';
 
       // 提取纯净文本
       let cleanSummary = data.summary || data.conclusion || '';
-      // 过滤任何遗留的八股标签
       cleanSummary = cleanSummary.replace(/【快速答疑】/g, '')
                                  .replace(/【办事要点】/g, '')
                                  .replace(/【注意事项与关键提醒】/g, '')
@@ -1472,49 +1728,75 @@
         citClause = citation.clauseNo + '：' + citClause;
       }
 
+      // 智能提取正文末尾附带的政策依据，并将其归集至底部权威注脚抽屉，避免正文重复与割裂
+      const policyMatch = cleanSummary.match(/政策依据[：:]\s*《([^》]+)》(?:[（\(]([^）\)]+)[）\)])?/);
+      if (policyMatch) {
+        if (!citTitle) {
+          citTitle = policyMatch[1].trim();
+          citDocNumber = policyMatch[2] ? policyMatch[2].trim() : '';
+        }
+        cleanSummary = cleanSummary.replace(/政策依据[：:]\s*《[^》]+》[^\r\n]*/g, '').trim();
+      }
+
       // 保障正文非空防御
       if (!cleanSummary) {
         cleanSummary = '市民您好！您咨询的政务事项已接入广州政务服务网及“穗好办”平台，符合条件的市民可备齐材料在线确认申报。';
       }
 
-      // 构造自然文本主体
-      let mainHtml = `<div class="lezai-natural-paragraph">${formatAnswerParagraphs(cleanSummary)}</div>`;
+      // 构造智能分层文本主体
+      let mainHtml = `<div class="lezai-natural-paragraph">${formatSmartGovAnswer(cleanSummary)}</div>`;
 
-      // 随文办事导办清单 (若有事项指引，以极简流线呈现，无嵌套丑陋边框)
+      // 随文办事导办清单 (升级为官方政务导办专卡，层次精细，呼吸感强)
       if (gs && (gs.qualifications || (gs.materials && gs.materials.length > 0) || (gs.processSteps && gs.processSteps.length > 0))) {
-        let flowHtml = '<div class="lezai-affair-flow">';
+        let flowHtml = '<div class="gov-affair-guide-card">';
+        flowHtml += `
+          <div class="guide-card-head">
+            <div class="guide-badge-wrap">
+              <span class="guide-gov-badge">政务导办</span>
+              <span class="guide-affair-title">${escapeText(gs.affairName || '权威办事指引')}</span>
+            </div>
+            <div class="guide-limit-tag">承诺办结：<strong>${escapeText(gs.promisedLimitDays ? gs.promisedLimitDays + '个工作日' : '法定办结')}</strong></div>
+          </div>
+          <div class="guide-card-body">
+        `;
 
         if (gs.qualifications) {
           flowHtml += `
-            <div>
-              <div class="flow-sec-title">准入条件</div>
-              <div class="flow-sec-content">${formatMarkdownLike(gs.qualifications)}</div>
+            <div class="guide-section-block">
+              <div class="guide-section-label">准入条件与申报资格</div>
+              <div class="guide-section-content">${formatGovInlineText(gs.qualifications)}</div>
             </div>
           `;
         }
 
         if (gs.materials && gs.materials.length > 0) {
           flowHtml += `
-            <div>
-              <div class="flow-sec-title">申报材料清单</div>
-              <ul class="flow-mat-list">
-                ${gs.materials.map(m => `<li><strong>${escapeText(m.name)}</strong></li>`).join('')}
-              </ul>
+            <div class="guide-section-block">
+              <div class="guide-section-label">申报材料要件</div>
+              <div class="guide-mat-wrap">
+                ${gs.materials.map(m => `
+                  <span class="guide-mat-chip">
+                    <svg viewBox="0 0 24 24" width="11" height="11" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/></svg>
+                    <strong>${escapeText(m.name)}</strong>
+                    ${m.format ? '<span class="mat-fmt">[' + escapeText(m.format) + ']</span>' : ''}
+                  </span>
+                `).join('')}
+              </div>
             </div>
           `;
         }
 
         if (gs.processSteps && gs.processSteps.length > 0) {
           flowHtml += `
-            <div>
-              <div class="flow-sec-title">办理流程与渠道</div>
-              <div class="flow-sec-content" style="margin-bottom:6px;">
-                承诺时限：<strong>${escapeText(gs.promisedLimitDays ? gs.promisedLimitDays + '个工作日' : '法定办结')}</strong>
-                ${gs.handlingAddress ? ' &nbsp;·&nbsp; 网点：' + escapeText(gs.handlingAddress) : ''}
-              </div>
-              <div class="flow-step-list">
+            <div class="guide-section-block">
+              <div class="guide-section-label">办理步骤与通道</div>
+              <div class="guide-step-flow">
                 ${gs.processSteps.map((p, idx) => `
-                  <div class="flow-step-item">${idx + 1}. <strong>${escapeText(p.stepName)}</strong>: ${escapeText(p.description)}</div>
+                  <div class="guide-step-node">
+                    <span class="step-num">${idx + 1}</span>
+                    <span class="step-name">${escapeText(p.stepName)}</span>
+                    <span class="step-desc">${escapeText(p.description)}</span>
+                  </div>
                 `).join('')}
               </div>
             </div>
@@ -1526,7 +1808,7 @@
           flowHtml += `
             <div class="lezai-direct-btn-wrap">
               <a class="lezai-direct-btn" href="${escapeText(gs.onlineHandleUrl)}" target="_blank" rel="noopener noreferrer">
-                点击直达广东政务服务网申报入口 [${escapeText(gs.affairCode || '在线申办')}] ↗
+                点击直达广东政务服务网在线申办入口 [${escapeText(gs.affairCode || '在线申办')}] ↗
               </a>
             </div>
           `;
@@ -1536,12 +1818,12 @@
         if (gs.warnTip) {
           flowHtml += `
             <div class="lezai-tip-note">
-              <strong>温馨提示：</strong>${formatMarkdownLike(gs.warnTip)}
+              <strong>温馨提示：</strong>${formatGovInlineText(gs.warnTip)}
             </div>
           `;
         }
 
-        flowHtml += '</div>';
+        flowHtml += '</div></div>';
         mainHtml += flowHtml;
       }
 
