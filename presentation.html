@@ -1,0 +1,691 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>基于 Spring AI 与云端 Dual-Agent 智能政务咨询与导办系统 · 技术答辩全景汇报</title>
+<style>
+  :root {
+    --bg-primary: #0a0f1d;
+    --bg-card: rgba(16, 24, 48, 0.85);
+    --border-card: rgba(56, 189, 248, 0.18);
+    --accent-blue: #38bdf8;
+    --accent-indigo: #818cf8;
+    --accent-gold: #fbbf24;
+    --accent-green: #34d399;
+    --accent-red: #f87171;
+    --text-primary: #f8fafc;
+    --text-secondary: #94a3b8;
+    --text-muted: #64748b;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: var(--bg-primary);
+    color: var(--text-primary);
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'PingFang SC', 'Microsoft YaHei', sans-serif;
+    overflow: hidden;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    user-select: none;
+  }
+  /* 顶部导航与状态栏 */
+  .top-nav-bar {
+    height: 48px;
+    background: rgba(10, 15, 29, 0.95);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 24px;
+    z-index: 100;
+  }
+  .nav-title { font-size: 13.5px; font-weight: 600; color: var(--accent-blue); display: flex; align-items: center; gap: 8px; }
+  .nav-controls { display: flex; align-items: center; gap: 12px; font-size: 12px; color: var(--text-secondary); }
+  .nav-btn { background: rgba(255, 255, 255, 0.08); border: 1px solid rgba(255, 255, 255, 0.12); color: #fff; padding: 4px 10px; border-radius: 6px; cursor: pointer; transition: all 0.2s ease; }
+  .nav-btn:hover { background: var(--accent-blue); color: #000; }
+  .slide-counter { font-family: monospace; font-size: 13px; font-weight: bold; color: var(--accent-gold); }
+  /* 幻灯片主容器 (16:9 标准画幅) */
+  .deck-viewport {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 16px;
+    position: relative;
+  }
+  .slide-stage {
+    width: 100%;
+    max-width: 1280px;
+    aspect-ratio: 16 / 9;
+    background: radial-gradient(circle at 15% 15%, rgba(56, 189, 248, 0.08) 0%, transparent 45%), radial-gradient(circle at 85% 85%, rgba(129, 140, 248, 0.06) 0%, transparent 45%), var(--bg-card);
+    border: 1px solid var(--border-card);
+    border-radius: 16px;
+    box-shadow: 0 25px 60px rgba(0, 0, 0, 0.6), 0 0 40px rgba(56, 189, 248, 0.08);
+    position: relative;
+    overflow: hidden;
+    display: none;
+    padding: 36px 44px;
+    animation: slideFadeIn 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  }
+  .slide-stage.active { display: flex; flex-direction: column; }
+  @keyframes slideFadeIn { from { opacity: 0; transform: scale(0.98); } to { opacity: 1; transform: scale(1); } }
+  /* 幻灯片通用结构 */
+  .slide-header { margin-bottom: 20px; border-bottom: 1px solid rgba(255, 255, 255, 0.08); padding-bottom: 12px; display: flex; justify-content: space-between; align-items: flex-end; }
+  .slide-tag { font-size: 11px; font-weight: 700; text-transform: uppercase; color: var(--accent-blue); letter-spacing: 1px; margin-bottom: 4px; display: inline-flex; align-items: center; gap: 6px; }
+  .slide-tag::before { content: ''; display: inline-block; width: 6px; height: 6px; border-radius: 50%; background: var(--accent-blue); }
+  .slide-title { font-size: 26px; font-weight: 700; color: #ffffff; letter-spacing: -0.3px; line-height: 1.2; }
+  .slide-title span.hl { color: var(--accent-blue); }
+  .slide-cat { font-size: 12px; color: var(--text-muted); font-family: monospace; }
+  .slide-body { flex: 1; display: flex; flex-direction: column; justify-content: center; gap: 16px; overflow: hidden; }
+  /* 布局辅助类 */
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+  .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; }
+  .grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; }
+  .grid-23 { display: grid; grid-template-columns: 2fr 3fr; gap: 20px; }
+  .grid-32 { display: grid; grid-template-columns: 3fr 2fr; gap: 20px; }
+  .card {
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 10px;
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    transition: all 0.2s ease;
+  }
+  .card:hover { border-color: rgba(56, 189, 248, 0.4); background: rgba(56, 189, 248, 0.04); }
+  .card-title { font-size: 15px; font-weight: 700; color: var(--accent-blue); display: flex; align-items: center; gap: 6px; }
+  .card-text { font-size: 13px; color: var(--text-secondary); line-height: 1.6; }
+  .card-badge { align-self: flex-start; font-size: 10.5px; font-weight: 700; padding: 2px 7px; border-radius: 4px; background: rgba(56, 189, 248, 0.15); color: var(--accent-blue); }
+  .metric-hero { font-size: 34px; font-weight: 900; color: #fff; font-family: monospace; line-height: 1; }
+  .metric-sub { font-size: 11px; color: var(--text-muted); }
+  /* 表格 */
+  .deck-table { width: 100%; border-collapse: collapse; font-size: 12.5px; }
+  .deck-table th { background: rgba(56, 189, 248, 0.12); color: var(--accent-blue); text-align: left; padding: 8px 12px; border-bottom: 1.5px solid rgba(56, 189, 248, 0.3); font-weight: 700; }
+  .deck-table td { padding: 8px 12px; border-bottom: 1px solid rgba(255, 255, 255, 0.06); color: var(--text-secondary); }
+  .deck-table tr:hover td { background: rgba(255, 255, 255, 0.03); color: #fff; }
+  /* 代码块 */
+  .code-box { background: #050811; border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 8px; padding: 12px 14px; font-family: ui-monospace, Menlo, Consolas, monospace; font-size: 12px; color: #e2e8f0; line-height: 1.5; overflow-x: auto; }
+  .code-kw { color: #f472b6; }
+  .code-str { color: #a5b4fc; }
+  .code-fn { color: #38bdf8; }
+  .code-com { color: #64748b; font-style: italic; }
+  /* 讲稿抽屉 */
+  .notes-drawer {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 160px;
+    background: rgba(13, 20, 36, 0.98);
+    border-top: 2px solid var(--accent-blue);
+    padding: 16px 32px;
+    z-index: 200;
+    transform: translateY(100%);
+    transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+    box-shadow: 0 -10px 30px rgba(0, 0, 0, 0.5);
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .notes-drawer.open { transform: translateY(0); }
+  .notes-header { display: flex; justify-content: space-between; align-items: center; font-size: 12px; color: var(--accent-gold); font-weight: 700; }
+  .notes-content { font-size: 13.5px; color: #cbd5e1; line-height: 1.6; overflow-y: auto; }
+  /* 浮层概览 */
+  .overview-modal {
+    position: fixed;
+    top: 48px; left: 0; right: 0; bottom: 0;
+    background: rgba(10, 15, 29, 0.96);
+    backdrop-filter: blur(10px);
+    z-index: 150;
+    display: none;
+    padding: 30px;
+    overflow-y: auto;
+  }
+  .overview-modal.open { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
+  .thumb-card { background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 8px; padding: 12px; cursor: pointer; transition: all 0.2s ease; }
+  .thumb-card:hover { border-color: var(--accent-blue); transform: scale(1.02); }
+  .thumb-num { font-size: 11px; font-weight: bold; color: var(--accent-blue); margin-bottom: 4px; }
+  .thumb-title { font-size: 12px; color: #fff; line-height: 1.3; }
+</style>
+</head>
+<body>
+<div class="top-nav-bar">
+  <div class="nav-title">🏛️ 广州政务 AI 智能专窗 · 综合技术答辩全景 PPT (Spring AI + Dual-Agent)</div>
+  <div class="nav-controls">
+    <span class="slide-counter"><span id="curSlideNum">1</span> / <span id="totalSlideNum">23</span></span>
+    <button class="nav-btn" id="btnPrev" title="上一页 (PageUp/←)">◀ 上一页</button>
+    <button class="nav-btn" id="btnNext" title="下一页 (PageDown/Space/→)">下一页 ▶</button>
+    <button class="nav-btn" id="btnNotes" title="开启/关闭讲稿逐字提词器 (S)">🎙️ 演讲讲稿 [S]</button>
+    <button class="nav-btn" id="btnOverview" title="幻灯片全局缩略图 (O)">📑 幻灯片总览 [O]</button>
+    <button class="nav-btn" id="btnFullscreen" title="切换全屏演说 (F)">⛶ 全屏 [F]</button>
+  </div>
+</div>
+<div class="deck-viewport">
+<div class="slide-stage active" data-slide="1" data-cat="OVERVIEW" data-notes="尊敬的各位评委老师、专家学者：大家好！今天我汇报的课题是《基于 Spring AI 与云端 Dual-Agent 协同的智能政务咨询与导办系统》。本项目针对政务服务领域长期存在的‘机械搜索看不懂’与‘通用大模型虚构政策事实’两大瓶颈，构建了一套企业级微服务解耦的智能政务导办解决方案。">
+  <div class="slide-header"><span class="slide-tag">PROJECT DEFENSE · GRADUATION CAPSTONE</span><span class="slide-cat">P01 / 23</span></div>
+  <div class="slide-body" style="text-align: center; justify-content: center; gap: 20px;">
+    <div style="font-size: 14px; letter-spacing: 2px; color: var(--accent-blue); font-weight: 700;">国家“高效办成一件事”政务数字化转型示范实战</div>
+    <h1 style="font-size: 38px; font-weight: 900; line-height: 1.25; color: #ffffff;">基于 <span class="hl">Spring AI</span> 与云端 Dual-Agent 协同的<br/>智能政务咨询与导办系统设计与实现</h1>
+    <p style="font-size: 15px; color: var(--text-secondary); max-width: 820px; margin: 0 auto; line-height: 1.6;">面向 4.4GB 真实政务公文与 1.39 万项标准指南 · 纯 CPU 毫秒级交叉精排与伴随式插件无感落地</p>
+    <div style="display: inline-flex; gap: 24px; justify-content: center; margin-top: 10px; font-size: 13.5px; color: #cbd5e1; background: rgba(255,255,255,0.05); padding: 10px 24px; border-radius: 30px; border: 1px solid rgba(255,255,255,0.1); width: fit-content; margin-left: auto; margin-right: auto;">
+      <span><strong>答辩人：</strong>[答辩人姓名]</span><span>|</span>
+      <span><strong>指导老师：</strong>[指导老师姓名]</span><span>|</span>
+      <span><strong>专业方向：</strong>软件工程 / 计算机科学</span>
+    </div>
+    <div style="display: flex; gap: 10px; justify-content: center; margin-top: 10px;">
+      <span class="card-badge">Java 21 LTS</span><span class="card-badge">Spring Boot 3.2</span><span class="card-badge">Spring AI 1.0</span><span class="card-badge">CPU ONNX ~110ms</span><span class="card-badge">FTS5 &lt;1ms</span><span class="card-badge">Shadow DOM 伴随插件</span>
+    </div>
+  </div>
+</div>
+<div class="slide-stage" data-slide="2" data-cat="BACKGROUND" data-notes="第一部分，立项背景。今年国务院印发国发〔2024〕3号文，明确要求各级政府推动‘高效办成一件事’。以广东政务服务网、广州市人民政府网为代表的数字化门户，每日面临海量公积金提取、落户、医保等民生咨询。但现有系统高度依赖机械关键词匹配，用户查不准，体验亟待升级。">
+  <div class="slide-header"><div><span class="slide-tag">POLICY BACKGROUND</span><h2 class="slide-title">国家政策战略驱动：从<span class="hl">“能办”</span>向<span class="hl">“好办、易办、智办”</span>跨越</h2></div><span class="slide-cat">P02 / 23</span></div>
+  <div class="slide-body">
+    <div class="grid-3">
+      <div class="card"><div class="card-title">📜 国务院【国发〔2024〕3号文】</div><div class="card-text">明确要求依托政务数字化与人工智能，优化审批流线，解决跨部门跨领域协同难、咨询答疑不准的问题，构建“高效办成一件事”常态化推进机制。</div><div class="card-badge">国家顶层设计</div></div>
+      <div class="card"><div class="card-title">🌐 一网通办进入“深水区”</div><div class="card-text">广东省“粤省事”、广州市“穗好办”已打通数千项政务网办渠道，但群众端入口深、申报表单多，线上咨询仍停留在“生硬搜索框”模式。</div><div class="card-badge">现实业务瓶颈</div></div>
+      <div class="card"><div class="card-title">🎯 课题立项建设宗旨</div><div class="card-text">打造“懂政策、明要件、知渠道、防幻觉”的权威智能问答系统，让群众用口语就能一站式获取标准指引与直达网办入口，辅助基层减负增效。</div><div class="card-badge">系统核心使命</div></div>
+    </div>
+    <div class="card" style="background: rgba(56, 189, 248, 0.05); border-color: rgba(56, 189, 248, 0.25);">
+      <div style="display:flex; justify-content:space-between; align-items:center;"><div><strong style="color:var(--accent-blue);">民生咨询数据支撑：</strong> 广州市公积金中心、社保中心日均政策问答请求超过 50,000+ 人次，70% 以上集中在材料自检与办事时限咨询。</div><div class="card-badge">业务价值巨大</div></div>
+    </div>
+  </div>
+</div>
+<div class="slide-stage" data-slide="3" data-cat="CHALLENGES" data-notes="在严肃政务场景下，传统技术和通用大模型均存在不可调和的矛盾。传统搜索机械分词，群众输入口语化‘办80大寿’根本查不到‘高龄津贴’；而通用大模型虽然会说话，却存在严重的‘政策事实性虚构’，胡编办结时限和网址，甚至违反上位法原则。此外，传统向量库对高昂 GPU 算力的依赖也是基层难以承受的。">
+  <div class="slide-header"><div><span class="slide-tag">INDUSTRY PAIN POINTS</span><h2 class="slide-title">行业三大核心痛点：为什么传统搜索与通用大模型<span class="hl">均不可行？</span></h2></div><span class="slide-cat">P03 / 23</span></div>
+  <div class="slide-body">
+    <div class="grid-3">
+      <div class="card" style="border-color: rgba(248, 113, 113, 0.3);">
+        <div class="card-title" style="color:var(--accent-red);">1. 传统政务搜索“查不准”</div>
+        <div class="card-text">• 机械字面匹配：群众输入“办80大寿”，无法关联到法定全称“广州市高龄老人津贴申领”；<br/>• 缺乏歧义消解：搜“办身份证”，机械罗列数十个同名细分场景，群众如同看天书。</div>
+        <div class="metric-hero" style="color:var(--accent-red); font-size:24px;">召回断层</div>
+      </div>
+      <div class="card" style="border-color: rgba(251, 191, 36, 0.3);">
+        <div class="card-title" style="color:var(--accent-gold);">2. 通用大模型的“政策严重幻觉”</div>
+        <div class="card-text">• 严肃要素编造：信口胡编承诺办结时限、虚构申报材料或死链网址，极易引发行政诉讼与舆情风险；<br/>• 法律位阶失效：缺乏上位法与废止公文时效识别，拿已废止旧文件指导当下办理。</div>
+        <div class="metric-hero" style="color:var(--accent-gold); font-size:24px;">政务风险不可控</div>
+      </div>
+      <div class="card" style="border-color: rgba(129, 140, 248, 0.3);">
+        <div class="card-title" style="color:var(--accent-indigo);">3. 算力与硬件成本居高不下</div>
+        <div class="card-text">• 传统向量库（Milvus/pgvector）密集向量运算重度绑定高端大显存 GPU；<br/>• 商业公有云 RAG 接口按 Token/调用量收费高昂且存在网络抖动，基层政务无力长期维系。</div>
+        <div class="metric-hero" style="color:var(--accent-indigo); font-size:24px;">GPU 成本门槛</div>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="slide-stage" data-slide="4" data-cat="OBJECTIVES" data-notes="针对上述痛点，我们确立了本课题的四大核心建设目标：第一，企业级双层解耦架构；第二，基于 4.4GB 官方全量库的严肃防幻觉；第三，办事实操与政策法理双闭环；第四，全程纯 CPU 本地毫秒级推理，实现真正的零 GPU 依赖。">
+  <div class="slide-header"><div><span class="slide-tag">SYSTEM OBJECTIVES</span><h2 class="slide-title">破局之道：以<span class="hl">双层解耦架构</span>构筑严肃政务智能防线</h2></div><span class="slide-cat">P04 / 23</span></div>
+  <div class="slide-body">
+    <div class="grid-4">
+      <div class="card"><div class="card-badge">架构解耦</div><div class="card-title">前后台两层分离</div><div class="card-text">公网 Spring AI 业务大脑专注于政务安全审计与流式推理；内网知识中台专注于高确定性海量检索与图谱提取。</div></div>
+      <div class="card"><div class="card-badge">严肃防幻觉</div><div class="card-title">4.4GB 官方底座</div><div class="card-text">汇聚 5 万权威公文与 1.39 万条标准化指南，实现 100% 事实溯源与权威公文依据闭环，坚决不瞎猜。</div></div>
+      <div class="card"><div class="card-badge">双闭环引擎</div><div class="card-title">实操 + 法理双 Agent</div><div class="card-text">导办 Agent 组装国务院 8 要素指南；政策 Agent 提供母法向上穿透与法律效力位阶加权。</div></div>
+      <div class="card"><div class="card-badge">低成本运行</div><div class="card-title">零 GPU 纯 CPU 运算</div><div class="card-text">单文件 SQLite 结合 CPU ONNX Runtime 毫秒级重排，可在普通服务器实现毫秒级端到端响应。</div></div>
+    </div>
+  </div>
+</div>
+<div class="slide-stage" data-slide="5" data-cat="ARCHITECTURE" data-notes="请各位老师看这张系统端到端微服务架构拓扑图。我们在软件工程上彻底摒弃了单一 Python 脚本的玩具做法。公网仅开放 6001 端口，运行基于 Java 21 与 Spring Boot 3 的业务大脑，内置安全审计切面；通过 127.0.0.1 本地回环连接 6002 知识计算中台与 8766 纯 CPU 精排微服务。核心数据完全物理隔离在内网，极大增强了系统安全性。">
+  <div class="slide-header"><div><span class="slide-tag">MICROSERVICE TOPOLOGY</span><h2 class="slide-title">系统端到端拓扑全景图：<span class="hl">四层物理隔离与微服务协同</span></h2></div><span class="slide-cat">P05 / 23</span></div>
+  <div class="slide-body">
+    <div class="grid-23">
+      <div class="card" style="gap:12px;">
+        <div class="card-title">🔒 企业级安全分层理念</div>
+        <div class="card-text"><strong>1. 边界防御与审计：</strong>公网仅暴露 6001 端口，所有请求必经 Spring AI 切面审计拦截；</div>
+        <div class="card-text"><strong>2. 内部知识中台隔离：</strong>6002 检索中台与 8766 精排模型仅监听 <code>127.0.0.1</code>，外部探测无法触碰核心数据库；</div>
+        <div class="card-text"><strong>3. 极速响应式中继：</strong>WebClient 异步长连接，毫秒级拉取上下文，为大模型流式推理预留充足计算空间。</div>
+      </div>
+      <div class="code-box" style="font-size:11px;">
+<span class="code-com">// 四层架构数据交互链路拓扑</span>
+[1. 客户端] 浏览器伴随式插件 (Shadow DOM 挂载真实政务网站)
+     │  POST /api/chat/stream (SSE 逐字流式推流)
+     ▼
+[2. 业务大脑] Spring Boot 3.2 + Spring AI 1.0 (公网 6001 端口)
+     ├─ ChatStreamController (鉴权与会话管理)
+     ├─ AuditLoggingAdvisor (涉密词/Prompt注入前置拦截 &amp; TTFT监听)
+     ├─ GovRagBrainService (业务状态机、消歧直发 &amp; 跨省拦截)
+     └─ WebClient (64MB 编解码大缓冲区连接池)
+          │  POST /api/context (内网回环 127.0.0.1:6002, 耗时 ~100ms)
+          ▼
+[3. 知识中台] Node.js 22 + SQLite FTS5 4.4GB (内网 6002)
+     ├─ QueryCompiler 联合语义编译器 (单次网络往返转译)
+     └─ jieba + unicode61 倒排精准检索 (&lt; 1ms)
+          │  HTTP POST /rerank (127.0.0.1:8766)
+          ▼
+[4. 语义精排] Python CPU ONNX Runtime (BAAI/bge-reranker-base ~110ms)
+</div>
+    </div>
+  </div>
+</div>
+<div class="slide-stage" data-slide="6" data-cat="TECH STACK" data-notes="在技术选型上，我们全面拥抱现代软件工程标准。采用 Java 21 LTS 与 Spring Boot 3.2，深度集成了 Spring 官方首推的 Spring AI 1.0 框架，利用 ChatClient Fluent API 替代传统的生硬调用。底层存储选用单文件 4.4GB SQLite，规避了大型数据库的运维成本，精排模块采用 CPU ONNX，体现了极致的成本与性能权衡。">
+  <div class="slide-header"><div><span class="slide-tag">TECHNOLOGY SELECTION</span><h2 class="slide-title">关键技术选型矩阵：<span class="hl">严苛政务场景下的工程权衡</span></h2></div><span class="slide-cat">P06 / 23</span></div>
+  <div class="slide-body">
+    <table class="deck-table">
+      <thead><tr><th>分层领域</th><th>所选组件 / 框架</th><th>关键版本</th><th>技术选型核心理由与工程价值</th></tr></thead>
+      <tbody>
+        <tr><td><strong>开发语言与运行时</strong></td><td>OpenJDK</td><td>21.0.12 LTS</td><td>长期支持版，原生虚拟线程（Virtual Threads）优化高并发，性能强劲</td></tr>
+        <tr><td><strong>业务微服务中枢</strong></td><td>Spring Boot</td><td>3.2.11</td><td>企业级标准框架，组件生态成熟，配置解耦与生产级监控指标完善</td></tr>
+        <tr><td><strong>大模型应用抽象</strong></td><td>Spring AI</td><td>1.0.0-M2</td><td>Spring 官方最新 AI 抽象层，ChatClient Fluent API 与切面化 Advisor 架构</td></tr>
+        <tr><td><strong>响应式网络通信</strong></td><td>Spring WebFlux</td><td>6.1.14</td><td>异步非阻塞 Netty HttpClient，支持 Server-Sent Events (SSE) 逐字推流</td></tr>
+        <tr><td><strong>政务知识存储底座</strong></td><td>SQLite 3 (FTS5)</td><td>3.45+</td><td>单文件 4.4GB 数据库内嵌运行，零部署和外部服务运维开销，秒级便携迁移</td></tr>
+        <tr><td><strong>语义精排推理引擎</strong></td><td>CPU ONNX Runtime</td><td>1.18+</td><td><code>bge-reranker-base</code> 纯 CPU 交叉注意力量化推理，单次 ~110ms，零 GPU 成本</td></tr>
+        <tr><td><strong>前端伴随式沙箱</strong></td><td>Shadow DOM / UserScript</td><td>ES6+</td><td>Web Component 样式物理隔离，挂载广州市人民政府门户网 100% 零样式冲突</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+<div class="slide-stage" data-slide="7" data-cat="DATA BASE" data-notes="第三部分，4.4GB 黄金政务数据底座。我们的系统绝非玩具 Demo，而是实打实收录了 5 万篇官方公文、36.8 万条切片。在数据工程 ETL 阶段，我们发现全省大量街道重复备案同名事项，原始库达 7.2 万条极其臃肿。我们设计了主干归一化算法，将数据收敛归一为 13,939 条标准事项，体积压缩 75%，并将各区办事网点聚合为结构化 JSON，实现全省全区智能适配。">
+  <div class="slide-header"><div><span class="slide-tag">DATA ENGINEERING</span><h2 class="slide-title">4.4GB 黄金数据底座构建：<span class="hl">离线清洗治理与 75% 收敛归一化</span></h2></div><span class="slide-cat">P07 / 23</span></div>
+  <div class="slide-body">
+    <div class="grid-4">
+      <div class="card"><div class="metric-hero" style="color:var(--accent-blue);">50,000+</div><div class="metric-sub">权威规范性文件与红头公文</div></div>
+      <div class="card"><div class="metric-hero" style="color:var(--accent-indigo);">36.8 万条</div><div class="metric-sub">递归语义切片 (policy_chunks)</div></div>
+      <div class="card"><div class="metric-hero" style="color:var(--accent-gold);">13,939 项</div><div class="metric-sub">标准化归一办事事项 (service_items)</div></div>
+      <div class="card"><div class="metric-hero" style="color:var(--accent-green);">22,000+ 条</div><div class="metric-sub">法规引用拓扑边 (legal_graph_edges)</div></div>
+    </div>
+    <div class="grid-2">
+      <div class="card">
+        <div class="card-title">🧹 离线事项去冗余与主干归一化算法</div>
+        <div class="card-text"><strong>痛点：</strong>原始政务爬虫数据包含大量街道办重复备案（如‘广州市越秀区大东街办理老年人优待卡’等），同名事项高达 7.2 万条，检索库臃肿不堪且命中重复。</div>
+        <div class="card-text"><strong>解决：</strong>提取业务主干名与实施编码，收敛压缩 <strong>75%</strong> 至 13,939 条核心标准事项，索引体积剧降且召回精准度大幅提升。</div>
+      </div>
+      <div class="card">
+        <div class="card-title">📍 街道网点聚合机制 (handling_spots_json)</div>
+        <div class="card-text"><strong>多网点结构化：</strong>将各区、街镇窗口地址、经纬度与咨询电话聚合为单事项下的结构化 JSON 数组。</div>
+        <div class="card-text"><strong>辖区自适应：</strong>结合用户意图中的辖区标识（如‘海珠区’、‘天河区’），动态过滤展示最近线下网点，兼具统一性与地域适配性。</div>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="slide-stage" data-slide="8" data-cat="QUERY COMPILER" data-notes="面对市民口语化提问，传统方案要串行调用多次大模型分别判意图、提实体、转SQL，往往耗时 6 到 8 秒。我们设计了前置联合语义编译器 QueryCompiler，将意图路由、行政辖区、核心动作以及底层 FTS5 布尔表达式，在单次网络往返中联合推理完成，前置耗时从 6 秒直接压缩到 1 秒左右，同时辅以 1800 词条的政务词典作为防超时兜底。">
+  <div class="slide-header"><div><span class="slide-tag">ALGORITHM INNOVATION</span><h2 class="slide-title">前置联合语义编译器 (QueryCompiler)：<span class="hl">单次网络往返极致压缩</span></h2></div><span class="slide-cat">P08 / 23</span></div>
+  <div class="slide-body">
+    <div class="grid-2">
+      <div class="card">
+        <div class="card-title">⚡ 单次往返 (One-Pass) 联合推理</div>
+        <div class="card-text">设计专用编译 Prompt，单次调用模型并行提取 4 类决策要素：<br/>
+        1. <strong>意图路由：</strong>办事指南 (SERVICE) / 法规解读 (POLICY) / 复合路线；<br/>
+        2. <strong>辖区实体：</strong>精准识别广州 11 区及越界省份；<br/>
+        3. <strong>客体动作解耦：</strong>提取‘身份证’+‘补领’核心语义元；<br/>
+        4. <strong>FTS5 布尔检索式：</strong>直接输出优化倒排匹配表达式。</div>
+        <div class="card-badge" style="background:rgba(52,211,153,0.2); color:var(--accent-green);">耗时从 6.0s 降至 ~1.0s</div>
+      </div>
+      <div class="card">
+        <div class="card-title">🛡️ 本地规则字典双保险熔断机制</div>
+        <div class="card-text">• <strong>政务高频字典：</strong>内建 1,800+ 条高频民生事项词典与正则表达式匹配矩阵；<br/>• <strong>高可用兜底保障：</strong>当云端编译器网络偶发抖动或超时时，系统自动在 <strong>0ms</strong> 内平滑熔断降级为本地纯规则分词，确保检索中台可用性高达 <strong>100%</strong>。</div>
+        <div class="code-box" style="font-size:11px;">{
+  "intent": "SERVICE", "region": "广州市",
+  "keywords": ["公积金", "租房提取"],
+  "ftsQuery": "公积金 AND 租房提取"
+}</div>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="slide-stage" data-slide="9" data-cat="SEARCH RETRIEVAL" data-notes="在底层检索攻坚中，我们解决了一个重大缺陷：SQLite 默认的 Trigram 分词器存在 3 字符门槛，而政务词汇大量是 2 字，比如‘办税’、‘注销’、‘社保’，默认分词器的召回率居然是 0%！我们通过 jieba 中文精确预分词对齐 unicode61 分词器，把文本离线和在线切分为空格分隔的规范词元，攻克了这一短词盲区，实现了 2 字政务词汇 100% 召回，单次倒排检索耗时小于 1 毫秒！">
+  <div class="slide-header"><div><span class="slide-tag">SEARCH OPTIMIZATION</span><h2 class="slide-title">攻克 SQLite 3 字符盲区：<span class="hl"><code>jieba + unicode61</code></span> 倒排算法调优</h2></div><span class="slide-cat">P09 / 23</span></div>
+  <div class="slide-body">
+    <div class="grid-2">
+      <div class="card" style="border-color:rgba(248,113,113,0.3);">
+        <div class="card-title" style="color:var(--accent-red);">❌ 默认 Trigram 分词器的严重缺陷</div>
+        <div class="card-text">• SQLite 官方 Trigram 强制要求检索串长度 $\ge 3$；<br/>• 政务高频关键词绝大多数为 <strong>2 字短词</strong>（‘办税’、‘注销’、‘社保’、‘医保’、‘公证’、‘落户’）；<br/>• <strong>实测致命后果：</strong>针对 2 字短词查询，默认 FTS5 召回率为 <strong>0%</strong>，直接漏检所有办事事项！</div>
+      </div>
+      <div class="card" style="border-color:rgba(52,211,153,0.3);">
+        <div class="card-title" style="color:var(--accent-green);">✅ <code>jieba + unicode61</code> 创新对齐机制</div>
+        <div class="card-text">• <strong>离线与在线双向分词：</strong>离线写入 SQLite 与在线查询时，先调用 jieba 将中文精准切分为空格隔开的 Token；<br/>• <strong>unicode61 对齐：</strong>由官方 unicode61 分词器按空格建立倒排链，彻底摧毁 3 字符限制；<br/>• <strong>成果：</strong>2 字短词召回率达 <strong>100%</strong>，单次检索耗时 <strong>&lt; 1 ms</strong>！</div>
+      </div>
+    </div>
+    <div class="card"><div class="card-title">📊 短词召回对照实测 (Top-10 召回率)</div><div style="display:flex; justify-content:space-around; font-size:13px;"><span>查询词“办税”：原生 Trigram <strong>0%</strong> ➔ 本方案 <strong>100%</strong></span><span>查询词“注销”：原生 Trigram <strong>0%</strong> ➔ 本方案 <strong>100%</strong></span><span>单次耗时：<strong>0.68 ms</strong></span></div></div>
+  </div>
+</div>
+<div class="slide-stage" data-slide="10" data-cat="SEMANTIC RERANK" data-notes="粗排倒排索引虽然快，但只认字面词频，容易受官样套话干扰。我们引入了 BAAI 的 BGE-Reranker-base 交叉注意力模型进行语义精排。为了彻底摆脱对昂贵显卡的依赖，我们在工程上放弃了笨重的 PyTorch，采用 CPU ONNX Runtime 量化加速，Top-10 候选文档精排耗时稳定在 110 毫秒左右，在普通服务器上跑得飞快。">
+  <div class="slide-header"><div><span class="slide-tag">CROSS-ENCODER RERANK</span><h2 class="slide-title">本地 CPU 端 BGE-Reranker 精排：<span class="hl">零 GPU 依赖的 ~110ms 突破</span></h2></div><span class="slide-cat">P10 / 23</span></div>
+  <div class="slide-body">
+    <div class="grid-3">
+      <div class="card"><div class="card-title">1. 交叉注意力机制</div><div class="card-text">不同于双塔向量的余弦近似，Cross-Encoder 将 <code>(query, document)</code> 拼接后计算全局自注意力，精准捕捉‘办事前提’与‘例外情形’等微弱语义。</div><div class="card-badge">深度语义理解</div></div>
+      <div class="card"><div class="card-title">2. CPU ONNX 深度量化</div><div class="card-text">剔除臃肿的 CUDA / PyTorch 依赖，通过 ONNX Runtime 算子融合与 INT8 动态量化，内存占用压至 400MB，极度便携。</div><div class="card-badge">低成本轻量化</div></div>
+      <div class="card"><div class="card-title">3. 进程常驻与模型预热</div><div class="card-text">构建独立常驻 Python 微服务（端口 8766），启动即完成权重加载预热，规避动态冷启动，Top-10 文档精排耗时稳定在 <strong>~110ms</strong>。</div><div class="card-badge">毫秒级低延迟</div></div>
+    </div>
+    <div class="card" style="background:rgba(255,255,255,0.02); text-align:center;"><span style="color:var(--text-secondary); font-size:13px;">🏆 成果：无需采购数万元的 A10/V100 显卡，普通 4 核云服务器即可流畅支撑企业级政务语义精排。</span></div>
+  </div>
+</div>
+<div class="slide-stage" data-slide="11" data-cat="SPRING AI CORE" data-notes="第四部分，Spring Boot 3 与 Spring AI 业务大脑。我们在项目中全面采用了 Spring AI 1.0 最新推荐的 ChatClient Fluent API，彻底淘汰了旧版本的直接调用方式。通过 ChatClient 单例注入政务专家 System Prompt，明确限定回答必须严格依据检索到的公文事实，并利用流式链式语法直接输出反应式数据流。">
+  <div class="slide-header"><div><span class="slide-tag">SPRING AI ENTERPRISE</span><h2 class="slide-title">Spring AI 1.0 核心落地：<span class="hl">ChatClient Fluent API 链式实战</span></h2></div><span class="slide-cat">P11 / 23</span></div>
+  <div class="slide-body">
+    <div class="grid-2">
+      <div class="card">
+        <div class="card-title">💎 Spring AI 最新 Fluent API 特性</div>
+        <div class="card-text">• <strong>单例统一构建：</strong>通过 <code>ChatClient.builder(chatModel)</code> 单例装配全局政务助手规则；<br/>
+        • <strong>严肃政务人设注入：</strong><br/>
+        <em style="color:#cbd5e1;">“你是广州市政务服务与政策法规权威专家助手……凡涉及办事时限、所需材料、网办网址，严格遵从提供的知识库，不得臆测虚构……”</em><br/>
+        • <strong>反应式流式输出：</strong>原生返回 Reactor <code>Flux&lt;String&gt;</code>，无缝驱动前端打字机推流。</div>
+      </div>
+      <div class="code-box">
+<span class="code-com">// SpringAiConfig.java 核心代码落地</span>
+<span class="code-kw">@Bean</span>
+<span class="code-kw">public</span> ChatClient <span class="code-fn">chatClient</span>(ChatModel model, AuditAdvisor advisor) {
+    <span class="code-kw">return</span> ChatClient.<span class="code-fn">builder</span>(model)
+        .<span class="code-fn">defaultSystem</span>(GOV_EXPERT_SYSTEM_PROMPT)
+        .<span class="code-fn">defaultAdvisors</span>(advisor)
+        .<span class="code-fn">build</span>();
+}
+
+<span class="code-com">// 业务层链式调用流式推理</span>
+chatClient.<span class="code-fn">prompt</span>()
+    .<span class="code-fn">user</span>(structuredUserPrompt)
+    .<span class="code-fn">stream</span>()
+    .<span class="code-fn">content</span>();
+</div>
+    </div>
+  </div>
+</div>
+<div class="slide-stage" data-slide="12" data-cat="SPRING AI ADVISOR" data-notes="在政务场景中，安全合规是高压线。我们实现了 Spring AI 的 RequestResponseAdvisor 核心切面，打造了 AuditLoggingAdvisor。在请求进入大模型前进行涉密词汇与注入攻击的前置拦截；在流式生成过程中，实时捕捉首个 Chunk 到达时间，精确计算首包延迟（TTFT），并统计总 Token 消耗记录审计日志，完美符合政务等保要求。">
+  <div class="slide-header"><div><span class="slide-tag">SECURITY &amp; AUDIT</span><h2 class="slide-title">Spring AI Advisor 切面工程：<span class="hl">涉密拦截、TTFT 首包监听与 Token 审计</span></h2></div><span class="slide-cat">P12 / 23</span></div>
+  <div class="slide-body">
+    <div class="grid-3">
+      <div class="card">
+        <div class="card-title">1. 前置涉密阻断 (adviseRequest)</div>
+        <div class="card-text">建立涉密公文与 Prompt 注入违规词库，一旦命中直接抛出自定义 <code>GovSecurityException</code>，在提问进入大模型前予以毫秒级物理阻断。</div>
+        <div class="card-badge" style="color:var(--accent-red);">合规红线防御</div>
+      </div>
+      <div class="card">
+        <div class="card-title">2. 首包延迟监听 (TTFT)</div>
+        <div class="card-text">通过 Reactor 响应式流操作符 <code>doOnNext</code> 实时监听第一个输出块到达时间，计算 Time-To-First-Token（实测 ~2.1s），严控用户交互体验。</div>
+        <div class="card-badge">流式性能监测</div>
+      </div>
+      <div class="card">
+        <div class="card-title">3. Token 消耗与全链路留痕</div>
+        <div class="card-text">通过 <code>doOnComplete</code> 聚合 Prompt Tokens 与 Completion Tokens，结构化输出 <code>[GOV-AUDIT-RESP]</code> 日志，满足政务信息化三级等保要求。</div>
+        <div class="card-badge">等保合规留痕</div>
+      </div>
+    </div>
+    <div class="code-box" style="font-size:11.5px;">
+<span class="code-kw">public</span> Flux&lt;ChatResponse&gt; <span class="code-fn">adviseResponse</span>(Flux&lt;ChatResponse&gt; responseFlux) {
+    <span class="code-kw">long</span> startTime = System.currentTimeMillis();
+    <span class="code-kw">return</span> responseFlux.<span class="code-fn">doOnNext</span>(chunk -&gt; logFirstChunkTTFT(startTime))
+                        .<span class="code-fn">doOnComplete</span>(() -&gt; auditLogTotalUsage(startTime));
+}
+</div>
+  </div>
+</div>
+<div class="slide-stage" data-slide="13" data-cat="NETWORKING" data-notes="在微服务通信上，我们使用 Spring WebFlux 的 WebClient。针对政务公文动辄数万字的特性，我们做了一项关键调优：Spring 默认缓冲区仅 256KB，遇到长公文直接报 DataBufferLimitException 崩溃。我们定制配置将缓冲区显式扩容至 64MB，并设置 180 秒长超时，彻底根绝了内存溢出和超时断连问题。">
+  <div class="slide-header"><div><span class="slide-tag">ENTERPRISE NETWORK</span><h2 class="slide-title">WebClient 响应式中继：<span class="hl">64MB 超大编解码缓冲区与长连接调优</span></h2></div><span class="slide-cat">P13 / 23</span></div>
+  <div class="slide-body">
+    <div class="grid-2">
+      <div class="card">
+        <div class="card-title">💥 生产事故攻坚：256KB 缓冲区溢出</div>
+        <div class="card-text"><strong>痛点：</strong>政务法规往往长篇大论，当后台中台拉取多个公文全文时，返回 JSON 达数兆；Spring WebFlux 默认仅分配 256KB 内存，瞬间抛出：<br/>
+        <code style="color:var(--accent-red);">DataBufferLimitException: Exceeded limit on max bytes to buffer : 262144</code><br/>
+        <strong>解决：</strong>定制 <code>ExchangeStrategies</code> 将 <code>maxInMemorySize</code> 扩容至 <strong>64MB</strong>，彻底消除长公文溢出隐患。</div>
+      </div>
+      <div class="card">
+        <div class="card-title">⚡ Netty 连接池长超时配置</div>
+        <div class="card-text">• <strong>异步非阻塞池化：</strong>建立基于 Netty 的单例连接池，减少反复 TCP 三次握手开销；<br/>
+        • <strong>180s 响应容错超时：</strong>适配大模型长文本复杂推理时延，避免提前断连；<br/>
+        • <strong>自动挂载 Bearer 凭证：</strong>在 Bean 容器中注入鉴权切面，实现业务调用零侵入。</div>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="slide-stage" data-slide="14" data-cat="SSE PROTOCOL" data-notes="在端到端推流方面，系统采用了标准 Server-Sent Events 全双工长连接协议。设计了清晰的状态机流转：建立连接先下发 session 会话ID，检索中下发 progress 实时进度，命中事项直发 matched_item 卡片，法规引用下发 references，正文进入逐字打字机 chunk 推流，最后发送 done 闭环。用户在 2 秒内就能看到事项直通卡，体验极佳。">
+  <div class="slide-header"><div><span class="slide-tag">STREAMING PROTOCOL</span><h2 class="slide-title">Server-Sent Events (SSE)：<span class="hl">全生命周期流式事件状态机</span></h2></div><span class="slide-cat">P14 / 23</span></div>
+  <div class="slide-body">
+    <div class="code-box" style="font-size:12px; margin-bottom:12px;">
+POST /api/chat/stream ──► 建立 HTTP text/event-stream 长连接
+  ├─► event: session       {"sessionId": "416e..."}        // 1. 会话初始化/继承上下文
+  ├─► event: progress      {"stage": "RETRIEVING"}         // 2. 状态栏呈现“政策库检索中...”
+  ├─► event: matched_item  {"itemName": "补领居民身份证"}  // 3. 事项直通申报卡提前渲染 (&lt;1s)
+  ├─► event: references    {"title": "居民身份证法"}      // 4. 政策法规依据角标与折叠抽屉
+  ├─► event: chunk         {"content": "市民您好..."}     // 5. 逐字打字机流式输出正文
+  └─► event: done          {"totalTimeMs": 2150}         // 6. 状态闭环，完成度 100%
+</div>
+    <div class="grid-3">
+      <div class="card"><div class="card-title">提前解耦感知</div><div class="card-text">2 秒内率先渲染办事指南卡片与申报按钮，无需等待正文写完。</div></div>
+      <div class="card"><div class="card-title">天然防御断连</div><div class="card-text">断线自动带上 <code>sessionId</code> 恢复，规避长连接丢失状态。</div></div>
+      <div class="card"><div class="card-title">多事件类型隔离</div><div class="card-text">元数据与文本内容分离，前端解析干净规整，杜绝混淆。</div></div>
+    </div>
+  </div>
+</div>
+<div class="slide-stage" data-slide="15" data-cat="SERVICE AGENT" data-notes="第五部分，业务双闭环。我们打造了针对办事实操的导办 Agent，严格落地国务院统一政务服务指南的 8 大核心要素。包含事项名称与部门、申办条件自检、材料清单表格、承诺时限与跑动次数、收费标准、网办申报 URL、窗口电话及法定依据。通过大模型结构化装配，让老百姓一目了然。">
+  <div class="slide-header"><div><span class="slide-tag">SERVICE AGENT</span><h2 class="slide-title">办事实操 Agent：<span class="hl">国务院 8 要素标准化办事指引落地</span></h2></div><span class="slide-cat">P15 / 23</span></div>
+  <div class="slide-body">
+    <div class="grid-4">
+      <div class="card"><div class="card-badge">要素 1 &amp; 2</div><div class="card-title">事项全称 &amp; 准入条件</div><div class="card-text">精准明确具体实施属地局（如公安局），准入条件以 Checklist 形式呈现。</div></div>
+      <div class="card"><div class="card-badge">要素 3 &amp; 4</div><div class="card-title">材料清单 &amp; 办理时限</div><div class="card-text">表格化区分原件/复印件与必要性；严格区分“承诺办结时限”与“法定时限”。</div></div>
+      <div class="card"><div class="card-badge">要素 5 &amp; 6</div><div class="card-title">收费标准 &amp; 网办链接</div><div class="card-text">清晰注明免费或物价局标准（如工本费20元）；直接给出广东政务服务网申报入口。</div></div>
+      <div class="card"><div class="card-badge">要素 7 &amp; 8</div><div class="card-title">线下网点 &amp; 法定依据</div><div class="card-text">匹配就近办事大厅窗口与 12345 电话；明确注明该事项对应的国家或地方依据条目。</div></div>
+    </div>
+    <div class="card" style="background:rgba(56,189,248,0.04); border-color:rgba(56,189,248,0.2);">
+      <span style="font-size:13px; color:var(--text-secondary);">💡 <strong>防幻觉保障：</strong>时限、收费、材料均由知识中台从 13,939 条标准指南提取并强约束注入，严防模型臆造。</span>
+    </div>
+  </div>
+</div>
+<div class="slide-stage" data-slide="16" data-cat="DISAMBIGUATION" data-notes="在实际应用中，提问往往存在歧义。比如问‘办身份证’，系统若直接回答就会答非所问。我们设计了多情形消歧状态机，中台自动识别歧义后，直接返回可选分支，完全跳过大模型推理，100毫秒内把选项推给用户；用户选‘丢失补领’后秒出结果。此外，当群众询问外省事项时，系统严格执行跨省管辖权守恒，直接温馨阻断并引导至当地热线，坚决不让大模型跨省胡编政策。">
+  <div class="slide-header"><div><span class="slide-tag">BUSINESS LOGIC</span><h2 class="slide-title">交互式业务消歧与跨省管辖权守恒：<span class="hl">严守政务事实红线</span></h2></div><span class="slide-cat">P16 / 23</span></div>
+  <div class="slide-body">
+    <div class="grid-2">
+      <div class="card">
+        <div class="card-title">🔀 多情形消歧状态机 (Ambiguity State Machine)</div>
+        <div class="card-text">• <strong>现象：</strong>用户输入口语“办身份证”，存在初次、换领、补领等多种法律流程；<br/>
+        • <strong>机制：</strong>中台自动判定歧义，<strong>跳过大模型推理（耗时 &lt; 100ms）</strong>，直接下发结构化分支；<br/>
+        • <strong>交互：</strong>前端渲染为交互卡片（[1] 丢失补领 / [2] 到期换领），用户点击后带原 <code>sessionId</code> 精准答复。</div>
+        <div class="card-badge">秒级消歧</div>
+      </div>
+      <div class="card">
+        <div class="card-title">🛡️ 跨省管辖权守恒 (Anti-Hallucination)</div>
+        <div class="card-text">• <strong>现象：</strong>用户询问“北京居住证怎么办？”、“上海公积金提取条件”；<br/>
+        • <strong>机制：</strong>前置联合编译器精确识别越界辖区，<strong>坚决不调用通用模型胡乱编造</strong>；<br/>
+        • <strong>输出：</strong>秒级输出统一温馨提醒，告知本系统覆盖广东省及广州市，引导其通过当地 12345 办理。</div>
+        <div class="card-badge" style="color:var(--accent-gold);">越界合规防御</div>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="slide-stage" data-slide="17" data-cat="LEGAL AGENT" data-notes="在政策法规层面，我们打造了法理 Agent。收录了 2.2 万条公文法规拓扑边。具有三大特色：第一，母法向上穿透，基层文件可追溯至国务院行政法规和国家法律；第二，效力位阶守恒，宪法、法律、地方性法规位阶由高到低赋权排序；第三，已废止失效的文件设置红线标记，严禁作为办理依据，杜绝‘拿前朝法律办今朝事务’的政务事故。">
+  <div class="slide-header"><div><span class="slide-tag">LEGAL GRAPH</span><h2 class="slide-title">政策法理 Agent：2.2 万条公文拓扑图谱与<span class="hl">效力位阶穿透</span></h2></div><span class="slide-cat">P17 / 23</span></div>
+  <div class="slide-body">
+    <div class="grid-3">
+      <div class="card">
+        <div class="card-title">1. 向上穿透 (母法溯源)</div>
+        <div class="card-text">当市民咨询基层政府制定的规范性文件时，系统沿拓扑边自动反向追溯至广东省地方性法规乃至全国人大法律，提供权威法理支撑。</div>
+        <div class="card-badge">溯源穿透</div>
+      </div>
+      <div class="card">
+        <div class="card-title">2. 效力位阶守恒</div>
+        <div class="card-text">严格遵循“法律 &gt; 行政法规 &gt; 地方性法规 &gt; 部门规章 &gt; 规范性文件”效力层级赋权，高位阶法条在检索重排中优先召回。</div>
+        <div class="card-badge">法律位阶</div>
+      </div>
+      <div class="card">
+        <div class="card-title">3. 废止时效红线拦截</div>
+        <div class="card-text">公文库深度标注 <code>REPLACES</code> 与失效日期，对已被新法废止的历史文件设立阻断拦截，杜绝“拿前朝法律办今朝事务”。</div>
+        <div class="card-badge" style="color:var(--accent-red);">防时效风险</div>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="slide-stage" data-slide="18" data-cat="FRONTEND INTEGRATION" data-notes="第六部分，前端伴随式插件落地。我们采用了纯前端无感挂载架构。第一，利用 Shadow DOM 创建完全封闭的私有样式沙箱，无论广州市人民政府网原本的 CSS 如何复杂，插件样式绝对不会受污染，也不会污染原网站；第二，政务网站全站 HTTPS，而接口为 HTTP，我们通过油猴底层的 GM_xmlhttpRequest 成功穿透浏览器混合内容 Mixed Content 限制，直连云端。">
+  <div class="slide-header"><div><span class="slide-tag">FRONTEND ARCHITECTURE</span><h2 class="slide-title">前端伴随式无感挂载：<span class="hl">Shadow DOM 隔离与 Mixed Content 穿透</span></h2></div><span class="slide-cat">P18 / 23</span></div>
+  <div class="slide-body">
+    <div class="grid-2">
+      <div class="card">
+        <div class="card-title">🛡️ Web Component / Shadow DOM 物理级隔离</div>
+        <div class="card-text">• <strong>痛点：</strong>直接在政府门户注入 HTML 会被宿主网全局 CSS 强制污染导致错位，或导致官网原本布局崩溃；<br/>
+        • <strong>方案：</strong>通过 <code>attachShadow({ mode: 'open' })</code> 构建专属宿主沙箱；<br/>
+        • <strong>效果：</strong>挂载在广州市人民政府网、广东政务服务网时，<strong>100% 样式零冲突、零污染</strong>。</div>
+      </div>
+      <div class="card">
+        <div class="card-title">⚡ 混合内容 (Mixed Content) 穿透技术</div>
+        <div class="card-text">• <strong>痛点：</strong>官网是 <code>https://</code> 加密连接，浏览器禁止向 <code>http://149.118...:6001</code> 发送网络请求；<br/>
+        • <strong>方案：</strong>封装 <code>@grant GM_xmlhttpRequest</code> 专属通道，直接调用浏览器扩展底层网络栈；<br/>
+        • <strong>效果：</strong>免去繁琐的本地自签名证书配置，即装即用，稳定直连云端服务器。</div>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="slide-stage" data-slide="19" data-cat="MARKDOWN ENGINE" data-notes="在前端呈现上，针对大模型输出的富文本，我们自研内置了纯原生轻量级政务 Markdown 引擎。支持将表格解析为政务蓝白主题、外层包裹自适应横向滑动条，材料清单再宽也不破坏排版；遇到‘进入申办’等动作链接，自动升级为高对比度、带直达箭头的政务蓝白渐变胶囊按钮，并采用 window.open 彻底防范政务网站 SPA 路由拦截。">
+  <div class="slide-header"><div><span class="slide-tag">UI/UX INNOVATION</span><h2 class="slide-title">政务级 Markdown 渲染：<span class="hl">自适应表格与一键直达申报胶囊</span></h2></div><span class="slide-cat">P19 / 23</span></div>
+  <div class="slide-body">
+    <div class="grid-3">
+      <div class="card">
+        <div class="card-title">📊 自适应可滑动表格</div>
+        <div class="card-text">针对审批材料清单等 5 列大表格，自动解析为 <code>.lezai-md-table</code> 并包裹 <code>.lezai-table-scroll</code> 容器，小窗口内流畅横滑，绝不溢出破坏版面。</div>
+        <div class="card-badge">自适应布局</div>
+      </div>
+      <div class="card">
+        <div class="card-title">🚀 一键直达申报胶囊按钮</div>
+        <div class="card-text">自动识别“申办/申报/办理/入口”等关键词链接，渲染为醒目的政务蓝渐变胶囊按钮（<code>.lezai-direct-link-btn</code>），带外部直达 ↗ 图标与悬浮微动效。</div>
+        <div class="card-badge">政务便民直通</div>
+      </div>
+      <div class="card">
+        <div class="card-title">🛡️ 跨行自愈与防路由拦截</div>
+        <div class="card-text">内置模型跨行换行自愈缝合正则；点击链接通过 <code>window.open</code> 在新标签页唤起，防止被宿主政务网站原生的单页路由系统拦截破坏。</div>
+        <div class="card-badge">高健壮性</div>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="slide-stage" data-slide="20" data-cat="HUMAN INTERACTION" data-notes="在人机交互细节上，我们做了四项深度优化：第一，静默待命模式，进站默认收起大窗口，只在右下角显示小徽标，绝不干扰市民正常浏览；第二，针对 PC 鼠标只有垂直滚轮的问题，动态转换滚轮事件，让用户直接用滚轮横向滑动浏览历史和推荐主题；第三，点击历史标签平滑跳转并有双层脉冲光圈聚焦；第四，右上角刷新一键清空并重置全新会话。">
+  <div class="slide-header"><div><span class="slide-tag">ACCESSIBILITY &amp; INTERACTION</span><h2 class="slide-title">适老化关怀与人机交互创新：<span class="hl">润物细无声的便民体验</span></h2></div><span class="slide-cat">P20 / 23</span></div>
+  <div class="slide-body">
+    <div class="grid-4">
+      <div class="card"><div class="card-badge">适老化字号</div><div class="card-title">大/中/小无级切换</div><div class="card-text">右上角即时切换字体大小，贴合国家适老化无障碍政务标准，并自动持久化市民偏好。</div></div>
+      <div class="card"><div class="card-badge">静默待命</div><div class="card-title">默认不自动弹窗</div><div class="card-text">进站仅在右下角常驻精致“叻仔”小微标（58px），不遮挡要闻公告，随用随唤。</div></div>
+      <div class="card"><div class="card-badge">滚轮横滑映射</div><div class="card-title">鼠标滚轮水平横滚</div><div class="card-text">将垂直滚轮 delta 智能转为水平横滑，轻松浏览多达 10 条历史词条与推荐主题。</div></div>
+      <div class="card"><div class="card-badge">历史平滑跳转</div><div class="card-title">脉冲波纹聚焦</div><div class="card-text">点击历史标签平滑滚动至对应对话，伴随双层高亮脉冲光圈；右上角 🔄 按钮一键彻底重置。</div></div>
+    </div>
+  </div>
+</div>
+<div class="slide-stage" data-slide="21" data-cat="PERFORMANCE" data-notes="第七部分，实测与验收。这是我们在真实环境下的全链路端到端性能测试数据。在 4.4GB 大数据底座上，FTS5 倒排检索耗时小于 1 毫秒；本地纯 CPU ONNX 语义重排仅需 110 毫秒；中台上下文拉取耗时 100 毫秒；Spring AI 流式首包返回延迟 TTFT 仅 2.1 秒；端到端自动化测试回归 100% 通过。各项指标均大幅领先传统方案。">
+  <div class="slide-header"><div><span class="slide-tag">VERIFICATION &amp; BENCHMARKS</span><h2 class="slide-title">系统端到端性能与指标验收实测：<span class="hl">严苛数据说话</span></h2></div><span class="slide-cat">P21 / 23</span></div>
+  <div class="slide-body">
+    <table class="deck-table">
+      <thead><tr><th>测试环节 / 关键指标</th><th>实测性能数据</th><th>技术优化抓手</th><th>行业达标参考基准</th></tr></thead>
+      <tbody>
+        <tr><td><strong>FTS5 倒排索引检索耗时</strong></td><td><strong style="color:var(--accent-green);">&lt; 1 ms</strong></td><td>jieba 中文预分词 + unicode61 索引深度调优</td><td>行业通常 50ms</td></tr>
+        <tr><td><strong>本地 ONNX 语义重排耗时</strong></td><td><strong style="color:var(--accent-green);">~110 ms</strong></td><td>纯 CPU 运行 BAAI 模型，进程常驻与算子融合</td><td>优于 GPU 方案的调用抖动</td></tr>
+        <tr><td><strong>知识中台结构化上下文拉取</strong></td><td><strong style="color:var(--accent-blue);">~100 ms</strong></td><td>不跑模型仅检索，为 Spring AI 预留算力</td><td>毫秒级内部微服务通信</td></tr>
+        <tr><td><strong>流式首包返回延迟 (TTFT)</strong></td><td><strong style="color:var(--accent-gold);">~2.1 s</strong></td><td>Spring AI 流式建立 + 阿里云 MaaS 流式推流</td><td>优于传统单体等待 20s 的体验</td></tr>
+        <tr><td><strong>全链路自动化集成测试</strong></td><td><strong style="color:var(--accent-green);">3 / 3 通过</strong></td><td>JUnit 5 全链路断言（连通、跨省、流式状态机）</td><td>自动化测试 100% 通过</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+<div class="slide-stage" data-slide="22" data-cat="COMPARISON &amp; SUMMARY" data-notes="对比横向技术方案，传统的单体脚本缺乏解耦，政策幻觉严重；商业向量云方案成本高昂且短词召回漂移。本方案实现了企业级架构解耦、100% 中文短词召回、零 GPU 极低成本部署和双智能体闭环。未来我们将进一步探索表单自动预填报以及多模态证件 OCR 核验链路。">
+  <div class="slide-header"><div><span class="slide-tag">TECHNICAL COMPARISON</span><h2 class="slide-title">同类方案横向技术对比矩阵与<span class="hl">三大创新总结</span></h2></div><span class="slide-cat">P22 / 23</span></div>
+  <div class="slide-body">
+    <table class="deck-table" style="margin-bottom:12px;">
+      <thead><tr><th>评测维度</th><th>传统单体脚本方案</th><th>商业公有云向量检索服务</th><th>本方案 (Spring AI + 中台体系)</th></tr></thead>
+      <tbody>
+        <tr><td><strong>架构解耦性</strong></td><td>差（代码耦合难以维护）</td><td>中（强绑定云厂商 SDK）</td><td><strong style="color:var(--accent-green);">优秀（Spring Boot 3 企业级微服务解耦）</strong></td></tr>
+        <tr><td><strong>政策防幻觉</strong></td><td>差（完全靠模型胡编）</td><td>中（单纯 Top-K 语义漂移）</td><td><strong style="color:var(--accent-green);">极高（4.4GB 官方底座 + 8 要素 + 法理图谱）</strong></td></tr>
+        <tr><td><strong>2 字短词召回</strong></td><td>0%（Trigram 存在 3 字盲区）</td><td>一般（短词向量表征易失真）</td><td><strong style="color:var(--accent-green);">100%（jieba 预分词精准秒级召回）</strong></td></tr>
+        <tr><td><strong>多情形消歧</strong></td><td>无（直接混乱混杂回答）</td><td>弱（不支持业务状态机）</td><td><strong style="color:var(--accent-green);">强（状态机直发分支，跳过模型 &lt;100ms）</strong></td></tr>
+        <tr><td><strong>硬件部署成本</strong></td><td>需昂贵高端显卡 GPU</td><td>按调用量持续收取高额费用</td><td><strong style="color:var(--accent-green);">零 GPU 依赖（纯 CPU ONNX 本地极低成本部署）</strong></td></tr>
+      </tbody>
+    </table>
+    <div class="card" style="background:rgba(56,189,248,0.05); border-color:rgba(56,189,248,0.25);">
+      <strong style="color:var(--accent-blue);">三大核心学术与工程创新点总结：</strong><br/>
+      1. <strong>架构创新：</strong>落地 Spring AI 1.0 企业级微服务双解耦体系；<br/>
+      2. <strong>算法突破：</strong>攻关中文政务短词 100% 倒排算法与纯 CPU ONNX 毫秒级重排；<br/>
+      3. <strong>全栈闭环：</strong>在 4.4GB 真实政务底座上实现了办事实操标准化与法规溯源双闭环。</div>
+  </div>
+</div>
+<div class="slide-stage" data-slide="23" data-cat="CONCLUSION" data-notes="最后，由衷感谢各位评审老师的悉心聆听！我们团队在此恭候各位老师的批评指正，欢迎各位老师就系统的微服务架构设计、Spring AI 深度特性或防幻觉治理机制进行提问交流。谢谢大家！">
+  <div class="slide-header"><span class="slide-tag">Q&amp;A · THANK YOU</span><span class="slide-cat">P23 / 23</span></div>
+  <div class="slide-body" style="text-align: center; justify-content: center; gap: 24px;">
+    <h2 style="font-size: 42px; font-weight: 900; color: #ffffff;">汇报完毕 · 敬请各位专家老师批评指正</h2>
+    <p style="font-size: 16px; color: var(--text-secondary); max-width: 680px; margin: 0 auto;">感谢各位老师在项目研发与论文撰写过程中给予的悉心指导与宝贵建议！</p>
+    <div style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 12px; padding: 20px; max-width: 780px; margin: 0 auto; text-align: left;">
+      <div style="font-weight: 700; color: var(--accent-blue); margin-bottom: 8px; font-size: 14px;">🎯 欢迎答辩评委老师质询方向（核心抓手）：</div>
+      <div style="font-size: 13px; color: var(--text-secondary); line-height: 1.8;">
+        • <strong>关于微服务拆分：</strong>为什么不直接在 Spring Boot 里嵌入向量库，而要拆分内网知识中台？<br/>
+        • <strong>关于 Spring AI 特性：</strong>ChatClient Fluent API 与 RequestResponseAdvisor 切面在安全审计中的不可替代性；<br/>
+        • <strong>关于防幻觉机制：</strong>系统在遇到知识库完全未命中的极端问题时，如何通过管辖权守恒筑牢安全底线？
+      </div>
+    </div>
+  </div>
+</div>
+</div>
+<div class="notes-drawer" id="notesDrawer">
+  <div class="notes-header">
+    <span>🎙️ 答辩演讲提词器（Speaker Notes 逐字讲稿）</span>
+    <button class="nav-btn" id="btnCloseNotes" style="padding:2px 8px;">收起 ▾</button>
+  </div>
+  <div class="notes-content" id="notesContent"></div>
+</div>
+<div class="overview-modal" id="overviewModal"></div>
+<script>
+  const slides = Array.from(document.querySelectorAll('.slide-stage'));
+  const total = slides.length;
+  let cur = 0;
+  const curSlideNum = document.getElementById('curSlideNum');
+  const totalSlideNum = document.getElementById('totalSlideNum');
+  totalSlideNum.textContent = total;
+  const notesDrawer = document.getElementById('notesDrawer');
+  const notesContent = document.getElementById('notesContent');
+  const overviewModal = document.getElementById('overviewModal');
+
+  function updateSlide(idx) {
+    if (idx < 0) idx = 0;
+    if (idx >= total) idx = total - 1;
+    cur = idx;
+    slides.forEach((s, i) => {
+      s.classList.toggle('active', i === cur);
+    });
+    curSlideNum.textContent = cur + 1;
+    notesContent.textContent = slides[cur].getAttribute('data-notes') || '暂无演讲说明。';
+  }
+  updateSlide(0);
+
+  document.getElementById('btnPrev').onclick = () => updateSlide(cur - 1);
+  document.getElementById('btnNext').onclick = () => updateSlide(cur + 1);
+  document.getElementById('btnNotes').onclick = () => notesDrawer.classList.toggle('open');
+  document.getElementById('btnCloseNotes').onclick = () => notesDrawer.classList.remove('open');
+  document.getElementById('btnFullscreen').onclick = () => {
+    if (!document.fullscreenElement) document.documentElement.requestFullscreen();
+    else document.exitFullscreen();
+  };
+
+  // 动态构建缩略图总览
+  slides.forEach((s, i) => {
+    const card = document.createElement('div');
+    card.className = 'thumb-card';
+    const titleEl = s.querySelector('.slide-title');
+    const titleText = titleEl ? titleEl.textContent : ('P' + (i+1));
+    card.innerHTML = `<div class="thumb-num">SLIDE ${i+1} [${s.getAttribute('data-cat')}]</div><div class="thumb-title">${titleText}</div>`;
+    card.onclick = () => {
+      overviewModal.classList.remove('open');
+      updateSlide(i);
+    };
+    overviewModal.appendChild(card);
+  });
+  document.getElementById('btnOverview').onclick = () => overviewModal.classList.toggle('open');
+
+  // 键盘快捷键监听
+  window.addEventListener('keydown', (e) => {
+    if (overviewModal.classList.contains('open')) {
+      if (e.key === 'Escape' || e.key === 'o' || e.key === 'O') overviewModal.classList.remove('open');
+      return;
+    }
+    if (e.key === 'ArrowRight' || e.key === ' ' || e.key === 'PageDown') {
+      e.preventDefault();
+      updateSlide(cur + 1);
+    } else if (e.key === 'ArrowLeft' || e.key === 'PageUp') {
+      e.preventDefault();
+      updateSlide(cur - 1);
+    } else if (e.key === 'Home') {
+      updateSlide(0);
+    } else if (e.key === 'End') {
+      updateSlide(total - 1);
+    } else if (e.key === 's' || e.key === 'S') {
+      notesDrawer.classList.toggle('open');
+    } else if (e.key === 'o' || e.key === 'O') {
+      overviewModal.classList.toggle('open');
+    } else if (e.key === 'f' || e.key === 'F') {
+      if (!document.fullscreenElement) document.documentElement.requestFullscreen();
+      else document.exitFullscreen();
+    }
+  });
+</script>
+</body>
+</html>
