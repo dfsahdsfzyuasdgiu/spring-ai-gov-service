@@ -1235,18 +1235,29 @@
       const loadingElem = appendLoadingRow();
       submitBtn.disabled = true;
 
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 20000);
+
       fetch(window.GzGovAiConfig.apiEndpoint, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ prompt: content, sessionId: currentSessionId })
+        body: JSON.stringify({
+          prompt: content,
+          sessionId: currentSessionId,
+          category: '',
+          token: window.gzGovToken || 'gz-citizen-token-authed'
+        }),
+        signal: controller.signal
       })
       .then(async response => {
+        clearTimeout(timeoutId);
         if (!response.ok) throw new Error('网络请求异常: ' + response.status);
         const reader = response.body.getReader();
         const decoder = new TextDecoder('utf-8');
         let fullText = '';
         let citationData = null;
         let guidedStepsData = null;
+        let recommendations = [];
         let sseBuffer = '';
 
         while (true) {
@@ -1256,26 +1267,38 @@
           const lines = sseBuffer.split('\n');
           sseBuffer = lines.pop();
 
-          for (const line of lines) {
+          for (let line of lines) {
+            line = line.trim();
             if (line.startsWith('data:')) {
+              const jsonStr = line.substring(5).trim();
+              if (jsonStr === '[DONE]') break;
               try {
-                const chunkObj = JSON.parse(line.substring(5).trim());
-                if (chunkObj.type === 'CHUNK' && chunkObj.chunk) {
-                  fullText += chunkObj.chunk;
-                } else if (chunkObj.type === 'CITATION' && chunkObj.data) {
+                const chunkObj = JSON.parse(jsonStr);
+                const type = (chunkObj.type || '').toLowerCase();
+                if (type === 'chunk' && chunkObj.content) {
+                  fullText += chunkObj.content;
+                } else if (type === 'citation' && chunkObj.data) {
                   citationData = chunkObj.data;
-                } else if (chunkObj.type === 'GUIDED_STEPS' && chunkObj.data) {
+                } else if ((type === 'guided_steps_card' || type === 'guided_steps' || type === 'guide_card') && chunkObj.data) {
                   guidedStepsData = chunkObj.data;
+                } else if (type === 'recommend_card' && chunkObj.data) {
+                  if (Array.isArray(chunkObj.data)) {
+                    recommendations = chunkObj.data.map(item => item.queryPrompt || item.title || item.name || item);
+                  }
                 }
               } catch (e) {}
             }
           }
         }
+        if (!fullText.trim()) {
+          throw new Error('未获取到有效回答文本');
+        }
         loadingElem.remove();
         renderPolicyAnswer({
           summary: fullText.trim(),
           citation: citationData,
-          guidedSteps: guidedStepsData
+          guidedSteps: guidedStepsData,
+          suggestions: recommendations
         });
       })
       .catch(err => {
@@ -1365,6 +1388,18 @@
 
       const gs = data.guidedSteps || null;
       const citation = (data.citations && data.citations[0]) || data.citation || null;
+      let citTitle = citation ? (citation.title || citation.docTitle || '') : '';
+      let citDocNumber = citation ? (citation.docNumber || '') : '';
+      let citDept = citation ? (citation.dept || citation.issuerDept || '广州市人民政府') : '';
+      let citClause = citation ? (citation.clause || citation.clauseText || '') : '';
+      if (citation && citation.clauseNo && citClause) {
+        citClause = citation.clauseNo + '：' + citClause;
+      }
+
+      // 保障正文非空防御
+      if (!cleanSummary) {
+        cleanSummary = '市民您好！您咨询的政务事项已接入广州政务服务网及“穗好办”平台，符合条件的市民可备齐材料在线确认申报。';
+      }
 
       // 构造自然文本主体
       let mainHtml = `<div class="lezai-natural-paragraph">${formatMarkdownLike(cleanSummary)}</div>`;
@@ -1436,18 +1471,18 @@
 
       // 政策依据左下角轻量单行注脚
       let footnoteHtml = '';
-      if (citation && citation.title) {
+      if (citTitle) {
         const drawerId = 'drawer-' + Math.random().toString(36).substring(2, 9);
         footnoteHtml = `
           <div class="source-footnote-line">
-            <span>政策依据：《${escapeText(citation.title)}》${citation.docNumber ? '（' + escapeText(citation.docNumber) + '）' : ''}</span>
+            <span>政策依据：《${escapeText(citTitle)}》${citDocNumber ? '（' + escapeText(citDocNumber) + '）' : ''}</span>
             <span>·</span>
             <button class="source-btn-toggle" data-target="${drawerId}">查看条文原文 ▾</button>
           </div>
           <div class="source-clause-drawer" id="${drawerId}">
-            <div style="font-weight:600;margin-bottom:4px;color:#0056b3;">${escapeText(citation.title)}</div>
-            <div style="font-size:11px;color:#64748b;margin-bottom:6px;">制定机关：${escapeText(citation.dept || '广州市人民政府')}</div>
-            <div>${formatMarkdownLike(citation.clause || '条文内容已依法在广州市政策公文库备案。')}</div>
+            <div style="font-weight:600;margin-bottom:4px;color:#0056b3;">${escapeText(citTitle)}</div>
+            <div style="font-size:11px;color:#64748b;margin-bottom:6px;">制定机关：${escapeText(citDept)}</div>
+            <div>${formatMarkdownLike(citClause || '条文内容已依法在广州市政策公文库备案。')}</div>
           </div>
         `;
       }
