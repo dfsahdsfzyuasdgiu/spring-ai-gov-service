@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         广州市人民政府门户网站 · 政策法规与办事导办 AI 智能问答专窗
 // @namespace    https://www.gz.gov.cn/
-// @version      3.4.0
+// @version      3.5.0
 // @description  广州市政务服务与政策法规 AI 智能问答专窗（直连云端双 Agent 协同系统，官方原生“叻仔”专窗）
 // @author       Guangzhou Smart Gov Project Team
 // @match        https://www.gdzwfw.gov.cn/portal/v3/index*
@@ -1505,6 +1505,18 @@
     btnDismiss.addEventListener('click', hideWindow);
 
     btnReset.addEventListener('click', () => {
+      // 刷新旋转动画反馈
+      const resetSvg = btnReset.querySelector('svg');
+      if (resetSvg) {
+        resetSvg.style.transition = 'transform 0.45s cubic-bezier(0.4, 0, 0.2, 1)';
+        resetSvg.style.transform = 'rotate(-360deg)';
+        setTimeout(() => {
+          resetSvg.style.transition = '';
+          resetSvg.style.transform = '';
+        }, 450);
+      }
+
+      // 1. 重置聊天视窗为官方首屏
       chatMain.innerHTML = `
         <div class="lezai-welcome-box">
           <div class="lezai-welcome-speech">
@@ -1518,6 +1530,18 @@
         </div>
       `;
       bindPromptPills();
+
+      // 2. 一并清空历史提问记录与持久化缓存
+      recentQuestions = [];
+      try {
+        localStorage.removeItem('gz_lezai_recent_q');
+      } catch (e) {}
+      renderHistoryChips();
+
+      // 3. 重置输入框与云端会话会话识别码 (开启新会话)
+      textInput.value = '';
+      currentSessionId = 'gz_sess_' + Math.random().toString(36).substring(2, 11) + '_' + Date.now();
+      window.gzGovSessionId = currentSessionId;
     });
 
     // 快捷提问胶囊绑定

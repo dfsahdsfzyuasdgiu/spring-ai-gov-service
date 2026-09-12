@@ -1486,6 +1486,18 @@
     btnDismiss.addEventListener('click', hideWindow);
 
     btnReset.addEventListener('click', () => {
+      // 刷新旋转动画反馈
+      const resetSvg = btnReset.querySelector('svg');
+      if (resetSvg) {
+        resetSvg.style.transition = 'transform 0.45s cubic-bezier(0.4, 0, 0.2, 1)';
+        resetSvg.style.transform = 'rotate(-360deg)';
+        setTimeout(() => {
+          resetSvg.style.transition = '';
+          resetSvg.style.transform = '';
+        }, 450);
+      }
+
+      // 1. 重置聊天视窗为官方首屏
       chatMain.innerHTML = `
         <div class="lezai-welcome-box">
           <div class="lezai-welcome-speech">
@@ -1499,6 +1511,18 @@
         </div>
       `;
       bindPromptPills();
+
+      // 2. 一并清空历史提问记录与持久化缓存
+      recentQuestions = [];
+      try {
+        localStorage.removeItem('gz_lezai_recent_q');
+      } catch (e) {}
+      renderHistoryChips();
+
+      // 3. 重置输入框与云端会话会话识别码 (开启新会话)
+      textInput.value = '';
+      currentSessionId = 'gz_sess_' + Math.random().toString(36).substring(2, 11) + '_' + Date.now();
+      window.gzGovSessionId = currentSessionId;
     });
 
     // 快捷提问胶囊绑定
