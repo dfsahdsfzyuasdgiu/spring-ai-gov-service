@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         广州市人民政府门户网站 · 政策法规与办事导办 AI 智能问答专窗
 // @namespace    https://www.gz.gov.cn/
-// @version      3.3.0
+// @version      3.4.0
 // @description  广州市政务服务与政策法规 AI 智能问答专窗（直连云端双 Agent 协同系统，官方原生“叻仔”专窗）
 // @author       Guangzhou Smart Gov Project Team
 // @match        https://www.gdzwfw.gov.cn/portal/v3/index*
@@ -870,6 +870,137 @@
         display: none;
       }
       .source-clause-drawer.open { display: block; }
+      /* ===== 政策导办 Markdown 格式与一键申报直达卡片 (v3.4.0) ===== */
+      .lezai-md-link {
+        color: #0071e3 !important;
+        text-decoration: underline !important;
+        text-underline-offset: 2px;
+        font-weight: 500;
+        cursor: pointer;
+        word-break: break-all;
+        transition: color 0.15s ease;
+      }
+      .lezai-md-link:hover {
+        color: #0056b3 !important;
+      }
+      .lezai-direct-link-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        padding: 5px 13px;
+        margin: 5px 0;
+        background: linear-gradient(135deg, #0071e3 0%, #1d88e5 100%);
+        color: #ffffff !important;
+        font-size: 12.5px;
+        font-weight: 600;
+        line-height: 1.5;
+        border-radius: 7px;
+        text-decoration: none !important;
+        box-shadow: 0 2px 7px rgba(0, 113, 227, 0.25);
+        transition: all 0.18s ease;
+        cursor: pointer;
+        vertical-align: middle;
+      }
+      .lezai-direct-link-btn:hover {
+        background: linear-gradient(135deg, #005bb5 0%, #1565c0 100%);
+        box-shadow: 0 4px 12px rgba(0, 113, 227, 0.38);
+        transform: translateY(-1px);
+        color: #ffffff !important;
+      }
+      .lezai-direct-link-btn:active {
+        transform: translateY(0);
+        box-shadow: 0 2px 4px rgba(0, 113, 227, 0.2);
+      }
+      .lezai-table-scroll {
+        width: 100%;
+        overflow-x: auto;
+        margin: 10px 0;
+        border-radius: 8px;
+        border: 1px solid #dcebfa;
+        background: #ffffff;
+        box-shadow: 0 2px 6px rgba(0, 80, 180, 0.04);
+        scrollbar-width: thin;
+      }
+      .lezai-md-table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 12px;
+        line-height: 1.5;
+        text-align: left;
+      }
+      .lezai-md-table th {
+        background: #f0f6ff;
+        color: #0056b3;
+        font-weight: 700;
+        padding: 8px 10px;
+        border-bottom: 1.5px solid #c9e0fc;
+        white-space: nowrap;
+      }
+      .lezai-md-table td {
+        padding: 8px 10px;
+        border-bottom: 1px solid #edf2f7;
+        color: #334155;
+        vertical-align: top;
+      }
+      .lezai-md-table tr:nth-child(even) td {
+        background: #fafcff;
+      }
+      .lezai-md-table tr:hover td {
+        background: #f0f7ff;
+      }
+      .lezai-md-h {
+        font-weight: 700;
+        color: #1e293b;
+        margin: 12px 0 6px 0;
+        line-height: 1.4;
+      }
+      .lezai-md-h1 { font-size: 15px; color: #0056b3; border-bottom: 1px solid #e2e8f0; padding-bottom: 4px; }
+      .lezai-md-h2 { font-size: 14px; color: #0056b3; }
+      .lezai-md-h3 {
+        font-size: 13.5px;
+        color: #0056b3;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        background: rgba(0, 113, 227, 0.05);
+        padding: 4px 8px;
+        border-radius: 6px;
+        border-left: 3px solid #0071e3;
+      }
+      .lezai-md-h4 { font-size: 13px; color: #334155; }
+      .lezai-md-ul, .lezai-md-ol {
+        margin: 6px 0;
+        padding-left: 18px;
+        color: #334155;
+        font-size: var(--gz-font-base);
+        line-height: 1.6;
+      }
+      .lezai-md-ul li, .lezai-md-ol li {
+        margin-bottom: 4px;
+      }
+      .lezai-md-p {
+        margin: 4px 0;
+        line-height: 1.6;
+        color: #1e293b;
+      }
+      .lezai-md-gap {
+        height: 6px;
+      }
+      .lezai-inline-code {
+        font-family: Menlo, Monaco, Consolas, monospace;
+        font-size: 11.5px;
+        background: #f1f5f9;
+        color: #0056b3;
+        padding: 1px 5px;
+        border-radius: 4px;
+        border: 1px solid #e2e8f0;
+      }
+      .lezai-flow-arrow {
+        color: #0071e3;
+        font-weight: 700;
+        margin: 0 3px;
+      }
+
 
       /* 消息底部操作栏 (复制 · 有疑问) */
       .bubble-action-bar {
@@ -1686,7 +1817,8 @@
         <div class="chat-meta-bar"><span class="chat-author">咨询市民</span></div>
         <div class="chat-bubble">${escapeText(text)}</div>
       `;
-      chatMain.appendChild(div);
+      
+chatMain.appendChild(div);
       scrollChatBottom();
     }
 
@@ -1733,6 +1865,9 @@
 
     function renderGovMarkdown(text) {
       if (!text) return '';
+      // 预处理：若模型将 [标题] 与 (url) 拆分在换行两侧，缝合到同一行
+      text = text.replace(/(\[[^\n\]]+\])\s*\n\s*(\((?:https?):\/[^\s\)]+\))/gi, '$1$2');
+
       const rawLines = text.replace(/\r\n/g, '\n').replace(/\r/g, '\n').split('\n');
       const out = [];
       let inTable = false;
@@ -1746,9 +1881,38 @@
       function formatInline(str) {
         if (!str) return '';
         let s = escapeText(str);
+
+        // 1. 解析 Markdown 链接：[标题](URL) 或 [ 标题 ] (URL)
+        s = s.replace(/\[([^\n\]]+)\]\s*\((https?:\/\/[^\s\)\"\'<>]+)\)/gi, function(match, label, url) {
+          const cleanLabel = label.trim();
+          const rawUrl = url.replace(/&amp;/g, '&');
+          const isAction = /(进入|申办|申报|办理|直达|入口|查询|指南|官网)/.test(cleanLabel);
+          if (isAction) {
+            return `<a class="lezai-direct-link-btn" href="${escapeText(rawUrl)}" target="_blank" rel="noopener noreferrer">${cleanLabel} ↗</a>`;
+          }
+          return `<a class="lezai-md-link" href="${escapeText(rawUrl)}" target="_blank" rel="noopener noreferrer">${cleanLabel} ↗</a>`;
+        });
+
+        // 2. 匹配未被 <a> 标签包裹的裸 URL (http/https)
+        s = s.replace(/(^|[^"'>])(https?:\/\/[a-zA-Z0-9\-\._~:\/\?#@!$&\*\+,;=%]+)/gi, function(match, prefix, rawUrl) {
+          let url = rawUrl;
+          let trailing = '';
+          while (url.endsWith('。') || url.endsWith('，') || url.endsWith('；') || url.endsWith('）') || url.endsWith(')') || url.endsWith('.')) {
+            trailing = url.substring(url.length - 1) + trailing;
+            url = url.substring(0, url.length - 1);
+          }
+          const cleanUrl = url.replace(/&amp;/g, '&');
+          return prefix + `<a class="lezai-md-link" href="${escapeText(cleanUrl)}" target="_blank" rel="noopener noreferrer">${escapeText(cleanUrl)} ↗</a>` + trailing;
+        });
+
+        // 3. 粗体与斜体
         s = s.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
         s = s.replace(/(^|[^\*])\*([^\*]+?)\*([^\*]|$)/g, '$1<em>$2</em>$3');
+
+        // 4. 代码块
         s = s.replace(/`([^`]+)`/g, '<code class="lezai-inline-code">$1</code>');
+
+        // 5. 流程箭头
         s = s.replace(/\s*(➔|->|&gt;)\s*/g, ' <span class="lezai-flow-arrow">➔</span> ');
         return s;
       }
@@ -2121,6 +2285,17 @@
         };
       });
 
+            // 绑定链接安全直达跳转 (新标签页直通，防止宿主政务网站 SPA 路由拦截)
+      div.querySelectorAll('.lezai-md-link, .lezai-direct-link-btn').forEach(link => {
+        link.onclick = (e) => {
+          e.stopPropagation();
+          const targetUrl = link.getAttribute('href');
+          if (targetUrl) {
+            window.open(targetUrl, '_blank', 'noopener,noreferrer');
+            e.preventDefault();
+          }
+        };
+      });
       chatMain.appendChild(div);
       scrollChatBottom();
     }
