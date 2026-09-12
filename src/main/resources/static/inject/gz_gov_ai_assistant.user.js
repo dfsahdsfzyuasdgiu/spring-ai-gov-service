@@ -463,6 +463,9 @@
         color: #0071e3;
         font-weight: 600;
         cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        gap: 2px;
       }
 
       /* 聊天行通用布局 */
@@ -878,6 +881,15 @@
       </svg>
     `;
 
+    // 地图定位 SVG 矢量图标定义 (对标官方极简线框定位点)
+    const MAP_PIN_SVG = `
+      <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block; vertical-align:-1.5px; margin-right:2px; flex-shrink:0;">
+        <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+        <circle cx="12" cy="10" r="3"></circle>
+      </svg>
+    `;
+
+
     // 构造 DOM 骨架 (1:1 官方原生布局)
     const container = document.createElement('div');
     container.className = 'gz-gov-shell';
@@ -906,7 +918,7 @@
             <div class="lezai-mascot-avatar">${LEZAI_AVATAR_SVG}</div>
             <div class="lezai-name-box">
               <span class="lezai-title-text">叻仔</span>
-              <span class="lezai-loc-tag" id="gzLocTag" title="点击切换所属区域">📍 广州市</span>
+              <span class="lezai-loc-tag" id="gzLocTag" title="点击切换所属区域">${MAP_PIN_SVG}广州市</span>
             </div>
           </div>
           <div class="header-right-tools">
@@ -960,7 +972,7 @@
             <div class="lezai-match-strip">
               <span style="display:inline-block;width:18px;height:18px;vertical-align:middle;">${LEZAI_AVATAR_SVG}</span>
               <span>叻仔 为您智能匹配到当前所在区域为"广州市"，如想咨询其他区域可点击修改</span>
-              <span class="lezai-loc-link" id="gzLocModifyLink">📍 广东省广州市 修改</span>
+              <span class="lezai-loc-link" id="gzLocModifyLink">${MAP_PIN_SVG}广东省广州市 修改</span>
             </div>
           </div>
         </div>
@@ -1154,7 +1166,7 @@
           <div class="lezai-match-strip">
             <span style="display:inline-block;width:18px;height:18px;vertical-align:middle;">${LEZAI_AVATAR_SVG}</span>
             <span>叻仔 为您智能匹配到当前所在区域为"广州市"，如想咨询其他区域可点击修改</span>
-            <span class="lezai-loc-link">📍 广东省广州市 修改</span>
+            <span class="lezai-loc-link">${MAP_PIN_SVG}广东省广州市 修改</span>
           </div>
         </div>
       `;
