@@ -1,15 +1,27 @@
 // ==UserScript==
 // @name         广州市人民政府门户网站 · 政策法规与办事导办 AI 智能问答专窗
 // @namespace    https://www.gz.gov.cn/
-// @version      2.1.0
-// @description  广州市政务服务与政策法规 AI 智能问答专窗（官方原生“叻仔”政务助手，适老字号切换、天蓝科技微光、自然对话流）
+// @version      2.1.3
+// @description  广州市政务服务与政策法规 AI 智能问答专窗（官方原生“叻仔”政务助手，仅在官网首页挂载）
 // @author       Guangzhou Smart Gov Project Team
-// @match        https://www.gz.gov.cn/*
-// @match        http://www.gz.gov.cn/*
-// @match        https://wsbs.gz.gov.cn/*
-// @match        http://wsbs.gz.gov.cn/*
-// @match        https://www.gdzwfw.gov.cn/*
-// @match        http://localhost:8080/*
+// @match        https://www.gz.gov.cn/
+// @match        https://www.gz.gov.cn/index.html
+// @match        https://www.gz.gov.cn/index.htm
+// @match        http://www.gz.gov.cn/
+// @match        http://www.gz.gov.cn/index.html
+// @match        http://www.gz.gov.cn/index.htm
+// @match        https://wsbs.gz.gov.cn/
+// @match        https://wsbs.gz.gov.cn/index.html
+// @match        http://wsbs.gz.gov.cn/
+// @match        http://wsbs.gz.gov.cn/index.html
+// @match        https://www.gdzwfw.gov.cn/
+// @match        https://www.gdzwfw.gov.cn/index.html
+// @match        https://www.gdzwfw.gov.cn/portal/index*
+// @match        https://www.gdzwfw.gov.cn/portal/v2/index*
+// @match        http://localhost:8080/
+// @match        http://localhost:8080/index.html
+// @match        http://127.0.0.1:8080/
+// @match        http://127.0.0.1:8080/index.html
 // @grant        none
 // @run-at       document-end
 // ==/UserScript==
@@ -23,6 +35,40 @@
       } else {
         setTimeout(initAssistant, 50);
       }
+      return;
+    }
+
+    // 官网首页判定：仅在官方门户网站首页或本地服务首页挂载
+    function isOfficialHomePage() {
+      if (window.GzGovAiForceMount || (window.location.search && window.location.search.includes('gz_ai_force=1'))) {
+        return true;
+      }
+      var host = (window.location.hostname || '').toLowerCase();
+      var pathname = (window.location.pathname || '').toLowerCase();
+
+      // 本地开发测试服务首页
+      if (host === 'localhost' || host === '127.0.0.1') {
+        return pathname === '/' || pathname === '/index.html' || pathname === '';
+      }
+      // 广州市人民政府门户网站 (www.gz.gov.cn) 首页
+      if (host === 'www.gz.gov.cn' || host === 'gz.gov.cn') {
+        return pathname === '/' || pathname === '/index.html' || pathname === '/index.htm' || pathname === '';
+      }
+      // 广州市政务服务网 / 网上办事大厅 (wsbs.gz.gov.cn) 首页
+      if (host === 'wsbs.gz.gov.cn') {
+        return pathname === '/' || pathname === '/index.html' || pathname === '/index.htm' || pathname === '';
+      }
+      // 广东政务服务网 (www.gdzwfw.gov.cn) 首页及广州专区首页
+      if (host === 'www.gdzwfw.gov.cn' || host === 'gdzwfw.gov.cn') {
+        return pathname === '/' || pathname === '/index.html' || pathname === '/portal/index' || pathname === '/portal/v2/index' || pathname === '';
+      }
+      // 其它环境默认仅根路径首页挂载
+      return pathname === '/' || pathname === '/index.html' || pathname === '';
+    }
+
+    // 仅在官网首页挂载，子页面自动跳过
+    if (!isOfficialHomePage()) {
+      console.log('[广州政策问答] 当前页面非官网首页，跳过专窗挂载。');
       return;
     }
 

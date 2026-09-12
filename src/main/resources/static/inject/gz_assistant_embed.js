@@ -11,6 +11,40 @@
       return;
     }
 
+    // 官网首页判定：仅在官方门户网站首页或本地服务首页挂载
+    function isOfficialHomePage() {
+      if (window.GzGovAiForceMount || (window.location.search && window.location.search.includes('gz_ai_force=1'))) {
+        return true;
+      }
+      var host = (window.location.hostname || '').toLowerCase();
+      var pathname = (window.location.pathname || '').toLowerCase();
+
+      // 本地开发测试服务首页
+      if (host === 'localhost' || host === '127.0.0.1') {
+        return pathname === '/' || pathname === '/index.html' || pathname === '';
+      }
+      // 广州市人民政府门户网站 (www.gz.gov.cn) 首页
+      if (host === 'www.gz.gov.cn' || host === 'gz.gov.cn') {
+        return pathname === '/' || pathname === '/index.html' || pathname === '/index.htm' || pathname === '';
+      }
+      // 广州市政务服务网 / 网上办事大厅 (wsbs.gz.gov.cn) 首页
+      if (host === 'wsbs.gz.gov.cn') {
+        return pathname === '/' || pathname === '/index.html' || pathname === '/index.htm' || pathname === '';
+      }
+      // 广东政务服务网 (www.gdzwfw.gov.cn) 首页及广州专区首页
+      if (host === 'www.gdzwfw.gov.cn' || host === 'gdzwfw.gov.cn') {
+        return pathname === '/' || pathname === '/index.html' || pathname === '/portal/index' || pathname === '/portal/v2/index' || pathname === '';
+      }
+      // 其它环境默认仅根路径首页挂载
+      return pathname === '/' || pathname === '/index.html' || pathname === '';
+    }
+
+    // 仅在官网首页挂载，子页面自动跳过
+    if (!isOfficialHomePage()) {
+      console.log('[广州政策问答] 当前页面非官网首页，跳过专窗挂载。');
+      return;
+    }
+
     // 避免在同一页面重复注入
     if (document.getElementById('gz-gov-ai-root')) {
       console.warn('[广州政策问答] 已存在运行实例，跳过重复初始化。');
