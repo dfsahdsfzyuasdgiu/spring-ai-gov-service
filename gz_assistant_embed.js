@@ -133,7 +133,7 @@
         background: #ffffff;
         box-shadow: 0 8px 24px rgba(0, 113, 227, 0.22), 0 2px 6px rgba(0, 0, 0, 0.06);
         cursor: pointer;
-        display: none; /* 默认主窗口处于打开状态时，关闭悬浮球，避免在左上角重叠露头 */
+        display: flex; /* 默认常驻右下角悬浮球，静默待命，不打扰市民正常浏览 */
         flex-direction: column;
         align-items: center;
         justify-content: center;
@@ -189,7 +189,7 @@
         border: 1px solid rgba(255, 255, 255, 0.95);
         border-radius: 20px !important;
         box-shadow: 0 20px 50px rgba(0, 50, 120, 0.16), 0 4px 14px rgba(0, 0, 0, 0.04);
-        display: flex;
+        display: none; /* 默认不自动弹出大窗，市民主动点击右下角悬浮球才唤出 */
         flex-direction: column;
         overflow: hidden;
         position: relative;
@@ -1192,8 +1192,8 @@
     const container = document.createElement('div');
     container.className = 'gz-gov-shell';
     container.innerHTML = `
-      <!-- 官方右下角悬浮圆形徽标 -->
-      <div class="gz-launcher" id="gzLauncher" style="display: none;" title="呼出广州政务官方智能咨询（叻仔）">
+      <!-- 官方右下角悬浮圆形徽标 (默认静默待命) -->
+      <div class="gz-launcher" id="gzLauncher" title="呼出广州政务官方智能咨询（叻仔）">
         <div class="launcher-tag-badge">叻仔</div>
         <div class="launcher-mascot-head">
           ${LEZAI_AVATAR_SVG}
@@ -1202,7 +1202,7 @@
       </div>
 
       <!-- 政策问答大厅主窗口 -->
-      <div class="gz-dialog-window" id="gzDialogWindow">
+      <div class="gz-dialog-window" id="gzDialogWindow" style="display: none;">
         <!-- 窗口缩放手柄与边缘拖拽热区 -->
         <div class="gz-resize-grip-nw" id="gzResizeGripNw" title="拖拽进行窗口缩放（最小 420×560）">
           <div class="gz-resize-corner-mark"></div>
