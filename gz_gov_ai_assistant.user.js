@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         广州市人民政府门户网站 · 政策法规与办事导办 AI 智能问答专窗
 // @namespace    https://www.gz.gov.cn/
-// @version      3.2.0
+// @version      3.3.0
 // @description  广州市政务服务与政策法规 AI 智能问答专窗（直连云端双 Agent 协同系统，官方原生“叻仔”专窗）
 // @author       Guangzhou Smart Gov Project Team
 // @match        https://www.gdzwfw.gov.cn/portal/v3/index*
@@ -435,6 +435,98 @@
       }
       .history-chip-close:hover {
         color: #ef4444;
+      }
+
+      /* 核心 Markdown 表格与结构化排版增强 */
+      .lezai-natural-paragraph {
+        font-size: var(--gz-font-base);
+        line-height: var(--gz-line-height);
+        color: #1e293b;
+        word-break: break-word;
+      }
+      .lezai-md-p {
+        margin: 0 0 6px 0;
+        line-height: var(--gz-line-height);
+      }
+      .lezai-md-gap {
+        height: 6px;
+      }
+      .lezai-table-scroll {
+        width: 100%;
+        overflow-x: auto;
+        margin: 10px 0;
+        border-radius: 8px;
+        border: 1px solid rgba(0, 113, 227, 0.2);
+        background: #ffffff;
+        box-shadow: 0 2px 8px rgba(0, 80, 179, 0.05);
+        -webkit-overflow-scrolling: touch;
+      }
+      .lezai-md-table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: var(--gz-font-small);
+        min-width: 360px;
+      }
+      .lezai-md-table th {
+        background: #f0f7ff;
+        color: #0050b3;
+        font-weight: 700;
+        padding: 8px 10px;
+        border: 1px solid #dbeafe;
+        white-space: nowrap;
+      }
+      .lezai-md-table td {
+        padding: 8px 10px;
+        border: 1px solid #e2e8f0;
+        color: #334155;
+        line-height: 1.5;
+        vertical-align: top;
+      }
+      .lezai-md-table tr:nth-child(even) td {
+        background: #f8fafc;
+      }
+      .lezai-md-table tr:hover td {
+        background: #eff6ff;
+      }
+      .lezai-md-h {
+        font-weight: 700;
+        color: #0050b3;
+        margin: 12px 0 6px 0;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+      }
+      .lezai-md-h1 { font-size: calc(var(--gz-font-base) + 3px); border-bottom: 2px solid #0071e3; padding-bottom: 4px; }
+      .lezai-md-h2 { font-size: calc(var(--gz-font-base) + 2px); }
+      .lezai-md-h3 {
+        font-size: calc(var(--gz-font-base) + 1px);
+        background: rgba(0, 113, 227, 0.06);
+        padding: 4px 10px;
+        border-left: 3px solid #0071e3;
+        border-radius: 0 6px 6px 0;
+      }
+      .lezai-md-h4 { font-size: var(--gz-font-base); }
+      .lezai-md-ul, .lezai-md-ol {
+        margin: 4px 0 8px 18px;
+        padding: 0;
+      }
+      .lezai-md-ul li, .lezai-md-ol li {
+        margin-bottom: 4px;
+        line-height: var(--gz-line-height);
+        color: #334155;
+      }
+      .lezai-inline-code {
+        background: #f1f5f9;
+        color: #0f766e;
+        padding: 2px 6px;
+        border-radius: 4px;
+        font-size: 0.9em;
+        font-family: ui-monospace, Menlo, Consolas, monospace;
+      }
+      .lezai-flow-arrow {
+        color: #0071e3;
+        font-weight: 700;
+        margin: 0 2px;
       }
 
       /* 聊天核心视窗 */
@@ -1639,13 +1731,145 @@
                .trim();
     }
 
-    function formatMarkdownLike(str) {
-      if (!str) return '';
-      let html = escapeText(stripEmoji(str))
-        .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
-        .replace(/\*(.*?)\*/g, '<em>$1</em>');
-      return html.replace(/\n/g, '<br/>');
+    function renderGovMarkdown(text) {
+      if (!text) return '';
+      const rawLines = text.replace(/\r\n/g, '\n').replace(/\r/g, '\n').split('\n');
+      const out = [];
+      let inTable = false;
+      let tableRows = [];
+      let tableAligns = [];
+      let inUl = false;
+      let ulItems = [];
+      let inOl = false;
+      let olItems = [];
+
+      function formatInline(str) {
+        if (!str) return '';
+        let s = escapeText(str);
+        s = s.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
+        s = s.replace(/(^|[^\*])\*([^\*]+?)\*([^\*]|$)/g, '$1<em>$2</em>$3');
+        s = s.replace(/`([^`]+)`/g, '<code class="lezai-inline-code">$1</code>');
+        s = s.replace(/\s*(➔|->|&gt;)\s*/g, ' <span class="lezai-flow-arrow">➔</span> ');
+        return s;
+      }
+
+      function flushUl() {
+        if (inUl) {
+          out.push('<ul class="lezai-md-ul">' + ulItems.map(it => '<li>' + formatInline(it) + '</li>').join('') + '</ul>');
+          inUl = false;
+          ulItems = [];
+        }
+      }
+
+      function flushOl() {
+        if (inOl) {
+          out.push('<ol class="lezai-md-ol">' + olItems.map(it => '<li>' + formatInline(it) + '</li>').join('') + '</ol>');
+          inOl = false;
+          olItems = [];
+        }
+      }
+
+      function flushLists() {
+        flushUl();
+        flushOl();
+      }
+
+      function flushTable() {
+        if (inTable && tableRows.length > 0) {
+          let html = '<div class="lezai-table-scroll"><table class="lezai-md-table">';
+          const header = tableRows[0];
+          html += '<thead><tr>';
+          for (let c = 0; c < header.length; c++) {
+            const align = tableAligns[c] ? ' style="text-align:' + tableAligns[c] + ';"' : '';
+            html += '<th' + align + '>' + formatInline(header[c]) + '</th>';
+          }
+          html += '</tr></thead><tbody>';
+          for (let r = 1; r < tableRows.length; r++) {
+            const row = tableRows[r];
+            html += '<tr>';
+            for (let c = 0; c < header.length; c++) {
+              const cell = (c < row.length) ? row[c] : '';
+              const align = tableAligns[c] ? ' style="text-align:' + tableAligns[c] + ';"' : '';
+              html += '<td' + align + '>' + formatInline(cell) + '</td>';
+            }
+            html += '</tr>';
+          }
+          html += '</tbody></table></div>';
+          out.push(html);
+          inTable = false;
+          tableRows = [];
+          tableAligns = [];
+        }
+      }
+
+      for (let i = 0; i < rawLines.length; i++) {
+        const line = rawLines[i].trim();
+        if (line.startsWith('|') && line.endsWith('|')) {
+          flushLists();
+          const rawCells = line.split('|');
+          const cells = rawCells.slice(1, -1).map(c => c.trim());
+          const isSep = cells.every(c => /^:?-+:?$/.test(c));
+          if (isSep) {
+            tableAligns = cells.map(c => {
+              const left = c.startsWith(':');
+              const right = c.endsWith(':');
+              if (left && right) return 'center';
+              if (right) return 'right';
+              return 'left';
+            });
+            continue;
+          }
+          if (!inTable) {
+            inTable = true;
+            tableRows = [cells];
+          } else {
+            tableRows.push(cells);
+          }
+          continue;
+        } else {
+          flushTable();
+        }
+
+        const headingMatch = line.match(/^(#{1,4})\s+(.+)$/);
+        if (headingMatch) {
+          flushLists();
+          const level = headingMatch[1].length;
+          const hText = headingMatch[2].trim();
+          out.push('<div class="lezai-md-h lezai-md-h' + level + '">' + formatInline(hText) + '</div>');
+          continue;
+        }
+
+        const ulMatch = line.match(/^[\*\-]\s+(.+)$/);
+        if (ulMatch) {
+          flushOl();
+          inUl = true;
+          ulItems.push(ulMatch[1]);
+          continue;
+        }
+
+        const olMatch = line.match(/^(\d+)\.\s+(.+)$/);
+        if (olMatch) {
+          flushUl();
+          inOl = true;
+          olItems.push(olMatch[2]);
+          continue;
+        }
+
+        if (!line) {
+          flushLists();
+          out.push('<div class="lezai-md-gap"></div>');
+          continue;
+        }
+
+        flushLists();
+        out.push('<p class="lezai-md-p">' + formatInline(line) + '</p>');
+      }
+
+      flushLists();
+      flushTable();
+      return out.join('');
     }
+    function formatMarkdownLike(str) { return renderGovMarkdown(str); }
 
 
     // 核心渲染器：自然对话流 + 随文导办（彻底剔除生硬八股框）
@@ -1692,7 +1916,7 @@
       }
 
       // 构造自然文本主体
-      let mainHtml = `<div class="lezai-natural-paragraph">${formatMarkdownLike(cleanSummary)}</div>`;
+      let mainHtml = `<div class="lezai-natural-paragraph">${renderGovMarkdown(cleanSummary)}</div>`;
 
       // 随文办事导办清单 (若有事项指引，以极简流线呈现，无嵌套丑陋边框)
       if (gs && (gs.qualifications || (gs.materials && gs.materials.length > 0) || (gs.processSteps && gs.processSteps.length > 0))) {
@@ -1901,283 +2125,7 @@
       scrollChatBottom();
     }
 
-    function escapeText(s) {
-      if (!s) return '';
-      return String(s)
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;');
-    }
-
-    function stripEmoji(s) {
-      if (!s) return '';
-      return s.replace(/[\u{1F000}-\u{1FFFF}\u{2600}-\u{27BF}\u{2B00}-\u{2BFF}\u{FE00}-\u{FEFF}\u{1F300}-\u{1F9FF}]/gu, '')
-               .replace(/[\u2702\u2705\u2708-\u270D\u270F\u2712\u2714\u2716\u271D\u2721\u2728\u2733\u2734\u2744\u2747\u274C\u274E\u2753-\u2755\u2757\u2763\u2764\u2795-\u2797\u27A1\u27B0\u27BF]/g, '')
-               .trim();
-    }
-
-    function formatMarkdownLike(str) {
-      if (!str) return '';
-      let html = escapeText(stripEmoji(str))
-        .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
-        .replace(/\*(.*?)\*/g, '<em>$1</em>');
-      return html.replace(/\n/g, '<br/>');
-    }
-
-
-    // 核心渲染器：自然对话流 + 随文导办（彻底剔除生硬八股框）
-    function renderPolicyAnswer(data) {
-      const div = document.createElement('div');
-      div.className = 'chat-row ai';
-
-      // 提取纯净文本
-      let cleanSummary = data.summary || data.conclusion || '';
-      // 过滤任何遗留的八股标签
-      cleanSummary = cleanSummary.replace(/【快速答疑】/g, '')
-                                 .replace(/【办事要点】/g, '')
-                                 .replace(/【注意事项与关键提醒】/g, '')
-                                 .replace(/【官方政策依据】[\s\S]*$/g, '')
-                                 .trim();
-
-      const gs = data.guidedSteps || null;
-      const citation = (data.citations && data.citations[0]) || data.citation || null;
-      let citTitle = '';
-      let citDocNumber = '';
-      let citDept = '广州市人民政府';
-      let citClause = '';
-      if (citation) {
-        if (citation.chunks && citation.chunks.length > 0) {
-          const firstChunk = citation.chunks[0];
-          citTitle = firstChunk.title || '法定政策依据';
-          citDocNumber = firstChunk.level || '';
-          citDept = firstChunk.level || '政务法规库';
-          citClause = (firstChunk.articleLabel ? firstChunk.articleLabel + '：' : '') + (firstChunk.content || '');
-        } else {
-          citTitle = citation.title || citation.docTitle || '';
-          citDocNumber = citation.docNumber || '';
-          citDept = citation.dept || citation.issuerDept || '广州市人民政府';
-          citClause = citation.clause || citation.clauseText || '';
-          if (citation.clauseNo && citClause) {
-            citClause = citation.clauseNo + '：' + citClause;
-          }
-        }
-      }
-
-      // 保障正文非空防御
-      if (!cleanSummary) {
-        cleanSummary = '市民您好！您咨询的政务事项已接入广州政务服务网及“穗好办”平台，符合条件的市民可备齐材料在线确认申报。';
-      }
-
-      // 构造自然文本主体
-      let mainHtml = `<div class="lezai-natural-paragraph">${formatMarkdownLike(cleanSummary)}</div>`;
-
-      // 随文办事导办清单 (若有事项指引，以极简流线呈现，无嵌套丑陋边框)
-      if (gs && (gs.qualifications || (gs.materials && gs.materials.length > 0) || (gs.processSteps && gs.processSteps.length > 0))) {
-        let flowHtml = '<div class="lezai-affair-flow">';
-
-        if (gs.qualifications) {
-          flowHtml += `
-            <div>
-              <div class="flow-sec-title">准入条件</div>
-              <div class="flow-sec-content">${formatMarkdownLike(gs.qualifications)}</div>
-            </div>
-          `;
-        }
-
-        if (gs.materials && gs.materials.length > 0) {
-          flowHtml += `
-            <div>
-              <div class="flow-sec-title">申报材料清单</div>
-              <ul class="flow-mat-list">
-                ${gs.materials.map(m => `<li><strong>${escapeText(m.name)}</strong></li>`).join('')}
-              </ul>
-            </div>
-          `;
-        }
-
-        if (gs.processSteps && gs.processSteps.length > 0) {
-          flowHtml += `
-            <div>
-              <div class="flow-sec-title">办理流程与渠道</div>
-              <div class="flow-sec-content" style="margin-bottom:6px;">
-                承诺时限：<strong>${escapeText(gs.promisedLimitDays ? gs.promisedLimitDays + '个工作日' : '法定办结')}</strong>
-                ${gs.handlingAddress ? ' &nbsp;·&nbsp; 网点：' + escapeText(gs.handlingAddress) : ''}
-              </div>
-              <div class="flow-step-list">
-                ${gs.processSteps.map((p, idx) => `
-                  <div class="flow-step-item">${idx + 1}. <strong>${escapeText(p.stepName)}</strong>: ${escapeText(p.description)}</div>
-                `).join('')}
-              </div>
-            </div>
-          `;
-        }
-
-        // 广东政务服务网官方办理直达链接
-        if (gs.onlineHandleUrl) {
-          flowHtml += `
-            <div class="lezai-direct-btn-wrap">
-              <a class="lezai-direct-btn" href="${escapeText(gs.onlineHandleUrl)}" target="_blank" rel="noopener noreferrer">
-                点击直达广东政务服务网申报入口 [${escapeText(gs.affairCode || '在线申办')}] ↗
-              </a>
-            </div>
-          `;
-        }
-
-        // 软提示
-        if (gs.warnTip) {
-          flowHtml += `
-            <div class="lezai-tip-note">
-              <strong>温馨提示：</strong>${formatMarkdownLike(gs.warnTip)}
-            </div>
-          `;
-        }
-
-        flowHtml += '</div>';
-        mainHtml += flowHtml;
-      }
-
-      // 匹配到的政务事项直通卡
-      let matchedItemHtml = '';
-      if (data.matchedItem && !gs) {
-        const mi = data.matchedItem;
-        const miName = mi.itemName || mi.name || '政务办事事项';
-        const miDept = mi.deptName || mi.dept || '';
-        const miUrl = mi.applyUrl || mi.url || '';
-        matchedItemHtml = `
-          <div class="lezai-matched-item-box" style="margin-top: 10px; padding: 10px 12px; background: #f0f7ff; border-radius: 8px; border: 1px solid #d0e7ff;">
-            <div style="font-weight: 600; color: #0071e3; font-size: 13px;">${escapeText(miName)}</div>
-            ${miDept ? `<div style="font-size: 12px; color: #64748b; margin-top: 2px;">办理部门：${escapeText(miDept)}</div>` : ''}
-            ${miUrl ? `
-              <div style="margin-top: 6px;">
-                <a class="lezai-direct-btn" href="${escapeText(miUrl)}" target="_blank" rel="noopener noreferrer" style="display: inline-block; padding: 4px 10px; font-size: 12px; background: #0071e3; color: #fff; border-radius: 6px; text-decoration: none;">
-                  广东政务服务网申报入口 ↗
-                </a>
-              </div>
-            ` : ''}
-          </div>
-        `;
-      }
-
-      // 多情形歧义一键选择卡片 (双 Agent ambiguity 协同)
-      let scenarioHtml = '';
-      if (data.scenarios && data.scenarios.length > 0) {
-        scenarioHtml = `
-          <div class="bubble-scenarios">
-            <div style="font-size: 12px; font-weight: 600; color: #0071e3; margin-bottom: 2px;">请选择您需要办理的具体情形：</div>
-            ${data.scenarios.map(sc => {
-              const idx = (typeof sc === 'object' && sc.index !== undefined) ? sc.index : '';
-              const label = (typeof sc === 'object') ? (sc.label || sc.officialName || sc.name || '') : String(sc);
-              const queryVal = idx ? String(idx) : label;
-              return `
-                <button class="scenario-option-btn" data-query="${escapeText(queryVal)}">
-                  ${idx ? `<strong>[${escapeText(String(idx))}]</strong> ` : ''}${escapeText(label)}
-                </button>
-              `;
-            }).join('')}
-          </div>
-        `;
-      }
-
-      // 政策依据左下角轻量单行注脚
-      let footnoteHtml = '';
-      if (citTitle) {
-        const drawerId = 'drawer-' + Math.random().toString(36).substring(2, 9);
-        footnoteHtml = `
-          <div class="source-footnote-line">
-            <span>政策依据：《${escapeText(citTitle)}》${citDocNumber ? '（' + escapeText(citDocNumber) + '）' : ''}</span>
-            <span>·</span>
-            <button class="source-btn-toggle" data-target="${drawerId}">查看条文原文 ▾</button>
-          </div>
-          <div class="source-clause-drawer" id="${drawerId}">
-            <div style="font-weight:600;margin-bottom:4px;color:#0056b3;">${escapeText(citTitle)}</div>
-            <div style="font-size:11px;color:#64748b;margin-bottom:6px;">制定机关：${escapeText(citDept)}</div>
-            <div>${formatMarkdownLike(citClause || '条文内容已依法在广州市政策公文库备案。')}</div>
-          </div>
-        `;
-      }
-
-      // 延伸咨询标签
-      let suggHtml = '';
-      if (data.suggestions && data.suggestions.length > 0) {
-        suggHtml = `
-          <div class="bubble-suggestions">
-            ${data.suggestions.map(s => `<span class="sugg-chip" data-query="${escapeText(s)}">${escapeText(s)}</span>`).join('')}
-          </div>
-        `;
-      }
-
-      // 操作条 (复制 · 有疑问)
-      const actionsHtml = `
-        <div class="bubble-action-bar">
-          <button class="action-text-btn btn-copy-reply">复制</button>
-          <span>·</span>
-          <button class="action-text-btn btn-doubt-reply">有疑问?</button>
-        </div>
-      `;
-
-      div.innerHTML = `
-        <div class="chat-meta-bar">
-          <span class="chat-author">叻仔</span>
-        </div>
-        <div class="chat-bubble">
-          ${mainHtml}
-          ${matchedItemHtml}
-          ${scenarioHtml}
-          ${footnoteHtml}
-          ${suggHtml}
-          ${actionsHtml}
-        </div>
-      `;
-
-      // 绑定多情形点击选项
-      div.querySelectorAll('.scenario-option-btn').forEach(btn => {
-        btn.onclick = () => {
-          const q = btn.getAttribute('data-query');
-          if (q) {
-            textInput.value = '';
-            doSendMessage(q);
-          }
-        };
-      });
-
-      // 绑定抽屉折叠
-      div.querySelectorAll('.source-btn-toggle').forEach(btn => {
-        btn.onclick = () => {
-          const targetId = btn.getAttribute('data-target');
-          const drawer = div.querySelector('#' + targetId);
-          if (drawer) {
-            drawer.classList.toggle('open');
-            btn.textContent = drawer.classList.contains('open') ? '收起条文原文 ▴' : '查看条文原文 ▾';
-          }
-        };
-      });
-
-      // 绑定复制
-      const copyBtn = div.querySelector('.btn-copy-reply');
-      if (copyBtn) {
-        copyBtn.onclick = () => {
-          navigator.clipboard.writeText(cleanSummary).then(() => {
-            copyBtn.textContent = '已复制';
-            setTimeout(() => { copyBtn.textContent = '复制'; }, 1500);
-          });
-        };
-      }
-
-      // 绑定延伸追问点击
-      div.querySelectorAll('.sugg-chip').forEach(ch => {
-        ch.onclick = () => {
-          const q = ch.getAttribute('data-query');
-          if (q) {
-            textInput.value = '';
-            doSendMessage(q);
-          }
-        };
-      });
-
-      chatMain.appendChild(div);
-      scrollChatBottom();
-    }
+    
   }
 
   if (!document.body && document.readyState === 'loading') {
