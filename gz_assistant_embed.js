@@ -1304,110 +1304,83 @@
       const loadingElem = appendLoadingRow();
       submitBtn.disabled = true;
 
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 20000);
+      let fullText = '';
+      let citationData = null;
+      let guidedStepsData = null;
+      let recommendations = [];
+      let ambiguityData = null;
+      let matchedItemData = null;
+      let sseBuffer = '';
 
-      fetch(window.GzGovAiConfig.apiEndpoint, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json; charset=utf-8',
-          'Authorization': 'Bearer ' + window.GzGovAiConfig.authToken
-        },
-        body: JSON.stringify({
-          query: content,
-          sessionId: currentSessionId
-        }),
-        signal: controller.signal
-      })
-      .then(async response => {
-        clearTimeout(timeoutId);
-        if (!response.ok) throw new Error('云端服务响应异常: ' + response.status + ' ' + response.statusText);
-        const reader = response.body.getReader();
-        const decoder = new TextDecoder('utf-8');
-        let fullText = '';
-        let citationData = null;
-        let guidedStepsData = null;
-        let recommendations = [];
-        let ambiguityData = null;
-        let matchedItemData = null;
-        let sseBuffer = '';
+      function handleSseBlock(block) {
+        block = block.trim();
+        if (!block) return;
 
-        while (true) {
-          const { done, value } = await reader.read();
-          if (done) break;
-          sseBuffer += decoder.decode(value, { stream: true });
-          const blocks = sseBuffer.split('\n\n');
-          sseBuffer = blocks.pop();
+        let eventType = 'chunk';
+        let dataStr = '';
 
-          for (let block of blocks) {
-            block = block.trim();
-            if (!block) continue;
-
-            let eventType = 'chunk';
-            let dataStr = '';
-
-            const subLines = block.split('\n');
-            for (let line of subLines) {
-              line = line.trim();
-              if (line.startsWith('event:')) {
-                eventType = line.substring(6).trim().toLowerCase();
-              } else if (line.startsWith('data:')) {
-                if (dataStr.length > 0) dataStr += '\n';
-                dataStr += line.substring(5).trim();
-              }
-            }
-
-            if (!dataStr || dataStr === '[DONE]') continue;
-
-            try {
-              const payload = JSON.parse(dataStr);
-              const effectiveType = (payload.type ? String(payload.type).toLowerCase() : '') || eventType;
-
-              if (effectiveType === 'session') {
-                const sId = payload.sessionId || payload.content;
-                if (sId) {
-                  currentSessionId = sId;
-                  window.gzGovSessionId = currentSessionId;
-                }
-              } else if (effectiveType === 'progress') {
-                const pMsg = payload.message || payload.content;
-                if (pMsg) {
-                  const st = loadingElem.querySelector('.typing-stage-text');
-                  if (st) st.textContent = pMsg;
-                }
-              } else if (effectiveType === 'route') {
-                console.log('[广州政务双Agent] 意图识别:', payload.intent, '辖区:', payload.region || '全市');
-              } else if (effectiveType === 'ambiguity') {
-                if (payload.message) fullText = payload.message;
-                ambiguityData = payload;
-              } else if (effectiveType === 'matched_item') {
-                matchedItemData = payload;
-              } else if (effectiveType === 'references' || effectiveType === 'citation') {
-                citationData = payload;
-              } else if (effectiveType === 'chunk') {
-                const c = payload.content || payload.text || '';
-                if (c) fullText += c;
-              } else if (effectiveType === 'error') {
-                fullText = '服务提示：' + (payload.message || '云端处理异常');
-              } else if (effectiveType === 'guide_card' || effectiveType === 'guided_steps_card') {
-                guidedStepsData = payload.data || payload;
-              } else if (effectiveType === 'recommend_card') {
-                if (Array.isArray(payload.data || payload)) {
-                  recommendations = (payload.data || payload).map(item => item.queryPrompt || item.title || item.name || item);
-                }
-              } else {
-                if (payload.content || payload.text) {
-                  fullText += (payload.content || payload.text);
-                }
-              }
-            } catch (e) {
-              if (dataStr && !dataStr.startsWith('{')) {
-                fullText += dataStr;
-              }
-            }
+        const subLines = block.split('\n');
+        for (let i = 0; i < subLines.length; i++) {
+          const line = subLines[i].trim();
+          if (line.startsWith('event:')) {
+            eventType = line.substring(6).trim().toLowerCase();
+          } else if (line.startsWith('data:')) {
+            if (dataStr.length > 0) dataStr += '\n';
+            dataStr += line.substring(5).trim();
           }
         }
 
+        if (!dataStr || dataStr === '[DONE]') return;
+
+        try {
+          const payload = JSON.parse(dataStr);
+          const effectiveType = (payload.type ? String(payload.type).toLowerCase() : '') || eventType;
+
+          if (effectiveType === 'session') {
+            const sId = payload.sessionId || payload.content;
+            if (sId) {
+              currentSessionId = sId;
+              window.gzGovSessionId = currentSessionId;
+            }
+          } else if (effectiveType === 'progress') {
+            const pMsg = payload.message || payload.content;
+            if (pMsg) {
+              const st = loadingElem.querySelector('.typing-stage-text');
+              if (st) st.textContent = pMsg;
+            }
+          } else if (effectiveType === 'route') {
+            console.log('[广州政务双Agent] 意图识别:', payload.intent, '辖区:', payload.region || '全市');
+          } else if (effectiveType === 'ambiguity') {
+            if (payload.message) fullText = payload.message;
+            ambiguityData = payload;
+          } else if (effectiveType === 'matched_item') {
+            matchedItemData = payload;
+          } else if (effectiveType === 'references' || effectiveType === 'citation') {
+            citationData = payload;
+          } else if (effectiveType === 'chunk') {
+            const c = payload.content || payload.text || '';
+            if (c) fullText += c;
+          } else if (effectiveType === 'error') {
+            fullText = '服务提示：' + (payload.message || '云端处理异常');
+          } else if (effectiveType === 'guide_card' || effectiveType === 'guided_steps_card') {
+            guidedStepsData = payload.data || payload;
+          } else if (effectiveType === 'recommend_card') {
+            if (Array.isArray(payload.data || payload)) {
+              recommendations = (payload.data || payload).map(item => item.queryPrompt || item.title || item.name || item);
+            }
+          } else {
+            if (payload.content || payload.text) {
+              fullText += (payload.content || payload.text);
+            }
+          }
+        } catch (e) {
+          if (dataStr && !dataStr.startsWith('{')) {
+            fullText += dataStr;
+          }
+        }
+      }
+
+      function onStreamComplete() {
         if (!fullText.trim() && ambiguityData) {
           fullText = ambiguityData.message || '请选择您需要办理的具体情形：';
         }
@@ -1423,19 +1396,118 @@
           scenarios: ambiguityData ? (ambiguityData.scenarios || []) : [],
           matchedItem: matchedItemData
         });
-      })
-      .catch(err => {
+        submitBtn.disabled = false;
+        scrollChatBottom();
+      }
+
+      function onStreamError(err) {
         console.error('[广州政务双Agent] 云端接口通信异常:', err);
         loadingElem.remove();
         renderPolicyAnswer({
-          summary: '市民您好！当前政务智能云端服务暂未连通（云端接口：' + window.GzGovAiConfig.apiEndpoint + '）。\n\n请确认同学的云端服务正常运行后重试，或拨打 12345 便民热线进行咨询。'
+          summary: '市民您好！当前政务智能云端服务暂未连通（云端接口：' + window.GzGovAiConfig.apiEndpoint + '）。\n\n【排查详情】' + (err && err.message ? err.message : '网络通信受阻') + '\n\n请确认同学的云端服务正常运行后重试，或拨打 12345 便民热线进行咨询。'
         });
-      })
-      .finally(() => {
         submitBtn.disabled = false;
         scrollChatBottom();
-      });
+      }
+
+      const gmXhr = (typeof GM_xmlhttpRequest === 'function') ? GM_xmlhttpRequest :
+                    ((typeof GM !== 'undefined' && typeof GM.xmlHttpRequest === 'function') ? GM.xmlHttpRequest : null);
+
+      if (gmXhr) {
+        let seenBytes = 0;
+        gmXhr({
+          method: 'POST',
+          url: window.GzGovAiConfig.apiEndpoint,
+          headers: {
+            'Content-Type': 'application/json; charset=utf-8',
+            'Authorization': 'Bearer ' + window.GzGovAiConfig.authToken,
+            'Accept': 'text/event-stream'
+          },
+          data: JSON.stringify({
+            query: content,
+            sessionId: currentSessionId
+          }),
+          timeout: 45000,
+          onprogress: function (response) {
+            const text = response.responseText || '';
+            const chunk = text.substring(seenBytes);
+            seenBytes = text.length;
+            sseBuffer += chunk;
+            const blocks = sseBuffer.split('\n\n');
+            sseBuffer = blocks.pop();
+            for (let i = 0; i < blocks.length; i++) {
+              handleSseBlock(blocks[i]);
+            }
+          },
+          onload: function (response) {
+            if (response.status >= 200 && response.status < 300) {
+              const text = response.responseText || '';
+              if (seenBytes < text.length) {
+                sseBuffer += text.substring(seenBytes);
+              }
+              if (sseBuffer.trim()) {
+                handleSseBlock(sseBuffer);
+              }
+              try {
+                onStreamComplete();
+              } catch (e) {
+                onStreamError(e);
+              }
+            } else {
+              onStreamError(new Error('云端服务响应状态异常: HTTP ' + response.status + ' ' + (response.statusText || '')));
+            }
+          },
+          onerror: function (err) {
+            onStreamError(new Error('跨域请求被拦截或网络连接失败'));
+          },
+          ontimeout: function () {
+            onStreamError(new Error('云端大模型响应超时'));
+          }
+        });
+      } else {
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 45000);
+
+        fetch(window.GzGovAiConfig.apiEndpoint, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json; charset=utf-8',
+            'Authorization': 'Bearer ' + window.GzGovAiConfig.authToken,
+            'Accept': 'text/event-stream'
+          },
+          body: JSON.stringify({
+            query: content,
+            sessionId: currentSessionId
+          }),
+          signal: controller.signal
+        })
+        .then(async response => {
+          clearTimeout(timeoutId);
+          if (!response.ok) throw new Error('云端服务响应异常: ' + response.status + ' ' + response.statusText);
+          const reader = response.body.getReader();
+          const decoder = new TextDecoder('utf-8');
+
+          while (true) {
+            const { done, value } = await reader.read();
+            if (done) break;
+            sseBuffer += decoder.decode(value, { stream: true });
+            const blocks = sseBuffer.split('\n\n');
+            sseBuffer = blocks.pop();
+            for (let i = 0; i < blocks.length; i++) {
+              handleSseBlock(blocks[i]);
+            }
+          }
+          if (sseBuffer.trim()) {
+            handleSseBlock(sseBuffer);
+          }
+          onStreamComplete();
+        })
+        .catch(err => {
+          onStreamError(err);
+        });
+      }
     }
+
 
     function appendUserRow(text) {
       const div = document.createElement('div');
