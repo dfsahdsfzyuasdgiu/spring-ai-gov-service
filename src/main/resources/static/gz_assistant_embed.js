@@ -1011,11 +1011,6 @@
                 <button class="prompt-pill-btn" data-query="公积金如何提取？">公积金如何提取？</button>
               </div>
             </div>
-            <div class="lezai-match-strip">
-              <span style="display:inline-block;width:18px;height:18px;vertical-align:middle;">${LEZAI_AVATAR_SVG}</span>
-              <span>叻仔 为您智能匹配到当前所在区域为"广州市"，如想咨询其他区域可点击修改</span>
-              <span class="lezai-loc-link" id="gzLocModifyLink">${MAP_PIN_SVG}广东省广州市 修改</span>
-            </div>
           </div>
         </div>
 
@@ -1204,11 +1199,6 @@
               <button class="prompt-pill-btn" data-query="我的社保卡丢了，怎么补办？">我的社保卡丢了，怎么补办？</button>
               <button class="prompt-pill-btn" data-query="公积金如何提取？">公积金如何提取？</button>
             </div>
-          </div>
-          <div class="lezai-match-strip">
-            <span style="display:inline-block;width:18px;height:18px;vertical-align:middle;">${LEZAI_AVATAR_SVG}</span>
-            <span>叻仔 为您智能匹配到当前所在区域为"广州市"，如想咨询其他区域可点击修改</span>
-            <span class="lezai-loc-link">${MAP_PIN_SVG}广东省广州市 修改</span>
           </div>
         </div>
       `;

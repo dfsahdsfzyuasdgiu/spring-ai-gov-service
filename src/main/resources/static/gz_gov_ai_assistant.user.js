@@ -1,8 +1,8 @@
 // ==UserScript==
 // @name         广州市人民政府门户网站 · 政策法规与办事导办 AI 智能问答专窗
 // @namespace    https://www.gz.gov.cn/
-// @version      2.1.4
-// @description  广州市政务服务与政策法规 AI 智能问答专窗（官方原生“叻仔”政务助手，支持广东政务服务网 v3 广州站等官网首页）
+// @version      2.1.5
+// @description  广州市政务服务与政策法规 AI 智能问答专窗（官方原生“叻仔”政务助手，精简高效纯净版）
 // @author       Guangzhou Smart Gov Project Team
 // @match        https://www.gdzwfw.gov.cn/portal/v3/index*
 // @match        https://www.gdzwfw.gov.cn/portal/v2/index*
@@ -1044,11 +1044,6 @@
                 <button class="prompt-pill-btn" data-query="公积金如何提取？">公积金如何提取？</button>
               </div>
             </div>
-            <div class="lezai-match-strip">
-              <span style="display:inline-block;width:18px;height:18px;vertical-align:middle;">${LEZAI_AVATAR_SVG}</span>
-              <span>叻仔 为您智能匹配到当前所在区域为"广州市"，如想咨询其他区域可点击修改</span>
-              <span class="lezai-loc-link" id="gzLocModifyLink">${MAP_PIN_SVG}广东省广州市 修改</span>
-            </div>
           </div>
         </div>
 
@@ -1237,11 +1232,6 @@
               <button class="prompt-pill-btn" data-query="我的社保卡丢了，怎么补办？">我的社保卡丢了，怎么补办？</button>
               <button class="prompt-pill-btn" data-query="公积金如何提取？">公积金如何提取？</button>
             </div>
-          </div>
-          <div class="lezai-match-strip">
-            <span style="display:inline-block;width:18px;height:18px;vertical-align:middle;">${LEZAI_AVATAR_SVG}</span>
-            <span>叻仔 为您智能匹配到当前所在区域为"广州市"，如想咨询其他区域可点击修改</span>
-            <span class="lezai-loc-link">${MAP_PIN_SVG}广东省广州市 修改</span>
           </div>
         </div>
       `;
