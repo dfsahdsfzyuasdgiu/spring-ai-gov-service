@@ -1365,7 +1365,7 @@
         historyChips.innerHTML = '<span style="font-size:11px;color:#94a3b8;">暂无提问记录</span>';
         return;
       }
-      recentQuestions.slice(-5).reverse().forEach((q) => {
+      recentQuestions.slice(-10).reverse().forEach((q) => {
         const chip = document.createElement('div');
         chip.className = 'history-chip-item';
         chip.innerHTML = `
@@ -1559,6 +1559,32 @@
         }
       };
     });
+
+    // 鼠标滚轮横向滚动增强 (在“提问记录”与“推荐主题”区域使用鼠标滚轮直接横向平滑滚动词条)
+    const historyStrip = shadow.getElementById('lezaiHistoryStrip');
+    const topicsStrip = shadow.getElementById('lezaiTopicsStrip');
+
+    function setupHorizontalWheel(el) {
+      if (!el) return;
+      el.addEventListener('wheel', (e) => {
+        const maxScroll = el.scrollWidth - el.clientWidth;
+        if (maxScroll <= 0) return;
+
+        let delta = e.deltaY;
+        if (Math.abs(e.deltaX) > Math.abs(e.deltaY)) {
+          delta = e.deltaX;
+        }
+
+        if (delta !== 0) {
+          e.preventDefault();
+          el.scrollLeft += delta;
+        }
+      }, { passive: false });
+    }
+
+    setupHorizontalWheel(historyStrip);
+    setupHorizontalWheel(topicsStrip);
+
 
     // 拖拽缩放
     let isResizing = false;
