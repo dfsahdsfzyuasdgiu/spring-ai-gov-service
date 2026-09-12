@@ -1,35 +1,18 @@
 // ==UserScript==
 // @name         广州市人民政府门户网站 · 政策法规与办事导办 AI 智能问答专窗
 // @namespace    https://www.gz.gov.cn/
-// @version      2.1.6
-// @description  广州市政务服务与政策法规 AI 智能问答专窗（官方原生“叻仔”政务助手，点击快捷标签即时清空输入框）
+// @version      2.1.7
+// @description  广州市政务服务与政策法规 AI 智能问答专窗（官方原生“叻仔”政务助手，自然对话排版无首行缩进）
 // @author       Guangzhou Smart Gov Project Team
 // @match        https://www.gdzwfw.gov.cn/portal/v3/index*
 // @match        https://www.gdzwfw.gov.cn/portal/v2/index*
 // @match        https://www.gdzwfw.gov.cn/portal/index*
-// @match        https://www.gdzwfw.gov.cn/
-// @match        https://www.gdzwfw.gov.cn/index.html
-// @match        http://www.gdzwfw.gov.cn/portal/v3/index*
-// @match        http://www.gdzwfw.gov.cn/portal/v2/index*
-// @match        http://www.gdzwfw.gov.cn/portal/index*
-// @match        http://www.gdzwfw.gov.cn/
-// @match        http://www.gdzwfw.gov.cn/index.html
-// @match        https://www.gz.gov.cn/
-// @match        https://www.gz.gov.cn/index.html
-// @match        https://www.gz.gov.cn/index.htm
-// @match        http://www.gz.gov.cn/
-// @match        http://www.gz.gov.cn/index.html
-// @match        http://www.gz.gov.cn/index.htm
-// @match        https://wsbs.gz.gov.cn/
-// @match        https://wsbs.gz.gov.cn/index.html
-// @match        http://wsbs.gz.gov.cn/
-// @match        http://wsbs.gz.gov.cn/index.html
-// @match        http://localhost:8080/
-// @match        http://localhost:8080/index.html
-// @match        http://127.0.0.1:8080/
-// @match        http://127.0.0.1:8080/index.html
+// @match        https://www.gz.gov.cn/*
+// @match        https://wsbs.gz.gov.cn/*
+// @match        http://localhost:8080/*
+// @match        http://127.0.0.1:8080/*
+// @run-at       document-idle
 // @grant        none
-// @run-at       document-end
 // ==/UserScript==
 (function () {
   'use strict';
@@ -588,7 +571,7 @@
         width: 100%;
       }
 
-      /* 消除生硬八股框：纯净自然语言流段落 (规范段落首行缩进 2 字符) */
+      /* 消除生硬八股框：纯净自然语言流段落 (自然齐整排版，无首行缩进) */
       .lezai-natural-paragraph {
         font-size: var(--gz-font-base);
         line-height: var(--gz-line-height);
@@ -602,13 +585,6 @@
       }
       .lezai-natural-paragraph p:last-child {
         margin-bottom: 0;
-      }
-      .lezai-natural-paragraph p.indent-para {
-        text-indent: 2em;
-      }
-      .lezai-natural-paragraph p.indent-list-item {
-        text-indent: 0;
-        padding-left: 1.2em;
       }
       .lezai-natural-paragraph strong {
         color: #0056b3;
@@ -1459,27 +1435,6 @@
       return html.replace(/\n/g, '<br/>');
     }
 
-    // AI 回答段落首行缩进 2 字符排版解析器
-    function formatAnswerParagraphs(str) {
-      if (!str) return '';
-      const clean = stripEmoji(str);
-      const rawLines = clean.split(/\r?\n+/);
-      const htmlParas = [];
-      for (let raw of rawLines) {
-        const line = raw.trim();
-        if (!line) continue;
-        let formatted = escapeText(line)
-          .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
-          .replace(/\*(.*?)\*/g, '<em>$1</em>');
-        const isList = /^[•▪\-\*]/.test(line) || /^\d+[\.、]/.test(line);
-        if (isList) {
-          htmlParas.push(`<p class="indent-list-item">${formatted}</p>`);
-        } else {
-          htmlParas.push(`<p class="indent-para">${formatted}</p>`);
-        }
-      }
-      return htmlParas.length > 0 ? htmlParas.join('') : `<p class="indent-para">${escapeText(clean)}</p>`;
-    }
 
     // 核心渲染器：自然对话流 + 随文导办（彻底剔除生硬八股框）
     function renderPolicyAnswer(data) {
@@ -1511,7 +1466,7 @@
       }
 
       // 构造自然文本主体
-      let mainHtml = `<div class="lezai-natural-paragraph">${formatAnswerParagraphs(cleanSummary)}</div>`;
+      let mainHtml = `<div class="lezai-natural-paragraph">${formatMarkdownLike(cleanSummary)}</div>`;
 
       // 随文办事导办清单 (若有事项指引，以极简流线呈现，无嵌套丑陋边框)
       if (gs && (gs.qualifications || (gs.materials && gs.materials.length > 0) || (gs.processSteps && gs.processSteps.length > 0))) {
