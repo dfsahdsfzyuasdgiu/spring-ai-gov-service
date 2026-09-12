@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         广州市人民政府门户网站 · 政策法规与办事导办 AI 智能问答专窗
 // @namespace    https://www.gz.gov.cn/
-// @version      3.1.0
+// @version      3.2.0
 // @description  广州市政务服务与政策法规 AI 智能问答专窗（直连云端双 Agent 协同系统，官方原生“叻仔”专窗）
 // @author       Guangzhou Smart Gov Project Team
 // @match        https://www.gdzwfw.gov.cn/portal/v3/index*
@@ -525,6 +525,24 @@
       }
       .chat-row.user {
         align-items: flex-end;
+      }
+      .chat-row.user.highlight-target .chat-bubble {
+        animation: userBubblePulse 1.8s ease-in-out;
+      }
+      @keyframes userBubblePulse {
+        0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(0, 113, 227, 0.7); }
+        30% { transform: scale(1.04); box-shadow: 0 0 0 6px rgba(0, 113, 227, 0.4); }
+        60% { transform: scale(1.02); box-shadow: 0 0 0 3px rgba(0, 113, 227, 0.2); }
+        100% { transform: scale(1); box-shadow: none; }
+      }
+      .chat-row.ai.highlight-target-ai {
+        animation: aiCardPulse 1.8s ease-in-out;
+      }
+      @keyframes aiCardPulse {
+        0% { box-shadow: 0 0 0 0 rgba(0, 113, 227, 0.5); }
+        30% { box-shadow: 0 0 0 5px rgba(0, 113, 227, 0.35); }
+        60% { box-shadow: 0 0 0 2px rgba(0, 113, 227, 0.15); }
+        100% { box-shadow: none; }
       }
       .chat-row.ai {
         align-items: flex-start;
@@ -1152,12 +1170,52 @@
             renderHistoryChips();
           } else {
             textInput.value = '';
-            doSendMessage(q);
+            const jumped = scrollToQuestionRow(q);
+            if (!jumped) {
+              doSendMessage(q);
+            }
           }
         });
         historyChips.appendChild(chip);
       });
     }
+    function scrollToQuestionRow(targetQ) {
+      if (!targetQ) return false;
+      const rows = chatMain.querySelectorAll('.chat-row.user');
+      let matchedRow = null;
+      for (let i = rows.length - 1; i >= 0; i--) {
+        const qAttr = rows[i].getAttribute('data-user-query');
+        const bubble = rows[i].querySelector('.chat-bubble');
+        const bubbleText = bubble ? bubble.textContent.trim() : '';
+        if (qAttr === targetQ || bubbleText === targetQ.trim()) {
+          matchedRow = rows[i];
+          break;
+        }
+      }
+      if (matchedRow) {
+        matchedRow.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        matchedRow.classList.remove('highlight-target');
+        void matchedRow.offsetWidth;
+        matchedRow.classList.add('highlight-target');
+
+        const nextAiRow = matchedRow.nextElementSibling;
+        if (nextAiRow && nextAiRow.classList.contains('ai')) {
+          nextAiRow.classList.remove('highlight-target-ai');
+          void nextAiRow.offsetWidth;
+          nextAiRow.classList.add('highlight-target-ai');
+          setTimeout(() => {
+            nextAiRow.classList.remove('highlight-target-ai');
+          }, 2200);
+        }
+
+        setTimeout(() => {
+          matchedRow.classList.remove('highlight-target');
+        }, 2200);
+        return true;
+      }
+      return false;
+    }
+
     renderHistoryChips();
 
     function addRecentQuestion(q) {
@@ -1531,6 +1589,7 @@
     function appendUserRow(text) {
       const div = document.createElement('div');
       div.className = 'chat-row user';
+      div.setAttribute('data-user-query', text);
       div.innerHTML = `
         <div class="chat-meta-bar"><span class="chat-author">咨询市民</span></div>
         <div class="chat-bubble">${escapeText(text)}</div>
