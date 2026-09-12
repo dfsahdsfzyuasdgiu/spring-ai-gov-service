@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         广州市人民政府门户网站 · 政策法规与办事导办 AI 智能问答专窗
 // @namespace    https://www.gz.gov.cn/
-// @version      3.5.0
+// @version      3.6.0
 // @description  广州市政务服务与政策法规 AI 智能问答专窗（直连云端双 Agent 协同系统，官方原生“叻仔”专窗）
 // @author       Guangzhou Smart Gov Project Team
 // @match        https://www.gdzwfw.gov.cn/portal/v3/index*
@@ -152,7 +152,7 @@
         background: #ffffff;
         box-shadow: 0 8px 24px rgba(0, 113, 227, 0.22), 0 2px 6px rgba(0, 0, 0, 0.06);
         cursor: pointer;
-        display: flex;
+        display: none; /* 默认主窗口处于打开状态时，关闭悬浮球，避免在左上角重叠露头 */
         flex-direction: column;
         align-items: center;
         justify-content: center;
@@ -1212,7 +1212,7 @@
     container.className = 'gz-gov-shell';
     container.innerHTML = `
       <!-- 官方右下角悬浮圆形徽标 -->
-      <div class="gz-launcher" id="gzLauncher" title="呼出广州政务官方智能咨询（叻仔）">
+      <div class="gz-launcher" id="gzLauncher" style="display: none;" title="呼出广州政务官方智能咨询（叻仔）">
         <div class="launcher-tag-badge">叻仔</div>
         <div class="launcher-mascot-head">
           ${LEZAI_AVATAR_SVG}
@@ -1368,7 +1368,14 @@
     let recentQuestions = [];
     try {
       const savedQ = localStorage.getItem('gz_lezai_recent_q');
-      if (savedQ) recentQuestions = JSON.parse(savedQ);
+      if (savedQ) {
+        // 自动清洗历史中误存的纯数字序号 (如选项 1, 2, 3 等)
+        recentQuestions = JSON.parse(savedQ).filter(item => {
+          if (!item) return false;
+          const s = String(item).trim();
+          return !/^\d+$/.test(s) && s.length > 1;
+        });
+      }
     } catch (e) {}
 
     function renderHistoryChips() {
@@ -1443,8 +1450,11 @@
 
     function addRecentQuestion(q) {
       if (!q) return;
-      recentQuestions = recentQuestions.filter(item => item !== q);
-      recentQuestions.push(q);
+      const trimmed = String(q).trim();
+      // 过滤无意义的纯数字或过短的序号 (如多情形选择 1, 2, 3 等，不作为提问记录)
+      if (/^\d+$/.test(trimmed) || trimmed.length <= 1) return;
+      recentQuestions = recentQuestions.filter(item => item !== trimmed);
+      recentQuestions.push(trimmed);
       if (recentQuestions.length > 10) recentQuestions.shift();
       try { localStorage.setItem('gz_lezai_recent_q', JSON.stringify(recentQuestions)); } catch (e) {}
       renderHistoryChips();
