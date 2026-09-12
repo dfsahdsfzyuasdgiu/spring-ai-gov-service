@@ -1,9 +1,9 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="zh-CN">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>广州市政务 AI 智能咨询与导办系统 · 真实网站测试与服务中枢</title>
+  <title>广州市政务 AI 智能咨询与导办系统 · 前端插件中枢与真实网页挂载工作台</title>
   <style>
     :root {
       --gov-red: #c20505;
@@ -123,6 +123,7 @@
       padding: 24px;
       box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
       border: 1px solid var(--gov-border);
+      margin-bottom: 24px;
     }
     .card-header {
       border-bottom: 2px solid #f1f5f9;
@@ -298,16 +299,16 @@
 
   <!-- 顶部政务红条 -->
   <div class="topbar">
-    <span>广州市政务政策法规 AI 智能咨询与导办系统 · 真实网站测试运行中枢</span>
-    <span>服务端口：8080 · 运行环境：本地开发/联调模式</span>
+    <span>广州市政务政策法规 AI 智能咨询与导办系统 · 纯前端浏览器插件 (Tampermonkey / Web Embed)</span>
+    <span>运行环境：纯前端零服务器依赖 · 直连云端双智能体引擎 (149.118.133.163:6001)</span>
   </div>
 
   <!-- 主头部 -->
   <div class="header-box">
     <div class="header-content">
-      <h1 class="header-title">广州市政务 AI 智能服务中枢</h1>
+      <h1 class="header-title">广州市政务 AI 智能助手 · 前端插件工作台</h1>
       <p class="header-subtitle">
-        基于 Spring Boot 3 + Spring AI + 阿里云通义千问 + 广州市公开政策法规知识库。系统专注于直接在真实的广州市政务网站上提供智能问答、办事导办与 12345 闭环服务。
+        纯前端浏览器伴随式架构 · 无感挂载于任意广州政务官方站点 · 直连云端政务双智能体 (Dual-Agent) 决策与知识检索集群，实现政策智能解读、全流程办事导向与 12345 闭环服务。
       </p>
     </div>
   </div>
@@ -319,13 +320,14 @@
     <div class="status-bar">
       <div class="status-left">
         <div class="status-dot"></div>
-        <div class="status-text">AI 后端服务已就绪 (Spring Boot Port 8080)</div>
+        <div class="status-text">云端政务双智能体服务已联通 (149.118.133.163:6001)</div>
       </div>
       <div class="status-tags">
-        <span class="badge">Spring AI 1.0.0-M2</span>
-        <span class="badge">Qwen-Max 大模型接入</span>
-        <span class="badge">H2 政策知识库持久化</span>
-        <span class="badge">跨域 CORS 全开 (允许任意真实政务域挂载)</span>
+        <span class="badge">纯前端插件架构</span>
+        <span class="badge">零本地服务器依赖</span>
+        <span class="badge">Dual-Agent 双智能体协同</span>
+        <span class="badge">SSE 全生命周期流式渲染</span>
+        <span class="badge">Shadow DOM 样式无污染隔离</span>
       </div>
     </div>
 
@@ -335,110 +337,156 @@
       <!-- 方案一：油猴插件真实挂载 -->
       <div class="card">
         <div class="card-header">
-          <div class="card-title">方案一：油猴插件挂载测试（推荐）</div>
+          <div class="card-title">方案一：油猴插件挂载（首推，全网伴随）</div>
           <div class="card-badge">无感伴随</div>
         </div>
 
         <div class="step-item">
           <div class="step-num">1</div>
-          <div class="step-title">安装浏览器扩展</div>
-          <div class="step-desc">确保 Chrome / Edge 浏览器已安装 Tampermonkey（油猴）或 ScriptCat（脚本猫）插件。</div>
+          <div class="step-title">安装浏览器油猴扩展</div>
+          <div class="step-desc">确保 Chrome / Edge / Firefox 浏览器已安装 Tampermonkey（油猴）或 ScriptCat（脚本猫）插件。</div>
         </div>
 
         <div class="step-item">
           <div class="step-num">2</div>
           <div class="step-title">一键安装政务助手用户脚本</div>
-          <div class="step-desc">点击下方按钮直接打开脚本源码，在弹出窗口中点击“安装”。</div>
+          <div class="step-desc">点击下方按钮打开脚本，Tampermonkey 将自动识别并弹出安装界面，点击“安装”或“更新”。</div>
           <div class="btn-group">
-            <a href="/gz_gov_ai_assistant.user.js" target="_blank" class="gov-btn gov-btn-primary">
-              一键安装 gz_gov_ai_assistant.user.js
+            <a href="./gz_gov_ai_assistant.user.js" target="_blank" class="gov-btn gov-btn-primary">
+              ⚡ 一键安装 gz_gov_ai_assistant.user.js
             </a>
           </div>
         </div>
 
         <div class="step-item">
           <div class="step-num">3</div>
-          <div class="step-title">打开真实广州政务网站直接测试</div>
+          <div class="step-title">打开真实广州政务网站直接使用</div>
           <div class="step-desc">安装完成后，访问任意真实官方页面，页面右下角将自动唤起“广州政务 AI 智能助手”徽章：</div>
           <div class="btn-group">
             <a href="https://www.gz.gov.cn/" target="_blank" class="gov-btn gov-btn-outline">
-              访问 广州市人民政府门户网站 (www.gz.gov.cn)
+              访问 广州市人民政府门户网 (gz.gov.cn) ➔
             </a>
             <a href="https://www.gdzwfw.gov.cn/?region=440100" target="_blank" class="gov-btn gov-btn-outline">
-              访问 广东政务服务网广州分厅 (www.gdzwfw.gov.cn/?region=440100)
+              访问 广东政务服务网广州分厅 ➔
             </a>
           </div>
         </div>
       </div>
 
-      <!-- 方案二：控制台注入即测 -->
+      <!-- 方案二：网页嵌入式测试 -->
       <div class="card">
         <div class="card-header">
-          <div class="card-title">方案二：控制台注入测试（免装插件）</div>
-          <div class="card-badge">即开即测</div>
+          <div class="card-title">方案二：当前页面直接交互（即开即测）</div>
+          <div class="card-badge">开箱即用</div>
         </div>
 
         <div class="step-item">
           <div class="step-num">1</div>
-          <div class="step-title">打开任意真实政务页面</div>
-          <div class="step-desc">在浏览器中打开真实政务网站，如广州市人民政府网政策页面或办事窗口。</div>
+          <div class="step-title">右下角浮窗已自动就绪</div>
+          <div class="step-desc">本页面底部已引入 <code>gz_assistant_embed.js</code>，右下角的政务助手悬浮窗可直接展开多轮问答。</div>
         </div>
 
         <div class="step-item">
           <div class="step-num">2</div>
-          <div class="step-title">打开开发者工具 Console 控制台</div>
-          <div class="step-desc">在目标政务网页上按键盘 <code>F12</code> 键（或点击鼠标右键选择“检查”），切换到 <code>Console</code>（控制台）面板。</div>
+          <div class="step-title">推荐体验测试问题</div>
+          <div class="step-desc">您可以直接向智能助手提问以下典型政务高频诉求：</div>
+          <ul style="margin: 8px 0 0 20px; font-size: 13px; color: var(--text-muted);">
+            <li>“在广州如何办理港澳通行证签注？”</li>
+            <li>“如何申请广州市新就业无房职工公租房？”</li>
+            <li>“灵活就业人员如何缴纳广州市职工医保？”</li>
+            <li>“如何提取广州公积金用于按月冲还房贷？”</li>
+          </ul>
         </div>
 
         <div class="step-item">
           <div class="step-num">3</div>
-          <div class="step-title">复制并执行一行注入脚本</div>
-          <div class="step-desc">将下方代码复制并粘贴到控制台回车，即可瞬间挂载助手并在真实政务页面上展开交互测试：</div>
+          <div class="step-title">任意三方网页嵌入引用代码</div>
+          <div class="step-desc">任何政务页面只需在 body 标签末尾引入一行脚本：</div>
           <div class="code-box" id="codeSnippet">
-            const s=document.createElement('script');s.src='http://localhost:8080/gz_assistant_embed.js';document.body.appendChild(s);
-            <button class="copy-btn" onclick="copyCode()">复制指令</button>
+            &lt;script src="./gz_assistant_embed.js"&gt;&lt;/script&gt;
+            <button class="copy-btn" onclick="copyCode()">复制标签</button>
           </div>
         </div>
       </div>
 
     </div>
 
-    <!-- 32项高频事项与政策法规数据库检查中心 -->
+    <!-- 项目架构与答辩核心资产 -->
     <div class="card">
       <div class="card-header">
-        <div class="card-title">广州政务 32 项全生命周期事项与政策数据库检查中心</div>
+        <div class="card-title">项目核心资产与答辩交付中心</div>
       </div>
       <div class="nav-grid">
-        <a href="/api/v1/gov/affairs" target="_blank" class="nav-tile">
+        <a href="./presentation.html" target="_blank" class="nav-tile">
           <div>
-            <div class="nav-tile-title">32项政务服务事项全览</div>
-            <div class="nav-tile-desc">查看 10 大委办局 32 项高频事项数据，包含实施编码、准入条件及广东政务服务网直达 URL。</div>
+            <div class="nav-tile-title">📊 答辩演示幻灯片 Deck</div>
+            <div class="nav-tile-desc">交互式全屏 PPT，涵盖项目背景、双智能体架构、前端隔离设计与攻防工程细节。</div>
           </div>
-          <div style="font-size: 12px; color: var(--gov-blue); font-weight: 600; margin-top: 10px;">查看 32 项事项 ➔</div>
+          <div style="font-size: 12px; color: var(--gov-blue); font-weight: 600; margin-top: 10px;">打开演示幻灯片 ➔</div>
         </a>
 
-        <a href="/api/v1/gov/policies" target="_blank" class="nav-tile">
+        <a href="./gz_gov_ai_assistant.user.js" target="_blank" class="nav-tile">
           <div>
-            <div class="nav-tile-title">27部红头政策法规公文库</div>
-            <div class="nav-tile-desc">查看广州市现行有效的 27 部法定红头政策公文、发文字号、制定机关与法规条款切片。</div>
+            <div class="nav-tile-title">🧩 油猴插件源码脚本</div>
+            <div class="nav-tile-desc">纯前端 Tampermonkey 用户脚本，内嵌完整 UI、Shadow DOM 样式隔离与流式通信。</div>
           </div>
-          <div style="font-size: 12px; color: var(--gov-blue); font-weight: 600; margin-top: 10px;">查看 27 部公文 ➔</div>
+          <div style="font-size: 12px; color: var(--gov-blue); font-weight: 600; margin-top: 10px;">查看插件源码 ➔</div>
         </a>
 
-        <a href="/api/v1/gov/policy/search?keyword=%E5%85%AC%E7%A7%9F%E6%88%BF" target="_blank" class="nav-tile">
+        <a href="./gz_assistant_embed.js" target="_blank" class="nav-tile">
           <div>
-            <div class="nav-tile-title">政策条款模糊检索接口</div>
-            <div class="nav-tile-desc">直接调用后端 REST API 探测公租房/公积金/医保等政策条款与法条出处结构化数据。</div>
+            <div class="nav-tile-title">🚀 网页嵌入集成脚本</div>
+            <div class="nav-tile-desc">标准 Web Embed 脚本，支持任何政务网站通过 script 标签一行加载智能助手。</div>
           </div>
-          <div style="font-size: 12px; color: var(--gov-blue); font-weight: 600; margin-top: 10px;">检索政策条款 ➔</div>
+          <div style="font-size: 12px; color: var(--gov-blue); font-weight: 600; margin-top: 10px;">查看嵌入脚本 ➔</div>
         </a>
 
-        <a href="/api/v1/gov/chat/history" target="_blank" class="nav-tile">
+        <a href="./api_integration.md" target="_blank" class="nav-tile">
           <div>
-            <div class="nav-tile-title">多轮问答持久化历史接口</div>
-            <div class="nav-tile-desc">查看 Spring AI 对话历史持久化记录，验证 Session 上下文与政策溯源关联数据。</div>
+            <div class="nav-tile-title">📡 云端接口对接规范</div>
+            <div class="nav-tile-desc">与后端同学约定的 Dual-Agent SSE 流式协议、鉴权令牌、事件流及意图澄清规范。</div>
           </div>
-          <div style="font-size: 12px; color: var(--gov-blue); font-weight: 600; margin-top: 10px;">查看会话历史 ➔</div>
+          <div style="font-size: 12px; color: var(--gov-blue); font-weight: 600; margin-top: 10px;">查看 API 规范 ➔</div>
+        </a>
+      </div>
+    </div>
+
+    <!-- 真实广州政务官方网站直达 -->
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title">官方真实广州政务网站直达入口（搭配油猴脚本实测）</div>
+      </div>
+      <div class="nav-grid">
+        <a href="https://www.gz.gov.cn/" target="_blank" class="nav-tile">
+          <div>
+            <div class="nav-tile-title">广州市人民政府门户网站</div>
+            <div class="nav-tile-desc">涵盖广州市各委办局规范性文件、政策解读、重点工作规划与政府公报。</div>
+          </div>
+          <div style="font-size: 12px; color: var(--gov-blue); font-weight: 600; margin-top: 10px;">访问 gz.gov.cn ➔</div>
+        </a>
+
+        <a href="https://www.gdzwfw.gov.cn/?region=440100" target="_blank" class="nav-tile">
+          <div>
+            <div class="nav-tile-title">广东政务服务网 · 广州分厅</div>
+            <div class="nav-tile-desc">涵盖广州市户籍、社保、医保、公积金、不动产等全生命周期高频办事事项办事指南。</div>
+          </div>
+          <div style="font-size: 12px; color: var(--gov-blue); font-weight: 600; margin-top: 10px;">访问 gdzwfw.gov.cn ➔</div>
+        </a>
+
+        <a href="https://gzgjj.gov.cn/" target="_blank" class="nav-tile">
+          <div>
+            <div class="nav-tile-title">广州住房公积金管理中心</div>
+            <div class="nav-tile-desc">公积金贷款、提取、按月冲还贷、租房提取及灵活就业缴存政策服务大厅。</div>
+          </div>
+          <div style="font-size: 12px; color: var(--gov-blue); font-weight: 600; margin-top: 10px;">访问 gzgjj.gov.cn ➔</div>
+        </a>
+
+        <a href="http://149.118.133.163:6001/api/health" target="_blank" class="nav-tile">
+          <div>
+            <div class="nav-tile-title">云端 Dual-Agent 探针</div>
+            <div class="nav-tile-desc">验证后端同学部署在云端的 Dual-Agent 大模型及知识库服务健康状态。</div>
+          </div>
+          <div style="font-size: 12px; color: var(--gov-blue); font-weight: 600; margin-top: 10px;">探测云端状态 ➔</div>
         </a>
       </div>
     </div>
@@ -447,20 +495,20 @@
 
   <!-- 页脚 -->
   <footer class="footer">
-    <p>广州市政务政策法规 AI 智能咨询与导办系统 · 技术架构：Spring Boot 3 + Spring AI + DashScope · 纯真实网站嵌入模式</p>
+    <p>广州市政务服务与政策法规 AI 智能专窗 · 纯前端浏览器插件 (Tampermonkey / Web Embed) · 云端 Dual-Agent 协同引擎驱动</p>
   </footer>
 
   <script>
     function copyCode() {
-      const code = "const s=document.createElement('script');s.src='http://localhost:8080/gz_assistant_embed.js';document.body.appendChild(s);";
+      const code = '<script src="./gz_assistant_embed.js"><\/script>';
       navigator.clipboard.writeText(code).then(() => {
-        alert('注入指令已复制到剪贴板！请在真实政务页面按 F12 粘贴至 Console 运行即可。');
+        alert('嵌入代码已复制到剪贴板！');
       }).catch(() => {
-        prompt('请手动复制以下注入指令：', code);
+        prompt('请手动复制以下嵌入代码：', code);
       });
     }
   </script>
-  <!-- 直接在首页加载政务助手，方便本地一键直接体验 -->
-  <script src="/gz_assistant_embed.js"></script>
+  <!-- 直接在首页加载政务助手，开箱即用 -->
+  <script src="./gz_assistant_embed.js"></script>
 </body>
 </html>
