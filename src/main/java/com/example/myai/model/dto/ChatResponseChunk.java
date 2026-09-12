@@ -76,6 +76,33 @@ public class ChatResponseChunk implements Serializable {
         return c;
     }
 
+    public static ChatResponseChunk customWithData(String type, String content, Object data) {
+        ChatResponseChunk c = new ChatResponseChunk();
+        c.setType(type);
+        c.setContent(content);
+        c.setData(data);
+        return c;
+    }
+
+    public static ChatResponseChunk progress(Object progressData, String message) {
+        return customWithData("progress", message, progressData);
+    }
+
+    public static ChatResponseChunk route(Object routeData, String intent) {
+        return customWithData("route", intent, routeData);
+    }
+
+    public static ChatResponseChunk ambiguity(Object ambiguityData, String message) {
+        return customWithData("ambiguity", message, ambiguityData);
+    }
+
+    public static ChatResponseChunk matchedItem(Object itemData) {
+        ChatResponseChunk c = new ChatResponseChunk();
+        c.setType("matched_item");
+        c.setData(itemData);
+        return c;
+    }
+
     public static ChatResponseChunk done() {
         ChatResponseChunk c = new ChatResponseChunk();
         c.setType("done");

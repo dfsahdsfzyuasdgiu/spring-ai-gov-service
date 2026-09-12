@@ -698,6 +698,29 @@
         font-weight: 600;
       }
 
+      /* 多情形歧义一键选择卡片 (双 Agent ambiguity 协同) */
+      .bubble-scenarios {
+        margin-top: 10px;
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+      }
+      .scenario-option-btn {
+        padding: 7px 12px;
+        font-size: 13px;
+        text-align: left;
+        background: #ffffff;
+        border: 1px solid #0071e3;
+        color: #0071e3;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: all 0.15s ease;
+      }
+      .scenario-option-btn:hover {
+        background: #0071e3 !important;
+        color: #ffffff !important;
+      }
+
       /* 官方政策依据脚注 (左下角单行轻量注脚) */
       .source-footnote-line {
         display: flex;
@@ -1321,6 +1344,8 @@
         let citationData = null;
         let guidedStepsData = null;
         let recommendations = [];
+        let ambiguityData = null;
+        let matchedItemData = null;
         let sseBuffer = '';
 
         while (true) {
@@ -1340,6 +1365,23 @@
                 const type = (chunkObj.type || '').toLowerCase();
                 if (type === 'chunk' && chunkObj.content) {
                   fullText += chunkObj.content;
+                } else if (type === 'session') {
+                  const sId = chunkObj.content || (chunkObj.data && chunkObj.data.sessionId);
+                  if (sId) {
+                    currentSessionId = sId;
+                    window.gzGovSessionId = currentSessionId;
+                  }
+                } else if (type === 'progress') {
+                  const pMsg = chunkObj.content || (chunkObj.data && chunkObj.data.message);
+                  if (pMsg) {
+                    const st = loadingElem.querySelector('.typing-stage-text');
+                    if (st) st.textContent = pMsg;
+                  }
+                } else if (type === 'ambiguity') {
+                  if (chunkObj.content) fullText += chunkObj.content;
+                  if (chunkObj.data) ambiguityData = chunkObj.data;
+                } else if (type === 'matched_item' && chunkObj.data) {
+                  matchedItemData = chunkObj.data;
                 } else if (type === 'citation' && chunkObj.data) {
                   citationData = chunkObj.data;
                 } else if ((type === 'guided_steps_card' || type === 'guided_steps' || type === 'guide_card') && chunkObj.data) {
@@ -1353,6 +1395,9 @@
             }
           }
         }
+        if (!fullText.trim() && ambiguityData) {
+          fullText = ambiguityData.message || (ambiguityData.question || '请选择您需要办理的具体情形：');
+        }
         if (!fullText.trim()) {
           throw new Error('未获取到有效回答文本');
         }
@@ -1361,7 +1406,9 @@
           summary: fullText.trim(),
           citation: citationData,
           guidedSteps: guidedStepsData,
-          suggestions: recommendations
+          suggestions: recommendations,
+          scenarios: ambiguityData ? (ambiguityData.scenarios || []) : [],
+          matchedItem: matchedItemData
         });
       })
       .catch(err => {
@@ -1395,10 +1442,11 @@
           <span class="chat-author">叻仔</span>
         </div>
         <div class="chat-bubble" style="padding: 10px 14px;">
-          <div class="typing-box">
+          <div class="typing-box" style="display: flex; align-items: center; gap: 4px;">
             <span class="typing-dot"></span>
             <span class="typing-dot"></span>
             <span class="typing-dot"></span>
+            <span class="typing-stage-text" style="font-size: 12px; color: #64748b; margin-left: 6px;">智能研判中...</span>
           </div>
         </div>
       `;
@@ -1533,6 +1581,48 @@
         mainHtml += flowHtml;
       }
 
+      // 匹配到的政务事项直通卡
+      let matchedItemHtml = '';
+      if (data.matchedItem && !gs) {
+        const mi = data.matchedItem;
+        const miName = mi.itemName || mi.name || '政务办事事项';
+        const miDept = mi.deptName || mi.dept || '';
+        const miUrl = mi.applyUrl || mi.url || '';
+        matchedItemHtml = `
+          <div class="lezai-matched-item-box" style="margin-top: 10px; padding: 10px 12px; background: #f0f7ff; border-radius: 8px; border: 1px solid #d0e7ff;">
+            <div style="font-weight: 600; color: #0071e3; font-size: 13px;">${escapeText(miName)}</div>
+            ${miDept ? `<div style="font-size: 12px; color: #64748b; margin-top: 2px;">办理部门：${escapeText(miDept)}</div>` : ''}
+            ${miUrl ? `
+              <div style="margin-top: 6px;">
+                <a class="lezai-direct-btn" href="${escapeText(miUrl)}" target="_blank" rel="noopener noreferrer" style="display: inline-block; padding: 4px 10px; font-size: 12px; background: #0071e3; color: #fff; border-radius: 6px; text-decoration: none;">
+                  广东政务服务网申报入口 ↗
+                </a>
+              </div>
+            ` : ''}
+          </div>
+        `;
+      }
+
+      // 多情形歧义一键选择卡片 (双 Agent ambiguity 协同)
+      let scenarioHtml = '';
+      if (data.scenarios && data.scenarios.length > 0) {
+        scenarioHtml = `
+          <div class="bubble-scenarios">
+            <div style="font-size: 12px; font-weight: 600; color: #0071e3; margin-bottom: 2px;">请选择您需要办理的具体情形：</div>
+            ${data.scenarios.map(sc => {
+              const idx = (typeof sc === 'object' && sc.index !== undefined) ? sc.index : '';
+              const label = (typeof sc === 'object') ? (sc.label || sc.officialName || sc.name || '') : String(sc);
+              const queryVal = idx ? String(idx) : label;
+              return `
+                <button class="scenario-option-btn" data-query="${escapeText(queryVal)}">
+                  ${idx ? `<strong>[${escapeText(String(idx))}]</strong> ` : ''}${escapeText(label)}
+                </button>
+              `;
+            }).join('')}
+          </div>
+        `;
+      }
+
       // 政策依据左下角轻量单行注脚
       let footnoteHtml = '';
       if (citTitle) {
@@ -1576,11 +1666,24 @@
         </div>
         <div class="chat-bubble">
           ${mainHtml}
+          ${matchedItemHtml}
+          ${scenarioHtml}
           ${footnoteHtml}
           ${suggHtml}
           ${actionsHtml}
         </div>
       `;
+
+      // 绑定多情形点击选项
+      div.querySelectorAll('.scenario-option-btn').forEach(btn => {
+        btn.onclick = () => {
+          const q = btn.getAttribute('data-query');
+          if (q) {
+            textInput.value = '';
+            doSendMessage(q);
+          }
+        };
+      });
 
       // 绑定抽屉折叠
       div.querySelectorAll('.source-btn-toggle').forEach(btn => {

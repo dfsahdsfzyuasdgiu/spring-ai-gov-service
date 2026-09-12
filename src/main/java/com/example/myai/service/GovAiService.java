@@ -27,17 +27,20 @@ public class GovAiService {
     private final AffairService affairService;
     private final ChatHistoryRepository chatHistoryRepository;
     private final KnowledgeGraphRepository knowledgeGraphRepository;
+    private final DualAgentProxyService dualAgentProxyService;
 
     public GovAiService(ChatClient.Builder builder,
                         GovRagService govRagService,
                         AffairService affairService,
                         ChatHistoryRepository chatHistoryRepository,
-                        KnowledgeGraphRepository knowledgeGraphRepository) {
+                        KnowledgeGraphRepository knowledgeGraphRepository,
+                        DualAgentProxyService dualAgentProxyService) {
         this.chatClient = builder.build();
         this.govRagService = govRagService;
         this.affairService = affairService;
         this.chatHistoryRepository = chatHistoryRepository;
         this.knowledgeGraphRepository = knowledgeGraphRepository;
+        this.dualAgentProxyService = dualAgentProxyService;
     }
 
     public static class ClarifyOption {
@@ -86,9 +89,55 @@ public class GovAiService {
     }
 
     /**
-     * 核心智能咨询入口：Spring AI 多轮会话上下文 + 关系数据库持久化 + 知识图谱关联 + 分步导办引导
+     * 核心智能咨询入口：支持方案 A 远端双 Agent 协同联邦路由 + 本地高可用容灾平滑降级
      */
     public Flux<ChatResponseChunk> streamConsultation(ChatRequest request) {
+        String prompt = request.getPrompt();
+        String sessionId = request.getSessionId() != null ? request.getSessionId() : UUID.randomUUID().toString();
+
+        if (dualAgentProxyService != null && dualAgentProxyService.isEnabled()) {
+            final StringBuilder replyAccumulator = new StringBuilder();
+            return dualAgentProxyService.streamChat(prompt, sessionId)
+                    .doOnNext(chunk -> {
+                        if ("chunk".equals(chunk.getType()) && chunk.getContent() != null) {
+                            replyAccumulator.append(chunk.getContent());
+                        }
+                    })
+                    .doFinally(sig -> {
+                        String fullReply = replyAccumulator.toString().trim();
+                        if (!fullReply.isEmpty()) {
+                            try {
+                                chatHistoryRepository.save(new GovChatHistory(
+                                        sessionId,
+                                        "citizen",
+                                        prompt,
+                                        fullReply,
+                                        "双Agent协同问答",
+                                        "DUAL-AGENT-FEDERATION"
+                                ));
+                                log.info("已将双 Agent 协同问答记录持久化至关系数据库: sessionId={}", sessionId);
+                            } catch (Exception e) {
+                                log.error("持久化双 Agent 对话历史异常", e);
+                            }
+                        }
+                    })
+                    .onErrorResume(err -> {
+                        log.warn("远端双 Agent 接口调用异常 ({})，平滑降级至本地高可用政务引擎", err.getMessage());
+                        return streamConsultationLocal(request);
+                    })
+                    .switchIfEmpty(Flux.defer(() -> {
+                        log.warn("远端双 Agent 未返回任何有效数据，平滑降级至本地高可用政务引擎");
+                        return streamConsultationLocal(request);
+                    }));
+        }
+
+        return streamConsultationLocal(request);
+    }
+
+    /**
+     * 本地高可用智能咨询引擎：Spring AI 多轮会话上下文 + 关系数据库持久化 + 知识图谱关联 + 分步导办引导
+     */
+    public Flux<ChatResponseChunk> streamConsultationLocal(ChatRequest request) {
         String prompt = request.getPrompt();
         String category = request.getCategory();
         String sessionId = request.getSessionId() != null ? request.getSessionId() : UUID.randomUUID().toString();

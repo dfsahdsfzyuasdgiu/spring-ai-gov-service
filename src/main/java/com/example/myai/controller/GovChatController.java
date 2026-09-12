@@ -10,6 +10,7 @@ import com.example.myai.model.dto.FeedbackDTO;
 import com.example.myai.repository.AffairRepository;
 import com.example.myai.repository.ChatHistoryRepository;
 import com.example.myai.repository.KnowledgeGraphRepository;
+import com.example.myai.service.DualAgentProxyService;
 import com.example.myai.service.GovAiService;
 import com.example.myai.service.GovCrawlerService;
 import org.springframework.http.MediaType;
@@ -37,16 +38,20 @@ public class GovChatController {
     public static final AtomicInteger thumbsDownCount = new AtomicInteger(6);
     public static final Map<String, String> feedbackReasons = new ConcurrentHashMap<>();
 
+    private final DualAgentProxyService dualAgentProxyService;
+
     public GovChatController(GovAiService govAiService,
                              ChatHistoryRepository chatHistoryRepository,
                              KnowledgeGraphRepository knowledgeGraphRepository,
                              AffairRepository affairRepository,
-                             GovCrawlerService govCrawlerService) {
+                             GovCrawlerService govCrawlerService,
+                             DualAgentProxyService dualAgentProxyService) {
         this.govAiService = govAiService;
         this.chatHistoryRepository = chatHistoryRepository;
         this.knowledgeGraphRepository = knowledgeGraphRepository;
         this.affairRepository = affairRepository;
         this.govCrawlerService = govCrawlerService;
+        this.dualAgentProxyService = dualAgentProxyService;
     }
 
     /**
@@ -215,5 +220,13 @@ public class GovChatController {
         } else {
             return Result.error(500, res.getMessage());
         }
+    }
+
+    /**
+     * 双 Agent 协同状态监控探针
+     */
+    @GetMapping("/dual-agent/status")
+    public Result<Map<String, Object>> getDualAgentStatus() {
+        return Result.success(dualAgentProxyService.checkStatus());
     }
 }

@@ -161,6 +161,16 @@ public class GovEndpointSecurityAuditTests {
         mockMvc.perform(get("/api/v1/gov/chat/graph"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.code").value(200));
+
+        // 双 Agent 状态接口审计
+        mockMvc.perform(get("/api/v1/gov/dual-agent/status"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.code").value(200))
+                .andExpect(jsonPath("$.data.enabled").value(true));
+
+        mockMvc.perform(get("/api/v1/gov/chat/dual-agent/status"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.code").value(200));
     }
 
     @Test
