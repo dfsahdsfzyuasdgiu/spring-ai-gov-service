@@ -1745,7 +1745,8 @@
         console.error('[广州政务双Agent] 云端接口通信异常:', err);
         loadingElem.remove();
         renderPolicyAnswer({
-          summary: '市民您好！当前政务智能云端服务暂未连通（云端接口：' + window.GzGovAiConfig.apiEndpoint + '）。\n\n【排查详情】' + (err && err.message ? err.message : '网络通信受阻') + '\n\n请确认同学的云端服务正常运行后重试，或拨打 12345 便民热线进行咨询。'
+          summary: '市民您好！当前政务智能云端服务暂未连通，请稍后再试',
+          isError: true
         });
         submitBtn.disabled = false;
         scrollChatBottom();
@@ -2258,8 +2259,8 @@ chatMain.appendChild(div);
         `;
       }
 
-      // 操作条 (复制 · 有疑问)
-      const actionsHtml = `
+      // 操作条 (复制 · 有疑问，错误提示时不展示)
+      const actionsHtml = data.isError ? '' : `
         <div class="bubble-action-bar">
           <button class="action-text-btn btn-copy-reply">复制</button>
           <span>·</span>
