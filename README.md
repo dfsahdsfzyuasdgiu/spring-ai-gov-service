@@ -44,6 +44,7 @@
 ```text
 ├── gz_gov_ai_assistant.user.js   # 【核心】Tampermonkey 油猴用户脚本（全网政务站点挂载）
 ├── gz_assistant_embed.js         # 【核心】网页嵌入集成脚本（普通网页 script 标签引入）
+├── DEVELOPMENT.md                # 【核心】开发文档：通信协议、真流式打字机与排错指南
 ├── backend_architecture_guide.md # 【参考】后端架构设计、微服务拓扑与答辩全景指南
 └── README.md                     # 【说明】项目使用说明文档
 ```
