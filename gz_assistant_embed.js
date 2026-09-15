@@ -1147,6 +1147,18 @@
         0%, 80%, 100% { transform: scale(0.6); opacity: 0.3; }
         40% { transform: scale(1.2); opacity: 1; }
       }
+      .typing-cursor {
+        display: inline-block;
+        color: #0071e3;
+        font-weight: 700;
+        font-size: 13px;
+        margin-left: 2px;
+        animation: cursorBlink 0.8s infinite;
+      }
+      @keyframes cursorBlink {
+        0%, 100% { opacity: 1; }
+        50% { opacity: 0; }
+      }
     `;
     shadow.appendChild(style);
 
@@ -1700,7 +1712,23 @@
             citationData = payload;
           } else if (effectiveType === 'chunk') {
             const c = payload.content || payload.text || '';
-            if (c) fullText += c;
+            if (c) {
+              fullText += c;
+              // 关键突破：从第 1 个 Token 开始，实时更新打字机渲染，绝不傻等 onload！
+              const typingBox = loadingElem.querySelector('.typing-box');
+              const textWrap = loadingElem.querySelector('.streaming-text-wrap');
+              const textBody = loadingElem.querySelector('.streaming-text-body');
+              if (typingBox && typingBox.style.display !== 'none') {
+                typingBox.style.display = 'none';
+              }
+              if (textWrap && textWrap.style.display === 'none') {
+                textWrap.style.display = 'block';
+              }
+              if (textBody) {
+                textBody.innerHTML = formatMarkdownLike(stripEmoji(fullText));
+              }
+              scrollChatBottom();
+            }
           } else if (effectiveType === 'error') {
             fullText = '服务提示：' + (payload.message || '云端处理异常');
           } else if (effectiveType === 'guide_card' || effectiveType === 'guided_steps_card') {
@@ -1711,12 +1739,23 @@
             }
           } else {
             if (payload.content || payload.text) {
-              fullText += (payload.content || payload.text);
+              const c2 = payload.content || payload.text;
+              fullText += c2;
+              const textBody2 = loadingElem.querySelector('.streaming-text-body');
+              if (textBody2) {
+                textBody2.innerHTML = formatMarkdownLike(stripEmoji(fullText));
+                scrollChatBottom();
+              }
             }
           }
         } catch (e) {
           if (dataStr && !dataStr.startsWith('{')) {
             fullText += dataStr;
+            const textBody3 = loadingElem.querySelector('.streaming-text-body');
+            if (textBody3) {
+              textBody3.innerHTML = formatMarkdownLike(stripEmoji(fullText));
+              scrollChatBottom();
+            }
           }
         }
       }
@@ -1726,6 +1765,7 @@
           fullText = ambiguityData.message || '请选择您需要办理的具体情形：';
         }
         if (!fullText.trim()) {
+          loadingElem.remove();
           throw new Error('未获取到有效回答文本');
         }
         loadingElem.remove();
@@ -1743,6 +1783,20 @@
 
       function onStreamError(err) {
         console.error('[广州政务双Agent] 云端接口通信异常:', err);
+        const textBody = loadingElem ? loadingElem.querySelector('.streaming-text-body') : null;
+        const cursor = loadingElem ? loadingElem.querySelector('.typing-cursor') : null;
+        if (cursor) cursor.remove();
+
+        // 核心保护：若已实时接收到实质文字，保留内容并友好提示，绝不清空报错！
+        if (fullText && fullText.trim().length > 15 && textBody) {
+          textBody.innerHTML = formatMarkdownLike(stripEmoji(fullText.trim())) +
+            '<div style="font-size: 11.5px; color: #94a3b8; margin-top: 8px; border-top: 1px dashed #e2e8f0; padding-top: 4px;">（网络传输中断，已为您展示已接收内容）</div>';
+          loadingElem.classList.remove('loading');
+          submitBtn.disabled = false;
+          scrollChatBottom();
+          return;
+        }
+
         loadingElem.remove();
         renderPolicyAnswer({
           summary: '市民您好！当前政务智能云端服务暂未连通，请稍后再试',
@@ -1877,6 +1931,9 @@ chatMain.appendChild(div);
             <span class="typing-dot"></span>
             <span class="typing-dot"></span>
             <span class="typing-stage-text" style="font-size: 12px; color: #64748b; margin-left: 6px;">智能研判中...</span>
+          </div>
+          <div class="streaming-text-wrap" style="display: none; line-height: 1.65;">
+            <span class="streaming-text-body"></span><span class="typing-cursor">▌</span>
           </div>
         </div>
       `;
